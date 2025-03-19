@@ -11,12 +11,27 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 const unit = new UnitModel();
-unit.setAnimate(renderer, scene, camera);
+renderer.setAnimationLoop(animate);
+unit.moveTo(new Coords(2, 0));
 
-renderer.setAnimationLoop(unit.animate);
+scene.add(unit.renderObj);
 
-unit.moveTo(new Coords(0, 0));
+const unit2 = new UnitModel();
 
-scene.add(unit.getModel());
+unit2.moveTo(new Coords(-2, 0));
 
-camera.position.z = 5;
+scene.add(unit2.renderObj);
+
+renderer.setAnimationLoop(animate);
+
+camera.position.z = 10;
+
+function animate() {
+  const rotation = unit.renderObj.rotation;
+  const rotation2 = unit2.renderObj.rotation;
+  rotation.x += 0.01;
+  rotation.y += 0.01;
+  rotation2.x += 0.02;
+  rotation2.y += 0.01;
+  renderer.render(scene, camera);
+}
