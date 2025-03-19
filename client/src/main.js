@@ -43,7 +43,7 @@ loader.load(
       rotation.y += 0.01;
       rotation2.x += 0.02;
       rotation2.y += 0.01;
-      unit.rotation.y += 0.02;
+      unit.rotation.y += 0.2;
 
       renderer.render(scene, camera);
     }

@@ -1,0 +1,6 @@
+export const UNIT_AUTHENTICATED = 'UNIT_AUTHENTICATED';
+export const UNIT_CONNECTED = 'UNIT_CONNECTED';
+export const UNIT_MOVED = 'UNIT_MOVED';
+export const UNIT_DISCONNECTED = 'UNIT_DISCONNECTED';
+export const INIT_UNITS = 'INIT_UNITS';
+export const UNIT_GET_ALL = 'UNIT_GET_ALL';
