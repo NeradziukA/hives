@@ -1,11 +1,24 @@
+"use strict";
+
 const express = require("express");
-const app = express();
-const port = process.env.PORT || 3000; // Use PORT from environment or default to 3000
+const { Server } = require("ws");
 
-app.get("/", (req, res) => {
-  res.send("Hello here!");
+const PORT = process.env.PORT || 3000;
+const INDEX = "/index.html";
+
+const server = express()
+  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+const wss = new Server({ server });
+
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+  ws.on("close", () => console.log("Client disconnected"));
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+setInterval(() => {
+  wss.clients.forEach((client) => {
+    client.send(new Date().toTimeString());
+  });
+}, 1000);
