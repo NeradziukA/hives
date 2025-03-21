@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "client": "vite ./client"
+    "server": "npm run start --prefix ./server",
+    "client": "npm run dev --prefix ./client"
   },
   "author": "",
   "license": "ISC",
