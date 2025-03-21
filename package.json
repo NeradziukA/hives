@@ -4,15 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run start --prefix ./server",
+    "server": "npm run start --prefix ./server",
     "client": "npm run dev --prefix ./client"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.21.2"
-  },
-  "engines": {
-    "node": ">=14.x"
-  }
+  "author": ""
 }
