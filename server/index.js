@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 const INDEX = "/index.html";
 
 // Define the path to the static files directory
-const STATIC_DIR = __dirname + "/../client/dist";
+const STATIC_DIR = "/app/client/dist";
 
 // Serve static files from the client/dist directory
 const server = express()
