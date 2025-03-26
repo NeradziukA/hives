@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "server": "npm run start --prefix ./server",
-    "client": "npm run dev --prefix ./client"
+    "client": "npm run dev --prefix ./client",
+    "build-client": "npm run build --prefix ./client"
   },
   "author": ""
 }
