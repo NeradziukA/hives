@@ -6,15 +6,11 @@ const { Server } = require("ws");
 
 // Define the server port and the default index file
 const PORT = process.env.PORT || 3000;
-const INDEX = "/index.html";
-
-// Define the path to the static files directory
-const STATIC_DIR = "/app/client/dist";
 
 // Serve static files from the client/dist directory
 const server = express()
-  .use(express.static(STATIC_DIR)) // Serve static files
-  .listen(PORT, () => console.log(`Listening on ${PORT}`)); // Start the server
+  .use((req, res) => res.sendFile(__dirname + "/static/index.html"))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 // Create a WebSocket server and attach it to the Express server
 const wss = new Server({ server });
