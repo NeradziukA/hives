@@ -5,7 +5,7 @@
   "scripts": {
     "server": "npm run start --prefix ./server",
     "client": "npm run dev --prefix ./client",
-    "build-client-win": "npm run build --prefix ./client && xcopy /E /I ./client/dist ./server/static",
+    "build-client-win": "npm run build --prefix ./client && Copy-Item -Recurse -Force ./client/dist/ ./server/static",
     "build-client": "npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/"
   },
   "author": ""
