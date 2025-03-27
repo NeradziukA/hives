@@ -16,8 +16,8 @@ function setupWebSocket(server) {
       id: id,
       type: "z1",
       coords: {
-        lat: 53.939085,
-        lon: 27.56348,
+        lat: 54.352,
+        lon: 18.647,
       },
     };
 
@@ -69,7 +69,20 @@ function setupWebSocket(server) {
         }
 
         case "UNIT_MOVED": {
+          const messageUserMoved = {
+            type: "UNIT_MOVED",
+            options: {
+              id: event.options.id,
+              coords: {
+                lat: event.options.coords.lat,
+                lon: event.options.coords.lon,
+              },
+            },
+          };
           units[event.options.id].coords = event.options.coords;
+          for (const key in clientsSockets) {
+            clientsSockets[key].send(JSON.stringify(messageUserMoved));
+          }
           break;
         }
 
