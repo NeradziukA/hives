@@ -10,6 +10,7 @@ export enum MessageType {
 export type User = {
   id: string;
   type: string;
+  coords: Coordinates;
 };
 
 export type UserList = { [key: string]: User };

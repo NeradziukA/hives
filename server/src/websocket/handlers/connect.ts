@@ -11,7 +11,7 @@ const users: { [key: string]: User } = {};
 
 export function broadcast(message: SocketMessage, senderId?: string) {
   for (const key in clientsSockets) {
-    if (!senderId || key !== senderId) {
+    if (senderId && key !== senderId) {
       clientsSockets[key].send(JSON.stringify(message));
     }
   }
@@ -55,7 +55,7 @@ export function handleConnection(ws: WebSocket) {
       }
 
       case MessageType.UNIT_MOVED: {
-        handleUnitMoved(message);
+        handleUnitMoved(message, users);
         break;
       }
     }

@@ -5,7 +5,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export class UnitModel extends Unit<THREE.Group> {
   animate: () => void;
-  private modelHeightMeters: number = 1.7; // Standard human height in meters
+  private modelHeightMeters: number = 0.17;
 
   static async create(isMainUnit: boolean = false): Promise<UnitModel> {
     const unit = new UnitModel();

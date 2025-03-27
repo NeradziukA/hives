@@ -33,7 +33,7 @@ const ambientLight = new THREE.AmbientLight(0x404040);
 scene.add(ambientLight);
 
 const aspectRatio = window.innerWidth / window.innerHeight;
-const viewSize = 10; // Увеличили размер видимой области
+const viewSize = 1; // Увеличили размер видимой области
 const camera = new THREE.OrthographicCamera(
   -viewSize * aspectRatio,
   viewSize * aspectRatio,
@@ -43,9 +43,9 @@ const camera = new THREE.OrthographicCamera(
   1000
 );
 
-// Подняли камеру выше и отодвинули назад для лучшего обзора
-camera.position.set(0, 20, 20);
-camera.lookAt(0, 0, 0);
+// Настраиваем камеру для обзора указанной локации
+camera.position.set(54.3761, 18.5694, 2);
+camera.lookAt(54.3761, 18.5694, 0);
 
 // Initialize main unit
 async function initMainUnit() {
@@ -80,7 +80,6 @@ function connectWebSocket() {
     socket.send(
       JSON.stringify({
         type: "UNIT_AUTH",
-        options: {},
       })
     );
   };
@@ -96,75 +95,87 @@ function connectWebSocket() {
   };
 
   socket.onmessage = async (event) => {
-    console.log("Received message:", event.data); // Добавляем логирование
     try {
       const message = JSON.parse(event.data);
 
       switch (message.type) {
         case "UNIT_AUTHENTICATED":
-          myId = message.options.id;
-          // Request all units after authentication
-          socket.send(
-            JSON.stringify({
-              type: "UNIT_GET_ALL",
-              options: { id: myId },
-            })
-          );
+          let isAuthenticated = false;
+          let srcId = message.srcId;
+          myId = srcId;
 
           // Start location tracking after authentication
           new LocationTracker((coords) => {
+            if (!isAuthenticated) {
+              // Request all units once after authentication
+              socket.send(
+                JSON.stringify({
+                  type: "UNIT_GET_ALL",
+                  srcId,
+                  payload: {
+                    coords: {
+                      lat: coords.lat,
+                      lon: coords.lon,
+                    },
+                  },
+                })
+              );
+              isAuthenticated = true;
+            }
             socket.send(
               JSON.stringify({
                 type: "UNIT_MOVED",
-                options: {
-                  id: myId,
-                  coords: coords,
+                srcId,
+                payload: {
+                  coords: {
+                    lat: coords.lat,
+                    lon: coords.lon,
+                  },
                 },
               })
             );
           });
           break;
 
-        case "UNIT_CONNECTED": // Changed from UNIT_JOINED
-          if (message.options.id !== myId) {
+        case "UNIT_CONNECTED":
+          if (message.srcId) {
             const unit = await UnitModel.create();
-            unit.moveTo(
-              new Coords(message.options.coords.x, message.options.coords.y)
-            );
-            otherUnits.set(message.options.id, unit);
+            // unit.moveTo(
+            //   new Coords(message.payload.coords.lat, message.payload.coords.lon)
+            // );
+            otherUnits.set(message.srcId, unit);
             scene.add(unit.renderObj);
           }
           break;
 
-        case "UNIT_DISCONNECTED": // Changed from UNIT_LEFT
-          const unitToRemove = otherUnits.get(message.options.id);
+        case "UNIT_DISCONNECTED":
+          const unitToRemove = otherUnits.get(message.srcId);
           if (unitToRemove) {
             scene.remove(unitToRemove.renderObj);
-            otherUnits.delete(message.options.id);
+            otherUnits.delete(message.srcId);
           }
           break;
 
         case "UNIT_MOVED":
-          const movingUnit = otherUnits.get(message.options.id);
+          const movingUnit = otherUnits.get(message.srcId);
           if (movingUnit) {
             movingUnit.moveTo(
-              new Coords(
-                message.options.coords.lat * 10,
-                message.options.coords.lon
-              )
+              new Coords(message.payload.coords.lat, message.payload.coords.lon)
             );
           }
-          console.log(message.options);
+
           break;
 
-        case "INIT_UNITS": // Add handling for initial units list
-          if (message.options.units) {
+        case "INIT_UNITS":
+          if (message.payload.users) {
             for (const [id, unitData] of Object.entries(
-              message.options.units
+              message.payload.users
             )) {
               if (id !== myId.toString()) {
                 const unit = await UnitModel.create();
-                unit.moveTo(new Coords(unitData.coords.x, unitData.coords.y));
+                unit.moveTo(
+                  new Coords(unitData.coords.lat, unitData.coords.lon)
+                );
                 otherUnits.set(id, unit);
                 scene.add(unit.renderObj);
               }
