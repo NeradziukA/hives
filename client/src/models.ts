@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { Coords } from "../../lib/geo/coords.js";
-import { Unit } from "../../lib/units/unit.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { Coords } from "../../lib/geo/coords";
+import { Unit } from "../../lib/units/unit";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export class UnitModel extends Unit<THREE.Group> {
   animate: () => void;
@@ -17,7 +17,7 @@ export class UnitModel extends Unit<THREE.Group> {
     super(new Coords(0, 0), 5, 250);
   }
 
-  private async loadModel(isMainUnit: boolean) {
+  private async loadModel(isMainUnit: boolean): Promise<void> {
     const loader = new GLTFLoader();
     return new Promise<void>((resolve, reject) => {
       loader.load(
@@ -42,7 +42,7 @@ export class UnitModel extends Unit<THREE.Group> {
     });
   }
 
-  moveTo(coords: Coords) {
+  moveTo(coords: Coords): void {
     const { position } = this.renderObj;
     const { x, y } = coords.get();
     position.x = x; // Широта (latitude)

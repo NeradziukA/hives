@@ -1,14 +1,22 @@
+export interface Coordinates {
+  lat: number;
+  lon: number;
+}
+
 export default class LocationTracker {
-  constructor(onLocationChange) {
+  private readonly onLocationChange: (coords: Coordinates) => void;
+  private readonly UPDATE_INTERVAL: number = 1000;
+  private _timer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(onLocationChange: (coords: Coordinates) => void) {
     this.onLocationChange = onLocationChange;
-    this.UPDATE_INTERVAL = 1000; // ms
     this.startTracking();
   }
 
-  startTracking() {
+  private startTracking(): void {
     if ("geolocation" in navigator) {
-      const onSuccess = (position) => {
-        const coords = {
+      const onSuccess = (position: GeolocationPosition) => {
+        const coords: Coordinates = {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
         };
@@ -17,11 +25,10 @@ export default class LocationTracker {
         this.onLocationChange(offsetCoords);
       };
 
-      const onError = (error) => {
+      const onError = (error: GeolocationPositionError) => {
         console.error("Geolocation error:", error.message);
       };
 
-      // Start periodic location updates
       this._timer = setInterval(() => {
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
       }, this.UPDATE_INTERVAL);
@@ -30,7 +37,7 @@ export default class LocationTracker {
     }
   }
 
-  stopTracking() {
+  stopTracking(): void {
     if (this._timer) {
       clearInterval(this._timer);
       this._timer = null;
@@ -38,11 +45,9 @@ export default class LocationTracker {
   }
 }
 
-function addRandomOffset(coords) {
-  // 1km is approximately 0.009 degrees for latitude
-  // 1km is approximately 0.014 degrees for longitude (varies with latitude)
-  const latOffset = (Math.random() - 0.5) * 0.018; // +/- 1km
-  const lonOffset = (Math.random() - 0.5) * 0.028; // +/- 1km
+function addRandomOffset(coords: Coordinates): Coordinates {
+  const latOffset = (Math.random() - 0.5) * 0.018;
+  const lonOffset = (Math.random() - 0.5) * 0.028;
   return {
     lat: coords.lat + latOffset,
     lon: coords.lon + lonOffset,
