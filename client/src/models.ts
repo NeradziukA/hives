@@ -26,6 +26,36 @@ export class UnitModel extends Unit<THREE.Group> {
         (gltf) => {
           const model = gltf.scene;
 
+          // Define color palettes
+          const mainUnitColors = [
+            0xff0000, // red
+            0xff6b00, // orange
+            0xffd700, // gold
+          ];
+
+          const regularUnitColors = [
+            0x4287f5, // blue
+            0x42f5ef, // cyan
+            0x42f54b, // green
+          ];
+
+          let colorIndex = 0;
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              const colors = isMainUnit ? mainUnitColors : regularUnitColors;
+              const color = colors[colorIndex % colors.length];
+              child.material = new THREE.MeshStandardMaterial({
+                color,
+                metalness: 0.3,
+                roughness: 0.7,
+                flatShading: false,
+              });
+              child.castShadow = true;
+              child.receiveShadow = true;
+              colorIndex++;
+            }
+          });
+
           // Calculate bounding box to get actual model height
           const bbox = new THREE.Box3().setFromObject(model);
           const modelHeight = bbox.max.y - bbox.min.y;
@@ -34,6 +64,7 @@ export class UnitModel extends Unit<THREE.Group> {
           const scale =
             metersToDegreesAtAltitude(this.modelHeightMeters) / modelHeight;
           model.scale.set(scale, scale, scale);
+          model.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2); // Rotate model to face the correct direction
 
           this.renderObj = model;
           resolve();
