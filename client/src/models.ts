@@ -2,10 +2,11 @@ import * as THREE from "three";
 import { Coords } from "../../lib/geo/coords";
 import { Unit } from "../../lib/units/unit";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { metersToDegreesAtAltitude } from "../../lib/geo/constants";
 
 export class UnitModel extends Unit<THREE.Group> {
   animate: () => void;
-  private modelHeightMeters: number = 0.17;
+  private modelHeightMeters: number = 20;
 
   static async create(isMainUnit: boolean = false): Promise<UnitModel> {
     const unit = new UnitModel();
@@ -30,7 +31,8 @@ export class UnitModel extends Unit<THREE.Group> {
           const modelHeight = bbox.max.y - bbox.min.y;
 
           // Calculate scale to achieve desired height in meters
-          const scale = this.modelHeightMeters / modelHeight;
+          const scale =
+            metersToDegreesAtAltitude(this.modelHeightMeters) / modelHeight;
           model.scale.set(scale, scale, scale);
 
           this.renderObj = model;

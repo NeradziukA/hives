@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { renderer } from "./renderer";
 import { UnitModel } from "./models";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { setupScene, setupCamera } from "./sceneSetup";
+import { setupScene, setupCamera, updateScenePosition } from "./sceneSetup";
 import { handleWebSocketMessages, connectWebSocket } from "./webSocketHandler";
 
 const loader = new GLTFLoader();
@@ -11,8 +11,11 @@ const mouse = new THREE.Vector2();
 let hasColorChanged = false;
 let mainUnit: UnitModel;
 
-const { scene, light, ambientLight } = setupScene();
+const { scene, light, ambientLight, gridHelper } = setupScene();
 const camera = setupCamera();
+
+// Обновление позиции сетки и камеры
+updateScenePosition(scene, camera, gridHelper);
 
 function onMouseClick(event: MouseEvent): void {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;

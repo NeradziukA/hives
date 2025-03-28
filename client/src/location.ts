@@ -1,3 +1,8 @@
+import {
+  metersToLatitudeDegrees,
+  metersToLongitudeDegrees,
+} from "../../lib/geo/constants";
+
 export interface Coordinates {
   lat: number;
   lon: number;
@@ -46,8 +51,12 @@ export default class LocationTracker {
 }
 
 function addRandomOffset(coords: Coordinates): Coordinates {
-  const latOffset = (Math.random() - 0.5) * 0.018;
-  const lonOffset = (Math.random() - 0.5) * 0.028;
+  const latOffset = metersToLatitudeDegrees((Math.random() - 0.5) * 100);
+  const lonOffset = metersToLongitudeDegrees(
+    (Math.random() - 0.5) * 100,
+    coords.lon
+  );
+
   return {
     lat: coords.lat + latOffset,
     lon: coords.lon + lonOffset,
