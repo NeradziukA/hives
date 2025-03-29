@@ -26,7 +26,7 @@ export function setupScene() {
 export function setupCamera() {
   const aspectRatio = window.innerWidth / window.innerHeight;
   const viewSize = 0.005; // Adjusted to fit the entire grid
-  let currentFov = 5; // Initial FOV value
+  let currentFov = 50; // Initial FOV value
 
   const camera = new THREE.PerspectiveCamera(
     currentFov,
