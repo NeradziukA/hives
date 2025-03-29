@@ -16,7 +16,9 @@ export function connectWebSocket(
   scene: THREE.Scene,
   messageHandler: Function
 ): void {
-  socket = new WebSocket("ws://localhost:3000");
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${wsProtocol}//${window.location.host}`;
+  socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
     console.log("Connected to server");
