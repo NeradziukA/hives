@@ -26,33 +26,49 @@ export function setupScene() {
 export function setupCamera() {
   const aspectRatio = window.innerWidth / window.innerHeight;
   const viewSize = 0.005; // Adjusted to fit the entire grid
+  let currentFov = 5; // Initial FOV value
 
   const camera = new THREE.PerspectiveCamera(
-    15, // fov
-    aspectRatio, // aspect
-    0.0001, // near
-    50 // far
+    currentFov,
+    aspectRatio,
+    0.0001,
+    50
   );
 
-  camera.position.set(54.3761, 18.5694, 100);
-  camera.lookAt(54.3761, 18.5694, 0);
+  // camera.position.set(54.3761, 18.5694, 100);
+  // camera.lookAt(54.3761, 18.5694, 0);
+
+  // Add keyboard controls for FOV
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "-" || event.key === "=") {
+      currentFov = Math.min(currentFov + 1, 50);
+      camera.fov = currentFov;
+      camera.updateProjectionMatrix();
+    }
+    if (event.key === "+" || event.key === "_") {
+      currentFov = Math.max(currentFov - 1, 2);
+      camera.fov = currentFov;
+      camera.updateProjectionMatrix();
+    }
+  });
+
   return camera;
 }
 
 export function updateScenePosition(
   scene: THREE.Scene,
   camera: THREE.Camera,
-  gridHelper: THREE.GridHelper
+  gridHelper: THREE.GridHelper,
+  light: THREE.DirectionalLight
 ): void {
   navigator.geolocation.getCurrentPosition((position) => {
     const { latitude, longitude } = position.coords;
 
-    // Обновление позиции сетки
     gridHelper.position.set(latitude, longitude, 0);
-
-    // Обновление позиции камеры
+    light.position.set(54.3761, 18.5694, 0.01); // Position light above the grid
+    light.target.position.set(54.3761, 18.5694, 0); // Point light directly at the grid
     camera.position.set(latitude - 0.005, longitude - 0.005, 0.003);
     camera.lookAt(latitude, longitude, 0);
-    camera.rotation.z = -Math.PI / 10; // Поворот камеры по оси Y
+    camera.rotation.z = -Math.PI / 8; // Поворот камеры по оси Y
   });
 }

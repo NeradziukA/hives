@@ -14,15 +14,7 @@ let mainUnit: UnitModel;
 const { scene, light, ambientLight, gridHelper } = setupScene();
 const camera = setupCamera();
 
-// Обновление позиции сетки и камеры
-updateScenePosition(scene, camera, gridHelper);
-
-function onMouseClick(event: MouseEvent): void {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-window.addEventListener("click", onMouseClick);
+updateScenePosition(scene, camera, gridHelper, light);
 
 async function initMainUnit(): Promise<void> {
   mainUnit = await UnitModel.create(true);
