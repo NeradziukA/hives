@@ -7,8 +7,7 @@
     "start": "npm run build && node ./dist/index.js",
     "build": "tsc",
     "dev": "nodemon ./dist/index.js",
-    "watch-ts": "tsc --watch",
-    "postinstall": "npm install --include=dev"
+    "watch-ts": "tsc --watch"
   },
   "author": "",
   "license": "ISC",
