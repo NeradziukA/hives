@@ -1,1 +1,1 @@
-web: npm install tsc -g && cd server && npm install && npm start
+web: npm install typescript -g && cd server && npm install && npm start
