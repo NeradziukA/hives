@@ -17,7 +17,7 @@ export function connectWebSocket(
   messageHandler: Function
 ): void {
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${wsProtocol}//${window.location.host}`;
+  const wsUrl = `${wsProtocol}//${window.location.hostname}:3000`;
   socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {

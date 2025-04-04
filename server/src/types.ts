@@ -7,13 +7,24 @@ export enum MessageType {
   UNIT_MOVED = "UNIT_MOVED",
 }
 
+export enum ObjectType {
+  ZOMBI_A = "zombi-a",
+  BUILDING_A = "builbing-a",
+}
+
 export type User = {
   id: string;
-  type: string;
+  type: ObjectType;
   coords: Coordinates;
 };
 
 export type UserList = { [key: string]: User };
+
+export type StaticObject = {
+  id: string;
+  type: ObjectType;
+  coords: Coordinates;
+};
 
 export type Coordinates = {
   lat: number;
@@ -26,5 +37,6 @@ export type SocketMessage = {
   payload?: {
     coords?: Coordinates;
     users?: UserList;
+    staticObjects?: StaticObject[];
   };
 };

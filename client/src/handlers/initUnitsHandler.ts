@@ -23,4 +23,17 @@ export async function handleInitUnits(
       }
     }
   }
+  if (message.payload.staticObjects) {
+    message.payload.staticObjects.forEach(async (o) => {
+      const unit = await UnitModel.create();
+      unit.moveTo(
+        new Coords(
+          (o as { coords: { lat: number; lon: number } }).coords.lat,
+          (o as { coords: { lat: number; lon: number } }).coords.lon
+        )
+      );
+      otherUnits.set(o.id, unit);
+      scene.add(unit.renderObj);
+    });
+  }
 }
