@@ -1,1 +1,1 @@
-web: npm install:all && npm build && npm server
+web: npm run install:all && npm run build && npm run server
