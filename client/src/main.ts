@@ -1,3 +1,6 @@
+declare const __BUILD_DATE__: string;
+console.log(`[Hives] Build date: ${__BUILD_DATE__}`);
+
 import * as THREE from "three";
 import { renderer } from "./renderer";
 import { UnitModel } from "./models";

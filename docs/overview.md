@@ -41,10 +41,10 @@ hives/
 
 | Layer | Technology |
 |-------|-----------|
-| 3D rendering | Three.js 0.174 |
-| Frontend build | Vite 6.2 |
+| 3D rendering | Three.js 0.183 |
+| Frontend build | Vite 8.0 |
 | Frontend language | TypeScript 5.2 |
-| Backend | Express 4.21, Node.js ≥ 14 |
+| Backend | Express 4.21, Node.js ≥ 24 |
 | Real-time | WebSocket (`ws` 8.18) |
 | IDs | UUID v4 |
 | Deployment | Heroku (client + server) |

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js ≥ 14
+- Node.js ≥ 24 (required by Vite 8)
 - npm
 
 ## Install Dependencies
@@ -66,8 +66,8 @@ Both client and server run on a single Heroku dyno.
 
 Heroku build sequence:
 1. `npm install` — installs root dependencies
-2. `heroku-postbuild` — installs client deps, builds client, copies to `server/static/`
-3. `Procfile` — installs server deps, compiles TypeScript, starts Express
+2. `heroku-postbuild` — installs client deps (including devDeps for Vite), builds client, copies to `server/static/`, installs server deps (including devDeps for TypeScript)
+3. `Procfile` — compiles TypeScript, starts Express
 
 Push to Heroku:
 ```bash
