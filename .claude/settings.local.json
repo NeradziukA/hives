@@ -1,12 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(cat /d/Programming/nodejs/hives/.github/workflows/*.*)",
-      "Bash(npm update)",
-      "Bash(npm install three@0.183.2 @types/three@0.183.1)",
-      "Bash(npm install typescript@5.9.3 @types/node@22.19.15)",
-      "Bash(npm install @types/node@24)",
-      "Bash(npm install tslog)"
-    ]
+    "allow": ["Bash(npm show:*)", "Bash(npm install:*)"]
   }
 }
