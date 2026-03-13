@@ -1,0 +1,42 @@
+{
+  "splash": {
+    "loading": "LOADING..."
+  },
+  "menu": {
+    "continue": "Continue",
+    "profile": "Player Profile",
+    "main_menu": "Main Menu"
+  },
+  "profile": {
+    "title": "Player Profile",
+    "attributes": {
+      "title": "Attributes",
+      "strength": "Strength",
+      "agility": "Agility",
+      "speed": "Speed",
+      "intelligence": "Intelligence",
+      "health": "Health",
+      "leadership": "Leadership",
+      "vision": "Vision",
+      "mutation": "Mutation / Vaccine",
+      "backpack": "Backpack"
+    },
+    "skills": {
+      "title": "Skills",
+      "heavy_weapon": "Heavy Weapon",
+      "dual_wield": "Dual Wield",
+      "stealth": "Stealth",
+      "regeneration": "Regeneration",
+      "stench": "Stench"
+    },
+    "role": {
+      "title": "Role",
+      "transformation": "Transformation",
+      "boss": "Boss",
+      "general": "General / Alpha",
+      "scientist": "Scientist",
+      "soldier": "Soldier",
+      "quest_master": "Quest Master"
+    }
+  }
+}

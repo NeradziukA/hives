@@ -43,10 +43,10 @@ export function setupCamera() {
   const BASE_OFFSET = new THREE.Vector3(-0.004, 0.004, 0);
   let zoom = 1;
 
-  // desiredTarget — куда хотим смотреть (обновляется по GPS)
-  // currentTarget — текущая точка фокуса (дрейфует к desiredTarget)
-  // Камера всегда = currentTarget + BASE_OFFSET * zoom
-  // Вектор камера→таргет постоянен → нет вращения во время дрейфа
+  // desiredTarget — where we want to look (updated by GPS)
+  // currentTarget — current focus point (drifts toward desiredTarget)
+  // Camera is always = currentTarget + BASE_OFFSET * zoom
+  // Camera→target vector stays constant → no rotation during drift
   const desiredTarget = new THREE.Vector3(54.3761, 0, 18.5694);
   const currentTarget = new THREE.Vector3(54.3761, 0, 18.5694);
 

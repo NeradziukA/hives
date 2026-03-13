@@ -1,0 +1,42 @@
+{
+  "splash": {
+    "loading": "ЗАГРУЗКА..."
+  },
+  "menu": {
+    "continue": "Продолжить",
+    "profile": "Профиль игрока",
+    "main_menu": "Главное меню"
+  },
+  "profile": {
+    "title": "Профиль игрока",
+    "attributes": {
+      "title": "Атрибуты",
+      "strength": "Сила",
+      "agility": "Ловкость",
+      "speed": "Скорость",
+      "intelligence": "Интеллект",
+      "health": "Здоровье",
+      "leadership": "Лидерство",
+      "vision": "Зрение",
+      "mutation": "Мутация / Вакцина",
+      "backpack": "Рюкзак"
+    },
+    "skills": {
+      "title": "Навыки",
+      "heavy_weapon": "Тяжёлое оружие",
+      "dual_wield": "Двуручный бой",
+      "stealth": "Маскировка",
+      "regeneration": "Регенерация",
+      "stench": "Зловоние"
+    },
+    "role": {
+      "title": "Роль",
+      "transformation": "Трансформация",
+      "boss": "Босс",
+      "general": "Генерал / Альфа",
+      "scientist": "Учёный",
+      "soldier": "Солдат",
+      "quest_master": "Квест мастер"
+    }
+  }
+}

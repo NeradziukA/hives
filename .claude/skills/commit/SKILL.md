@@ -6,8 +6,8 @@ description: Create a commit only after documentation and diagrams are
 
 # Commit With Documentation Update
 
-This skill ensures that every code commit includes updated documentation
-and logic diagrams.
+This skill ensures that every code commit includes updated documentation and logic diagrams.
+Do not add a co-author section.
 
 ## Rules
 
