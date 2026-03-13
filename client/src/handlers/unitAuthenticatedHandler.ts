@@ -1,14 +1,21 @@
 import LocationTracker from "../location";
+import { setDriftSpeed } from "../sceneSetup";
 
 export function handleUnitAuthenticated(
   message: any,
   socket: WebSocket,
-  setMyId: (id: string) => void
+  setMyId: (id: string) => void,
+  onOwnMove?: (coords: { lat: number; lon: number }) => void
 ): void {
   let isAuthenticated = false;
   const srcId = message.srcId;
   setMyId(srcId);
 
+  if (message.payload?.config?.cameraDriftSpeed !== undefined) {
+    setDriftSpeed(message.payload.config.cameraDriftSpeed);
+  }
+
+  const interval = message.payload?.config?.locationUpdateInterval;
   new LocationTracker((coords) => {
     if (!isAuthenticated) {
       socket.send(
@@ -37,5 +44,6 @@ export function handleUnitAuthenticated(
         },
       })
     );
-  });
+    onOwnMove?.(coords);
+  }, interval);
 }

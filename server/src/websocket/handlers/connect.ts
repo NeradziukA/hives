@@ -4,6 +4,8 @@ import { handleUnitGetAll, handleUnitMoved } from ".";
 import { MessageType, SocketMessage, User } from "../../types";
 import { handleClose } from "./close";
 import { getUser } from "../../api";
+import { logger } from "../../logger";
+import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL } from "../../config";
 
 // TODO move to DB
 const clientsSockets: { [key: string]: WebSocket } = {};
@@ -22,11 +24,12 @@ export function handleConnection(ws: WebSocket) {
   const id = user.id;
   users[id] = user;
   clientsSockets[id] = ws;
-  console.log("New connection: " + id);
+  logger.info("New connection: " + id);
 
   let message: SocketMessage = {
     type: MessageType.UNIT_AUTHENTICATED,
     srcId: id,
+    payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
   };
 
   ws.send(JSON.stringify(message));
@@ -39,13 +42,13 @@ export function handleConnection(ws: WebSocket) {
   broadcast(message, id);
 
   ws.on("message", function (wsMessage: string) {
-    console.log("Incoming message: " + wsMessage);
+    logger.debug("Incoming message: " + wsMessage);
 
     let message: SocketMessage;
     try {
       message = JSON.parse(wsMessage.toString());
     } catch (e) {
-      return console.error("Can't parse wsMessage");
+      return logger.error("Can't parse wsMessage");
     }
 
     switch (message.type) {

@@ -31,6 +31,11 @@ export type Coordinates = {
   lon: number;
 };
 
+export type GameConfig = {
+  cameraDriftSpeed: number;
+  locationUpdateInterval: number;
+};
+
 export type SocketMessage = {
   type: MessageType;
   srcId: string;
@@ -38,5 +43,6 @@ export type SocketMessage = {
     coords?: Coordinates;
     users?: UserList;
     staticObjects?: StaticObject[];
+    config?: GameConfig;
   };
 };

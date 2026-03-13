@@ -24,8 +24,8 @@ export async function handleInitUnits(
     }
   }
   if (message.payload.staticObjects) {
-    message.payload.staticObjects.forEach(async (o) => {
-      const unit = await UnitModel.create();
+    for (const o of message.payload.staticObjects) {
+      const unit = await UnitModel.create(false, "Large Building.glb", 25);
       unit.moveTo(
         new Coords(
           (o as { coords: { lat: number; lon: number } }).coords.lat,
@@ -34,6 +34,6 @@ export async function handleInitUnits(
       );
       otherUnits.set(o.id, unit);
       scene.add(unit.renderObj);
-    });
+    }
   }
 }

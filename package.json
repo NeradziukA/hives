@@ -4,9 +4,13 @@
   "description": "",
   "scripts": {
     "server": "npm run start --prefix ./server",
+    "server:dev": "npm run watch-ts --prefix ./server",
+    "server:run": "npm run dev --prefix ./server",
     "client": "npm run dev --prefix ./client",
-    "build-client-win": "npm run build --prefix ./client && Copy-Item -Recurse -Force ./client/dist/ ./server/static",
-    "build-client": "npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/"
+    "build": "npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/",
+    "build:win": "npm run build --prefix ./client && Copy-Item -Recurse -Force ./client/dist/ ./server/static",
+    "install:all": "npm install && npm install --prefix ./client && npm install --prefix ./server",
+    "heroku-postbuild": "npm install --prefix ./client && npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/"
   },
   "author": ""
 }

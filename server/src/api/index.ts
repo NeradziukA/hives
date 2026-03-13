@@ -16,21 +16,12 @@ export function getUser(): User {
 export function getStaticObjects(): StaticObject[] {
   return [
     {
-      id: uuidv4(),
+      id: "building-jp2",
       type: ObjectType.BUILDING_A,
       coords: {
-        // Stokrotka
-        lat: 54.3993223,
-        lon: 18.5707792,
-      },
-    },
-    {
-      id: uuidv4(),
-      type: ObjectType.BUILDING_A,
-      coords: {
-        // Work
-        lat: 54.3993223,
-        lon: 18.5707792,
+        // Aleja Jana Pawła II 3, Gdańsk
+        lat: 54.3762,
+        lon: 18.6197,
       },
     },
   ];

@@ -8,37 +8,42 @@ export interface Coordinates {
   lon: number;
 }
 
+const FALLBACK_COORDS: Coordinates = { lat: 54.3761, lon: 18.5694 };
+
 export default class LocationTracker {
   private readonly onLocationChange: (coords: Coordinates) => void;
-  private readonly UPDATE_INTERVAL: number = 1000;
+  private readonly UPDATE_INTERVAL: number;
   private _timer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(onLocationChange: (coords: Coordinates) => void) {
+  constructor(onLocationChange: (coords: Coordinates) => void, interval = 10000) {
     this.onLocationChange = onLocationChange;
+    this.UPDATE_INTERVAL = interval;
     this.startTracking();
   }
 
   private startTracking(): void {
+    const onSuccess = (position: GeolocationPosition) => {
+      const coords: Coordinates = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      };
+      this.onLocationChange(addRandomOffset(coords));
+    };
+
+    const onError = (error: GeolocationPositionError) => {
+      console.warn("Geolocation error, using fallback:", error.message);
+      this.onLocationChange(addRandomOffset(FALLBACK_COORDS));
+    };
+
     if ("geolocation" in navigator) {
-      const onSuccess = (position: GeolocationPosition) => {
-        const coords: Coordinates = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        };
-        const offsetCoords = addRandomOffset(coords);
-
-        this.onLocationChange(offsetCoords);
-      };
-
-      const onError = (error: GeolocationPositionError) => {
-        console.error("Geolocation error:", error.message);
-      };
-
       this._timer = setInterval(() => {
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
       }, this.UPDATE_INTERVAL);
     } else {
-      console.error("Geolocation is not supported");
+      console.warn("Geolocation not supported, using fallback");
+      this._timer = setInterval(() => {
+        this.onLocationChange(addRandomOffset(FALLBACK_COORDS));
+      }, this.UPDATE_INTERVAL);
     }
   }
 
@@ -56,7 +61,6 @@ function addRandomOffset(coords: Coordinates): Coordinates {
     (Math.random() - 0.5) * 100,
     coords.lon
   );
-
   return {
     lat: coords.lat + latOffset,
     lon: coords.lon + lonOffset,

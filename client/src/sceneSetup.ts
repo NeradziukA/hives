@@ -3,72 +3,93 @@ import * as THREE from "three";
 export function setupScene() {
   const scene = new THREE.Scene();
 
+  // X=lat, Y=altitude, Z=lon
   const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(54.3761, 18.5694, 0.01); // Position light above the grid
-  light.target.position.set(54.3761, 18.5694, 0); // Point light directly at the grid
+  light.position.set(54.3761, 0.01, 18.5694);
+  light.target.position.set(54.3761, 0, 18.5694);
   scene.add(light);
   scene.add(light.target);
 
   const ambientLight = new THREE.AmbientLight(0x404040);
   scene.add(ambientLight);
 
-  // Добавление сетки размером 1 на 1 км с центром в Гданьске, повернутой по оси Z
-  const gridSize = 0.01; // 1 km in geographic coordinates (approx. 0.01 degrees)
+  // 1km grid centered on Gdansk. GridHelper is horizontal in XZ by default — no rotation needed.
+  const gridSize = 0.01;
   const divisions = 10;
   const gridHelper = new THREE.GridHelper(gridSize, divisions);
-  gridHelper.position.set(54.3761, 18.5694, 0);
-  gridHelper.rotation.x = Math.PI / 2; // Поворот по оси X для выравнивания по Z
+  gridHelper.position.set(54.3761, 0, 18.5694);
   scene.add(gridHelper);
 
   return { scene, light, ambientLight, gridHelper };
 }
 
-export function setupCamera() {
-  const aspectRatio = window.innerWidth / window.innerHeight;
-  const viewSize = 0.005; // Adjusted to fit the entire grid
-  let currentFov = 50; // Initial FOV value
+// Drift speed set by server config via setDriftSpeed()
+let _driftSpeed = 0.05;
+export function setDriftSpeed(speed: number) {
+  _driftSpeed = speed;
+}
+export function getDriftSpeed(): number {
+  return _driftSpeed;
+}
 
+export function setupCamera() {
   const camera = new THREE.PerspectiveCamera(
-    currentFov,
-    aspectRatio,
+    50,
+    window.innerWidth / window.innerHeight,
     0.0001,
-    50
+    200,
   );
 
-  // camera.position.set(54.3761, 18.5694, 100);
-  // camera.lookAt(54.3761, 18.5694, 0);
+  const BASE_OFFSET = new THREE.Vector3(-0.004, 0.004, 0);
+  let zoom = 1;
 
-  // Add keyboard controls for FOV
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "-" || event.key === "=") {
-      currentFov = Math.min(currentFov + 1, 50);
-      camera.fov = currentFov;
-      camera.updateProjectionMatrix();
-    }
-    if (event.key === "+" || event.key === "_") {
-      currentFov = Math.max(currentFov - 1, 2);
-      camera.fov = currentFov;
-      camera.updateProjectionMatrix();
-    }
+  // desiredTarget — куда хотим смотреть (обновляется по GPS)
+  // currentTarget — текущая точка фокуса (дрейфует к desiredTarget)
+  // Камера всегда = currentTarget + BASE_OFFSET * zoom
+  // Вектор камера→таргет постоянен → нет вращения во время дрейфа
+  const desiredTarget = new THREE.Vector3(54.3761, 0, 18.5694);
+  const currentTarget = new THREE.Vector3(54.3761, 0, 18.5694);
+
+  function cameraOffset() {
+    return BASE_OFFSET.clone().multiplyScalar(zoom);
+  }
+
+  // Initialize — camera starts exactly at desired position (no initial lerp)
+  camera.position.copy(currentTarget).add(cameraOffset());
+  camera.lookAt(currentTarget);
+
+  window.addEventListener("wheel", (e) => {
+    zoom *= 1 + e.deltaY * 0.001;
+    zoom = Math.max(0.05, Math.min(200, zoom));
+    // Apply zoom immediately to current camera, no drift needed for zoom
+    camera.position.copy(currentTarget).add(cameraOffset());
   });
 
-  return camera;
+  function updateTarget(lat: number, lon: number) {
+    desiredTarget.set(lat, 0, lon);
+  }
+
+  // Called every frame — target and camera drift together (parallel translation, no rotation)
+  function tickCamera() {
+    currentTarget.lerp(desiredTarget, _driftSpeed);
+    camera.position.copy(currentTarget).add(cameraOffset());
+    camera.lookAt(currentTarget);
+  }
+
+  return { camera, updateTarget, tickCamera };
 }
 
 export function updateScenePosition(
-  scene: THREE.Scene,
-  camera: THREE.Camera,
+  updateTarget: (lat: number, lon: number) => void,
   gridHelper: THREE.GridHelper,
-  light: THREE.DirectionalLight
+  light: THREE.DirectionalLight,
 ): void {
   navigator.geolocation.getCurrentPosition((position) => {
     const { latitude, longitude } = position.coords;
 
-    gridHelper.position.set(latitude, longitude, 0);
-    light.position.set(54.3761, 18.5694, 0.01); // Position light above the grid
-    light.target.position.set(54.3761, 18.5694, 0); // Point light directly at the grid
-    camera.position.set(latitude - 0.005, longitude - 0.005, 0.003);
-    camera.lookAt(latitude, longitude, 0);
-    camera.rotation.z = -Math.PI / 8; // Поворот камеры по оси Y
+    gridHelper.position.set(latitude, 0, longitude);
+    light.position.set(latitude, 0.01, longitude);
+    light.target.position.set(latitude, 0, longitude);
+    updateTarget(latitude, longitude);
   });
 }
