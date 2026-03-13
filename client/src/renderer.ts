@@ -4,5 +4,5 @@ export const renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({
   antialias: true,
 });
 renderer.setClearColor(0xffffff, 0);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight - 1);
 document.body.appendChild(renderer.domElement);

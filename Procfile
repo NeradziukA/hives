@@ -1,1 +1,1 @@
-web: cd server && npm install --include=dev && npm start
+web: npm install:all && npm build && npm server

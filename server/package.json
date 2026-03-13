@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
+    "hives": "file:..",
     "tslog": "^4.10.2",
     "uuid": "^11.1.0",
     "ws": "^8.18.1"
