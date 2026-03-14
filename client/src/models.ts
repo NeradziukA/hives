@@ -96,6 +96,7 @@ export class UnitModel extends Unit<THREE.Group> {
             new THREE.SpriteMaterial({ map: dotTexture, color: dotColor, depthTest: false }),
           );
           this.dotSprite.visible = false;
+          this.dotSprite.scale.set(0.00001, 0.00001, 1); // tiny until first tick() sizes it
 
           // Selection ring sprite — visible only in LOD dot mode when selected
           const ringCanvas = document.createElement("canvas");
@@ -115,6 +116,7 @@ export class UnitModel extends Unit<THREE.Group> {
             }),
           );
           this.selectionRing.visible = false;
+          this.selectionRing.scale.set(0.00001, 0.00001, 1); // tiny until first tick() sizes it
 
           // Wrap both in a container group so renderObj position drives both
           const container = new THREE.Group();

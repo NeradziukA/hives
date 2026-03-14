@@ -3,6 +3,7 @@
   import Layout from "../components/Layout.svelte";
   import GameHud from "../components/hud/GameHud.svelte";
   import UnitActionMenu from "../components/UnitActionMenu.svelte";
+  import ZoomSlider from "../components/ZoomSlider.svelte";
 
   let { onprofile }: { onprofile: () => void } = $props();
 </script>
@@ -13,6 +14,7 @@
 ]}>
   {#snippet children()}
     <!-- Three.js canvas is rendered in the background layer of App.svelte -->
+    <ZoomSlider />
     <UnitActionMenu />
     <GameHud />
   {/snippet}

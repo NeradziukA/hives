@@ -4,6 +4,12 @@ export const gameState = $state({
   selectedUnitId: null as string | null,
 });
 
+// Wired up by game.ts after camera setup; call to actually move the camera
+export let setZoom: (value: number) => void = () => {};
+export function wireSetZoom(fn: (value: number) => void) {
+  setZoom = fn;
+}
+
 let _msgId = 0;
 
 export function pushMessage(text: string, ttl = 4000) {

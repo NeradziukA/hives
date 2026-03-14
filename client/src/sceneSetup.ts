@@ -26,6 +26,9 @@ export function getDriftSpeed(): number {
   return _driftSpeed;
 }
 
+const ZOOM_MIN = 0.05;
+const ZOOM_MAX = 200;
+
 export function setupCamera() {
   const camera = new THREE.PerspectiveCamera(
     50,
@@ -48,16 +51,18 @@ export function setupCamera() {
     return BASE_OFFSET.clone().multiplyScalar(zoom);
   }
 
+  function applyZoom(value: number) {
+    zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, value));
+    gameState.zoom = zoom;
+    camera.position.copy(currentTarget).add(cameraOffset());
+  }
+
   // Initialize — camera starts exactly at desired position (no initial lerp)
   camera.position.copy(currentTarget).add(cameraOffset());
   camera.lookAt(currentTarget);
 
   window.addEventListener("wheel", (e) => {
-    zoom *= 1 + e.deltaY * 0.001;
-    zoom = Math.max(0.05, Math.min(200, zoom));
-    gameState.zoom = zoom;
-    // Apply zoom immediately to current camera, no drift needed for zoom
-    camera.position.copy(currentTarget).add(cameraOffset());
+    applyZoom(zoom * (1 + e.deltaY * 0.001));
   });
 
   function updateTarget(lat: number, lon: number) {
@@ -71,7 +76,7 @@ export function setupCamera() {
     camera.lookAt(currentTarget);
   }
 
-  return { camera, updateTarget, tickCamera };
+  return { camera, updateTarget, tickCamera, setZoom: applyZoom };
 }
 
 export function updateScenePosition(

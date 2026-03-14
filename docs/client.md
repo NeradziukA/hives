@@ -96,9 +96,19 @@ A fixed bottom-center overlay visible on the Game screen.
 
 | Component | File | Displays |
 |-----------|------|---------|
-| `GameHud` | `components/hud/GameHud.svelte` | Container; reads `gameState` |
-| `ZoomDisplay` | `components/hud/ZoomDisplay.svelte` | Current camera zoom (`⊕ 1.0×`) |
+| `GameHud` | `components/hud/GameHud.svelte` | Container; shows `MessageLog` only |
+| `ZoomDisplay` | `components/hud/ZoomDisplay.svelte` | Current camera zoom value (used inside `ZoomSlider`) |
 | `MessageLog` | `components/hud/MessageLog.svelte` | Last incoming event message (auto-clears after 4s) |
+
+## Zoom Slider
+
+`ZoomSlider.svelte` — vertical slider on the left side of the screen (mobile-friendly).
+
+- Logarithmic scale: range 0.05× – 200×
+- Displays current zoom value below the slider
+- Drag does not jerk: local state decoupled from `gameState.zoom` during interaction
+- Syncs with mouse wheel via `$effect` when not dragging
+- `sceneSetup.setupCamera()` returns `setZoom(value)`, wired to `gameState` via `wireSetZoom()`
 
 ## Unit Selection
 
@@ -106,6 +116,7 @@ Clicking a non-own unit:
 - Highlights it with a green outline (`OutlinePass`) in 3D model mode
 - Shows a green selection ring sprite in dot LOD mode
 - Opens `UnitActionMenu` above the HUD with unit ID and action buttons
+- Deselects previous unit before selecting the new one
 
 Clicking empty space or pressing ✕ dismisses the selection.
 

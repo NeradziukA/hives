@@ -19,7 +19,7 @@ import {
   getUnitById,
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
-import { gameState } from "./ui/gameState.svelte.ts";
+import { gameState, wireSetZoom } from "./ui/gameState.svelte.ts";
 
 const MAIN_UNIT_ID = "__self__";
 
@@ -36,7 +36,8 @@ export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
 
   const { scene, light } = setupScene();
-  const { camera, updateTarget, tickCamera } = setupCamera();
+  const { camera, updateTarget, tickCamera, setZoom } = setupCamera();
+  wireSetZoom(setZoom);
   updateScenePosition(updateTarget, light);
 
   // Post-processing: RenderPass → OutlinePass → OutputPass
@@ -56,17 +57,22 @@ export async function initGame(container: HTMLElement): Promise<void> {
   composer.addPass(new OutputPass());
 
   const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
+  const mouse = new THREE.Vector2(-2, -2); // off-screen until first mousemove
   let hasColorChanged = false;
   let mainUnit: UnitModel;
+  let prevSelectedUnitId: string | null = null;
 
   window.addEventListener("mousemove", (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   });
 
-  renderer.domElement.addEventListener("click", () => {
-    raycaster.setFromCamera(mouse, camera);
+  renderer.domElement.addEventListener("click", (e: MouseEvent) => {
+    const clickPos = new THREE.Vector2(
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1,
+    );
+    raycaster.setFromCamera(clickPos, camera);
     const intersects = raycaster.intersectObjects(getOtherUnitObjects(), true);
 
     if (intersects.length > 0) {
@@ -101,19 +107,20 @@ export async function initGame(container: HTMLElement): Promise<void> {
     }
 
     // Outline selected unit (3D model) + selection ring (dot LOD)
-    if (gameState.selectedUnitId) {
-      const selectedUnit = getUnitById(gameState.selectedUnitId);
-      const selectedObj = selectedUnit?.renderObj ?? null;
-      outlinePass.selectedObjects = selectedObj ? [selectedObj] : [];
-      selectedUnit?.setSelected(true);
-    } else {
-      outlinePass.selectedObjects = [];
-      // Clear selection ring on all units
-      getOtherUnitObjects().forEach((obj) => {
-        const unit = getUnitById(obj.userData.unitId as string);
-        unit?.setSelected(false);
-      });
+    if (gameState.selectedUnitId !== prevSelectedUnitId) {
+      // Deselect previous
+      if (prevSelectedUnitId) {
+        getUnitById(prevSelectedUnitId)?.setSelected(false);
+      }
+      // Select new
+      if (gameState.selectedUnitId) {
+        getUnitById(gameState.selectedUnitId)?.setSelected(true);
+      }
+      prevSelectedUnitId = gameState.selectedUnitId;
     }
+
+    const selectedUnit = gameState.selectedUnitId ? getUnitById(gameState.selectedUnitId) : null;
+    outlinePass.selectedObjects = selectedUnit?.renderObj ? [selectedUnit.renderObj] : [];
 
     mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
