@@ -12,6 +12,7 @@
     "attributes": {
       "title": "Атрибуты",
       "strength": "Сила",
+      "defense": "Защита",
       "agility": "Ловкость",
       "speed": "Скорость",
       "intelligence": "Интеллект",

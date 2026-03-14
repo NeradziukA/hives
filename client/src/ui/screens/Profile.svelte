@@ -31,6 +31,7 @@
       <h3 class="section-title">{$_("profile.attributes.title")}</h3>
       <div class="stat-grid">
         <div class="stat"><span class="key">{$_("profile.attributes.strength")}</span><span class="val">—</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.defense")}</span><span class="val">—</span></div>
         <div class="stat"><span class="key">{$_("profile.attributes.agility")}</span><span class="val">—</span></div>
         <div class="stat"><span class="key">{$_("profile.attributes.speed")}</span><span class="val">—</span></div>
         <div class="stat"><span class="key">{$_("profile.attributes.intelligence")}</span><span class="val">—</span></div>

@@ -20,6 +20,7 @@ import {
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
 import { gameState, wireSetZoom } from "./ui/gameState.svelte.ts";
+import { createHexGrid, updateHexGrid } from "./hexgrid";
 
 const MAIN_UNIT_ID = "__self__";
 
@@ -111,6 +112,8 @@ export async function initGame(container: HTMLElement): Promise<void> {
     const selectedUnit = gameState.selectedUnitId ? getUnitById(gameState.selectedUnitId) : null;
     outlinePass.selectedObjects = selectedUnit?.renderObj ? [selectedUnit.renderObj] : [];
 
+    hexGrid.visible = gameState.zoom <= 25;
+
     mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
     mainUnit.tick(driftSpeed, camera, window.innerHeight);
@@ -126,6 +129,10 @@ export async function initGame(container: HTMLElement): Promise<void> {
     composer.setSize(window.innerWidth, window.innerHeight);
   });
 
+  const hexGrid = createHexGrid();
+  scene.add(hexGrid);
+  updateHexGrid(hexGrid, 54.3761, 18.5694); // render immediately at default scene position
+
   mainUnit = await UnitModel.create(true);
   mainUnit.renderObj.userData.unitId = MAIN_UNIT_ID;
   scene.add(mainUnit.renderObj);
@@ -134,5 +141,6 @@ export async function initGame(container: HTMLElement): Promise<void> {
   connectWebSocket(scene, handleWebSocketMessages, (coords) => {
     if (mainUnit?.renderObj) mainUnit.moveTo(new Coords(coords.lat, coords.lon));
     updateTarget(coords.lat, coords.lon);
+    updateHexGrid(hexGrid, coords.lat, coords.lon);
   });
 }

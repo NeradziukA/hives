@@ -11,6 +11,7 @@ Shared TypeScript code used by both client and server (and potentially other con
 | [lib/geo/coords.ts](../lib/geo/coords.ts) | `Coords` | Wrapper around `{ x, y }` with getters/setters |
 | [lib/geo/geo-object.ts](../lib/geo/geo-object.ts) | `GeoObject` | Base class with `coords: Coords` and `radius: number`; stub for collision detection |
 | [lib/geo/constants.ts](../lib/geo/constants.ts) | `metersToLatDegrees`, `metersToLonDegrees` | Geographic unit conversion |
+| [lib/geo/geogrid.ts](../lib/geo/geogrid.ts) | `HexCell`, `latLngToHex`, `hexCenter`, `hexById`, `hexNeighbors`, `hexDistance`, `hexRange` | Pointy-top hexagonal grid; axial coordinates `(q, r)`; cell id `"q:r"`; origin — Gdansk |
 
 #### Coordinate Conversion
 
@@ -20,6 +21,19 @@ metersToLatDegrees(meters: number): number
 
 // 1 degree longitude varies with latitude (cos factor)
 metersToLonDegrees(meters: number, latitudeDegrees: number): number
+```
+
+#### Hex Grid
+
+Pointy-top hexagonal grid. Cell radius = 150 m. See [docs/geo/geogrid.md](geo/geogrid.md).
+
+```typescript
+latLngToHex(lat, lng): HexCell     // find cell containing a point
+hexCenter(q, r): HexCell           // build cell from axial coords
+hexById("q:r"): HexCell            // parse id string
+hexNeighbors(q, r): HexCell[]      // 6 adjacent cells
+hexDistance(q1,r1, q2,r2): number  // distance in hex steps
+hexRange(q, r, radius): HexCell[]  // all cells within N steps
 ```
 
 ### Units

@@ -66,12 +66,12 @@ All positions are converted from lat/lon to scene-local meters using `lib/geo/co
 
 ```
 Scene origin (0, 0, 0) = own unit's starting position
-GridHelper = 1km × 1km grid at scene origin
-Camera = top-down perspective, FOV adjustable with +/- keys
+Hex grid overlay   = pointy-top hexagons, radius 150 m, hidden at zoom > 25
+Camera = top-down perspective, zoom via mouse wheel / ZoomSlider
 Own unit color = red / orange / gold palette
 Other units color = blue / cyan / green palette
 Static buildings = separate color palette
-Model height = 20m (converted to lat/lon degrees)
+Model height = 1.7 m (converted to lat/lon degrees); LOD dot below 20 px screen size
 ```
 
 ## Coordinate System

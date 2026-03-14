@@ -36,7 +36,10 @@ graph TD
         gameState["gameState.svelte.ts\nshared reactive state"]
     end
 
+    hexgrid["hexgrid.ts\nhex grid LineSegments"]
+
     main --> renderer & scene & wsHandler & UI
+    main --> hexgrid
     wsHandler --> auth & init & connected & moved & disconnected
     auth --> location
     location -->|coords| wsHandler
@@ -54,7 +57,8 @@ graph TD
 | File | Responsibility |
 |------|---------------|
 | [main.ts](../client/src/main.ts) | App entry; animation loop; raycaster for click interactions |
-| [game.ts](../client/src/game.ts) | Scene init, EffectComposer, OutlinePass, hover/click raycasting |
+| [game.ts](../client/src/game.ts) | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring |
+| [hexgrid.ts](../client/src/hexgrid.ts) | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25 |
 | [renderer.ts](../client/src/renderer.ts) | WebGL renderer (antialiasing, transparent background) |
 | [sceneSetup.ts](../client/src/sceneSetup.ts) | Three.js scene, lights, camera; updates `gameState.zoom` on scroll |
 | [models.ts](../client/src/models.ts) | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()` |

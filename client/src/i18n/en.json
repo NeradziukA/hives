@@ -12,6 +12,7 @@
     "attributes": {
       "title": "Attributes",
       "strength": "Strength",
+      "defense": "Defense",
       "agility": "Agility",
       "speed": "Speed",
       "intelligence": "Intelligence",
