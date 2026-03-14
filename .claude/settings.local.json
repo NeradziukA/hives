@@ -5,27 +5,11 @@
       "Bash(npm install:*)",
       "Bash(npm run:*)",
       "Bash(npx vite:*)",
-      "Read(//c/Users/Think/.ssh/**)",
-      "Bash(ls ~/.ssh/*.pub)",
-      "Bash(ssh -o StrictHostKeyChecking=no hstgr \"echo connected && uname -a && whoami\")",
-      "Bash(ssh -o StrictHostKeyChecking=no hstgr-hives \"echo connected && whoami && sudo whoami\")",
-      "Bash(ssh hstgr-hives:*)",
-      "Bash(git remote:*)",
-      "Bash(ssh -o StrictHostKeyChecking=no hstgr-aiorc \"whoami && sudo whoami\")",
-      "Bash(ssh hstgr:*)",
-      "Bash(ssh hstgr-aiorc:*)",
-      "Bash(git branch:*)",
-      "Bash(gh repo:*)",
-      "Bash(GIT_SSH_COMMAND=\"ssh -v\" git push -u origin main)",
-      "Bash(ssh -T git@github.com)",
-      "Bash(curl -s https://api.github.com/users/NeradziukA/repos?per_page=10)",
-      "Bash(git config:*)",
-      "Bash(cmdkey /list)",
-      "Read(//c/Users/Think/.claude//**)",
-      "Read(//c/Users/Think/.claude/**)",
-      "Bash(curl -s \"https://claude.ai/oauth/authorize?code=true&client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e&response_type=code&redirect_uri=https%3A%2F%2Fplatform.claude.com%2Foauth%2Fcode%2Fcallback&scope=org%3Acreate_api_key+user%3Aprofile+user%3Ainference+user%3Asessions%3Aclaude_code+user%3Amcp_servers+user%3Afile_upload&code_challenge=SoPWeqkR3ZKlc7vVivQeyvgFgwuY4MBJTkkzMTaUKHg&code_challenge_method=S256&state=mMV-YxPZIWQnAOiarIv0Xm0NgQWLr4p37pfhfOt3FcY\" -I)",
-      "Bash(find d:/Programming/ai -name *.py)",
-      "Bash(ssh aiorc@srv1491778.hstgr.cloud \"cd ~/projects/orchestrator && git pull origin main && pkill -f ''python3.*uvicorn.*bot:app''; sleep 5; ps aux | grep ''uvicorn.*bot'' | grep -v grep\")"
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

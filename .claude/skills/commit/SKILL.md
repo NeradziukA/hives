@@ -13,10 +13,13 @@ Do not add a co-author section.
 
 Before creating a commit, you MUST perform the following steps:
 
-1.  Analyze the completed task
+1.  Pull latest changes before committing
+    - Run `git pull --rebase origin main` to avoid conflicts
+    - If pull fails, stop and report the error
+2.  Analyze the completed task
     - Determine what functionality was added, changed, or removed.
     - Identify affected modules, APIs, or logic flows.
-2.  Update documentation
+3.  Update documentation
     - Update relevant files in:
       - README.md
       - /docs
@@ -25,18 +28,18 @@ Before creating a commit, you MUST perform the following steps:
       - new behavior
       - changed interfaces
       - configuration changes
-3.  Update logic diagrams
+4.  Update logic diagrams
     - If the change affects system flow, update diagrams:
       - sequence diagrams
       - flow diagrams
       - architecture diagrams
     - Prefer formats:
       - mermaid
-4.  Verify documentation completeness
+5.  Verify documentation completeness
     - Ensure that new features are documented
     - Ensure outdated descriptions are removed or corrected
-5.  Generate commit message based on the completed task
-6.  Push to both remotes
+6.  Generate commit message based on the completed task
+7.  Push to both remotes
     - After committing, push to both remotes:
       - `git push origin main`
       - `git push heroku main`
