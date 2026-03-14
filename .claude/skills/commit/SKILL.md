@@ -36,6 +36,10 @@ Before creating a commit, you MUST perform the following steps:
     - Ensure that new features are documented
     - Ensure outdated descriptions are removed or corrected
 5.  Generate commit message based on the completed task
+6.  Push to both remotes
+    - After committing, push to both remotes:
+      - `git push origin main`
+      - `git push heroku main`
 
 Commit message format:
 
