@@ -36,6 +36,17 @@ function renderDoc(title: string, body: string): string {
 <body>
 <nav><a href="/docs">← docs</a></nav>
 ${body}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+  document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = el.textContent;
+    el.parentElement.replaceWith(div);
+  });
+  await mermaid.run();
+</script>
 </body>
 </html>`;
 }
