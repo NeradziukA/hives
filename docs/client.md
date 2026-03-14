@@ -110,6 +110,11 @@ A fixed bottom-center overlay visible on the Game screen.
 - Syncs with mouse wheel via `$effect` when not dragging
 - `sceneSetup.setupCamera()` returns `setZoom(value)`, wired to `gameState` via `wireSetZoom()`
 
+## Mobile
+
+- Pinch zoom disabled via `user-scalable=no` in viewport meta and `touch-action: none` on the canvas
+- Zoom controlled via `ZoomSlider` on the left side
+
 ## Unit Selection
 
 Clicking a non-own unit:

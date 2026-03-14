@@ -56,9 +56,10 @@ export async function initGame(container: HTMLElement): Promise<void> {
   composer.addPass(outlinePass);
   composer.addPass(new OutputPass());
 
+  renderer.domElement.style.touchAction = "none"; // disable browser pinch-zoom on canvas
+
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2(-2, -2); // off-screen until first mousemove
-  let hasColorChanged = false;
   let mainUnit: UnitModel;
   let prevSelectedUnitId: string | null = null;
 
@@ -92,19 +93,6 @@ export async function initGame(container: HTMLElement): Promise<void> {
     const intersects = raycaster.intersectObjects(allObjects, true);
     renderer.domElement.style.cursor = intersects.length > 0 ? "pointer" : "default";
 
-    if (intersects.length > 0 && !hasColorChanged) {
-      mainUnit.renderObj.traverse((child: THREE.Object3D) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const material = (child as THREE.Mesh).material;
-          if (material && (material as THREE.MeshStandardMaterial).color) {
-            (material as THREE.MeshStandardMaterial).color.setHex(
-              Math.random() * 0xffffff
-            );
-          }
-        }
-      });
-      hasColorChanged = true;
-    }
 
     // Outline selected unit (3D model) + selection ring (dot LOD)
     if (gameState.selectedUnitId !== prevSelectedUnitId) {
