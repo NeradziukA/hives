@@ -7,8 +7,8 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 | File | Responsibility |
 |------|---------------|
 | [index.ts](../server/src/index.ts) | Express app; mounts docs router; serves `static/`; error handler; starts HTTP + WS |
-| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` — reads `docs/*.md`, converts to HTML, serves with TOC |
-| [docs-render.ts](../server/src/docs-render.ts) | `buildToc(html)` — injects anchors + Contents nav; `renderDoc(title, body)` — fills `docs-template.html` |
+| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` — reads `docs/*.md`, rewrites relative links, builds global nav, serves HTML |
+| [docs-render.ts](../server/src/docs-render.ts) | `renderDoc(title, body, nav)` — fills `docs-template.html` with content and sidebar nav |
 | [docs-template.html](../server/src/docs-template.html) | HTML/CSS/JS shell for all doc pages; includes Mermaid CDN renderer |
 | [types.ts](../server/src/types.ts) | Shared TypeScript types: `MessageType`, `User`, `Coordinates`, `SocketMessage`, `StaticObject` |
 | [api/index.ts](../server/src/api/index.ts) | `getUser()` — creates a new user with UUID; `getStaticObjects()` — returns 2 hardcoded buildings near Gdansk |
@@ -18,7 +18,7 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 graph TD
     index["index.ts\nExpress · port 3000"]
     docsRouter["docs-router.ts\n/docs routes"]
-    docsRender["docs-render.ts\nbuildToc · renderDoc"]
+    docsRender["docs-render.ts\nrenderDoc"]
     docsTemplate["docs-template.html\nHTML shell"]
     wsIndex["websocket/index.ts\nWebSocket server setup"]
     api["api/index.ts\ngetUser · getStaticObjects"]
@@ -107,9 +107,7 @@ Both client and server deploy to **Heroku** from a single dyno.
 web: cd server && npm install --include=dev && npm start
 ```
 
-Root `package.json` `heroku-postbuild` (runs before Procfile, builds client):
-```
-npm install --prefix ./client && npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/
-```
+Root `package.json` `heroku-postbuild` delegates to `scripts/heroku-postbuild.sh`:
+installs client and server dev deps, builds client, copies dist to `server/static/`.
 
 The built client ends up in `server/static/` and is served by Express at the root URL.

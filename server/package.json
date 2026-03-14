@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build && node ./dist/index.js",
-    "build": "tsc && cp src/docs-template.html dist/docs-template.html",
+    "build": "node scripts/build.js",
     "dev": "nodemon ./dist/index.js",
     "watch-ts": "tsc --watch"
   },
