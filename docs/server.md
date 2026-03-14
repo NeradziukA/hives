@@ -6,18 +6,23 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 
 | File | Responsibility |
 |------|---------------|
-| [index.ts](../server/src/index.ts) | Express app; serves `static/` on port 3000; renders `docs/*.md` at `/docs` with Mermaid diagrams via CDN; each diagram has an "open in mermaid.live" link using base64-encoded source |
+| [index.ts](../server/src/index.ts) | Express app; mounts docs router; serves `static/`; error handler; starts HTTP + WS |
+| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` — reads `docs/*.md`, converts to HTML, serves with TOC |
+| [docs-render.ts](../server/src/docs-render.ts) | `buildToc(html)` — injects anchors + Contents nav; `renderDoc(title, body)` — fills `docs-template.html` |
+| [docs-template.html](../server/src/docs-template.html) | HTML/CSS/JS shell for all doc pages; includes Mermaid CDN renderer |
 | [types.ts](../server/src/types.ts) | Shared TypeScript types: `MessageType`, `User`, `Coordinates`, `SocketMessage`, `StaticObject` |
 | [api/index.ts](../server/src/api/index.ts) | `getUser()` — creates a new user with UUID; `getStaticObjects()` — returns 2 hardcoded buildings near Gdansk |
 | [websocket/index.ts](../server/src/websocket/index.ts) | WebSocket server setup; delegates to connection handler |
 
 ```mermaid
 graph TD
-    index["index.ts\nExpress · port 3000 · /docs"]
+    index["index.ts\nExpress · port 3000"]
+    docsRouter["docs-router.ts\n/docs routes"]
+    docsRender["docs-render.ts\nbuildToc · renderDoc"]
+    docsTemplate["docs-template.html\nHTML shell"]
     wsIndex["websocket/index.ts\nWebSocket server setup"]
     api["api/index.ts\ngetUser · getStaticObjects"]
     types["types.ts\nMessageType · User · StaticObject"]
-    config["config.ts"]
     logger["logger.ts"]
 
     subgraph Handlers["websocket/handlers/"]
@@ -32,7 +37,9 @@ graph TD
         users["users\nMap&lt;id, User&gt;"]
     end
 
-    index --> wsIndex
+    index --> docsRouter & wsIndex
+    docsRouter --> docsRender
+    docsRender --> docsTemplate
     wsIndex --> connect
     connect --> unitGetAll & unitMove & close
     unitGetAll --> api & State

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{title}} — hives docs</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; color: #ccc; background: #111; line-height: 1.6; }
+  a { color: #7af; }
+  h1, h2, h3 { color: #eee; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 16px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #333; padding: 8px 12px; text-align: left; }
+  th { background: #1a1a1a; color: #eee; }
+  nav { margin-bottom: 32px; padding-bottom: 12px; border-bottom: 1px solid #333; }
+  nav a { margin-right: 16px; }
+  nav.toc { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 12px 20px; margin-bottom: 32px; }
+  nav.toc ul { margin: 6px 0 0; padding-left: 20px; }
+  nav.toc li { margin: 3px 0; }
+  nav.toc strong { color: #eee; }
+</style>
+</head>
+<body>
+<nav><a href="/docs">← docs</a></nav>
+{{body}}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+  document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.setAttribute('data-source', el.textContent);
+    div.textContent = el.textContent;
+    el.parentElement.replaceWith(div);
+  });
+  await mermaid.run();
+  document.querySelectorAll('.mermaid').forEach(el => {
+    const code = el.getAttribute('data-source') || '';
+    if (!code) return;
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify({ code, mermaid: { theme: 'dark' } }))));
+    const link = document.createElement('a');
+    link.href = 'https://mermaid.live/view#base64:' + b64;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = '↗ open in mermaid.live';
+    link.style.cssText = 'display:block; margin-top:8px; font-size:0.85em;';
+    el.after(link);
+  });
+</script>
+</body>
+</html>
