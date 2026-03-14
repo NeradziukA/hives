@@ -55,7 +55,7 @@ ${body}
     link.href = url;
     link.target = '_blank';
     link.rel = 'noopener';
-    link.textContent = '↗ открыть диаграмму в новом окне';
+    link.textContent = '↗ open diagram in new tab';
     link.style.cssText = 'display:block; margin-top:8px; font-size:0.85em;';
     el.after(link);
   });
@@ -70,7 +70,7 @@ app.get("/docs", (_req: Request, res: Response) => {
     const md = fs.readFileSync(indexPath, "utf8");
     const html = String(marked(md));
     const withLinks = html.replace(/href="([^"]+)\.md"/g, 'href="/docs/$1"');
-    res.send(renderDoc("Documentation", withLinks));
+    res.type("html").send(renderDoc("Documentation", withLinks));
   } catch {
     res.status(500).send("Failed to load docs index");
   }
@@ -87,7 +87,7 @@ app.get("/docs/:name", (req: Request, res: Response) => {
     const md = fs.readFileSync(filePath, "utf8");
     const html = String(marked(md));
     const withLinks = html.replace(/href="([^"]+)\.md"/g, 'href="/docs/$1"');
-    res.send(renderDoc(name, withLinks));
+    res.type("html").send(renderDoc(name, withLinks));
   } catch {
     res.status(404).send("Document not found");
   }
