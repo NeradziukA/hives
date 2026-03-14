@@ -47,19 +47,12 @@ ${body}
     el.parentElement.replaceWith(div);
   });
   await mermaid.run();
-  const { deflate } = await import('https://cdn.jsdelivr.net/npm/pako@2/dist/pako.esm.mjs');
-  function toMermaidLiveUrl(code) {
-    const state = JSON.stringify({ code, mermaid: { theme: 'dark' } });
-    const bytes = new TextEncoder().encode(state);
-    const compressed = deflate(bytes, { level: 9 });
-    const b64 = btoa(String.fromCharCode(...compressed)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return 'https://mermaid.live/view#pako:' + b64;
-  }
   document.querySelectorAll('.mermaid').forEach(el => {
-    const code = el.getAttribute('data-source');
+    const code = el.getAttribute('data-source') || '';
     if (!code) return;
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify({ code, mermaid: { theme: 'dark' } }))));
     const link = document.createElement('a');
-    link.href = toMermaidLiveUrl(code);
+    link.href = 'https://mermaid.live/view#base64:' + b64;
     link.target = '_blank';
     link.rel = 'noopener';
     link.textContent = '↗ open in mermaid.live';
