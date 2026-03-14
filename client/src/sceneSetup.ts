@@ -13,14 +13,7 @@ export function setupScene() {
   const ambientLight = new THREE.AmbientLight(0x404040);
   scene.add(ambientLight);
 
-  // 1km grid centered on Gdansk. GridHelper is horizontal in XZ by default — no rotation needed.
-  const gridSize = 0.01;
-  const divisions = 10;
-  const gridHelper = new THREE.GridHelper(gridSize, divisions);
-  gridHelper.position.set(54.3761, 0, 18.5694);
-  scene.add(gridHelper);
-
-  return { scene, light, ambientLight, gridHelper };
+  return { scene, light, ambientLight };
 }
 
 // Drift speed set by server config via setDriftSpeed()
@@ -81,13 +74,11 @@ export function setupCamera() {
 
 export function updateScenePosition(
   updateTarget: (lat: number, lon: number) => void,
-  gridHelper: THREE.GridHelper,
   light: THREE.DirectionalLight,
 ): void {
   navigator.geolocation.getCurrentPosition((position) => {
     const { latitude, longitude } = position.coords;
 
-    gridHelper.position.set(latitude, 0, longitude);
     light.position.set(latitude, 0.01, longitude);
     light.target.position.set(latitude, 0, longitude);
     updateTarget(latitude, longitude);

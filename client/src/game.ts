@@ -17,9 +17,9 @@ import { Coords } from "../../lib/geo/coords";
 export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
 
-  const { scene, light, gridHelper } = setupScene();
+  const { scene, light } = setupScene();
   const { camera, updateTarget, tickCamera } = setupCamera();
-  updateScenePosition(updateTarget, gridHelper, light);
+  updateScenePosition(updateTarget, light);
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
