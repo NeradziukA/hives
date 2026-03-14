@@ -46,6 +46,19 @@ ${body}
     el.parentElement.replaceWith(div);
   });
   await mermaid.run();
+  document.querySelectorAll('.mermaid').forEach(el => {
+    const svg = el.querySelector('svg');
+    if (!svg) return;
+    const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = '↗ открыть диаграмму в новом окне';
+    link.style.cssText = 'display:block; margin-top:8px; font-size:0.85em;';
+    el.after(link);
+  });
 </script>
 </body>
 </html>`;
