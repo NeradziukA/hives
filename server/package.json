@@ -12,8 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/marked": "^5.0.2",
     "express": "^4.21.2",
     "hives": "file:..",
+    "marked": "^17.0.4",
     "tslog": "^4.10.2",
     "uuid": "^11.1.0",
     "ws": "^8.18.1"
