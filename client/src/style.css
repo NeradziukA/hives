@@ -1,5 +1,12 @@
 *, *::before, *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas {
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 body {

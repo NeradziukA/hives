@@ -57,6 +57,7 @@ export async function initGame(container: HTMLElement): Promise<void> {
   composer.addPass(new OutputPass());
 
   renderer.domElement.style.touchAction = "none"; // disable browser pinch-zoom on canvas
+  renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault()); // block long-press context menu
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2(-2, -2); // off-screen until first mousemove
