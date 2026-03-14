@@ -8,3 +8,4 @@
 | [client.md](client.md) | Frontend files, Three.js scene, handlers, models, color palettes |
 | [server.md](server.md) | Backend files, WebSocket handlers, state, static objects |
 | [lib.md](lib.md) | Shared library — geo math, Unit class, interfaces |
+| [screen-transitions.md](screen-transitions.md) | Screen transition flows and state diagrams |
