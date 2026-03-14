@@ -10,7 +10,7 @@
     "build": "npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/",
     "build:win": "npm run build --prefix ./client && xcopy client\\dist server\\static /E /I /Y",
     "install:all": "npm install && npm install --prefix ./client && npm install --prefix ./server",
-    "heroku-postbuild": "npm install --include=dev --prefix ./client && npm run build --prefix ./client && cp -r ./client/dist/* ./server/static/ && npm install --include=dev --prefix ./server"
+    "heroku-postbuild": "npm install --include=dev --prefix ./client && npm run build --prefix ./client && mkdir -p ./server/static && cp -r ./client/dist/* ./server/static/ && npm install --include=dev --prefix ./server"
   },
   "author": "",
   "engines": {
