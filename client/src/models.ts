@@ -17,7 +17,7 @@ export class UnitModel extends Unit<THREE.Group> {
 
   static async create(
     isMainUnit: boolean = false,
-    modelPath = "funko_test_model.glb",
+    modelPath = "/assets/funko_test_model.glb",
     heightMeters = 1.7,
   ): Promise<UnitModel> {
     const unit = new UnitModel(heightMeters);

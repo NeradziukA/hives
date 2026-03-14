@@ -70,8 +70,8 @@ Located in [client/src/handlers/](../client/src/handlers/)
 
 | Asset | File | Used for |
 |-------|------|---------|
-| Unit model | `public/funko_test_model.glb` (5.1 MB) | All player units |
-| Building | `public/Large Building.glb` (140 KB) | Static BUILDING_A objects |
+| Unit model | `public/assets/funko_test_model.glb` (5.1 MB) | All player units |
+| Building | `public/assets/Large Building.glb` (140 KB) | Static BUILDING_A objects |
 
 ## Color Palettes
 

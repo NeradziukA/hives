@@ -25,7 +25,7 @@ export async function handleInitUnits(
   }
   if (message.payload.staticObjects) {
     for (const o of message.payload.staticObjects) {
-      const unit = await UnitModel.create(false, "Large Building.glb", 25);
+      const unit = await UnitModel.create(false, "/assets/Large Building.glb", 25);
       unit.moveTo(
         new Coords(
           (o as { coords: { lat: number; lon: number } }).coords.lat,
