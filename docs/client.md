@@ -6,6 +6,42 @@ Frontend Three.js application. Source: [client/src/](../client/src/)
 
 [main.ts](../client/src/main.ts) — initializes the scene, creates the local unit, starts the WebSocket connection, and runs the animation loop.
 
+```mermaid
+graph TD
+    main["main.ts\nentry point · animation loop"]
+    renderer["renderer.ts\nWebGL renderer"]
+    scene["sceneSetup.ts\nscene · lights · camera"]
+    wsHandler["webSocketHandler.ts\nWS connect · message routing"]
+    location["location.ts\nLocationTracker GPS 1s"]
+    models["models.ts\nUnitModel GLTF"]
+
+    subgraph Handlers["handlers/"]
+        auth["unitAuthenticatedHandler\nUNIT_AUTHENTICATED"]
+        init["initUnitsHandler\nINIT_UNITS"]
+        connected["unitConnectedHandler\nUNIT_CONNECTED"]
+        moved["unitMovedHandler\nUNIT_MOVED"]
+        disconnected["unitDisconnectedHandler\nUNIT_DISCONNECTED"]
+    end
+
+    subgraph UI["Svelte UI"]
+        App["App.svelte\nrouter · screen state"]
+        Splash["Splash.svelte"]
+        MainMenu["MainMenu.svelte"]
+        Game["Game.svelte"]
+        Profile["Profile.svelte"]
+        Layout["Layout.svelte"]
+        Sidebar["Sidebar.svelte"]
+    end
+
+    main --> renderer & scene & wsHandler & UI
+    wsHandler --> auth & init & connected & moved & disconnected
+    auth --> location
+    location -->|coords| wsHandler
+    init & connected & moved & disconnected --> models
+    App --> Splash & MainMenu & Game & Profile
+    Game & Profile --> Layout --> Sidebar
+```
+
 ## Files
 
 | File | Responsibility |

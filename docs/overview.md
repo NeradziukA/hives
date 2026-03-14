@@ -8,19 +8,35 @@ Multiple browser clients connect to a shared WebSocket server. Each client track
 
 ## Architecture
 
-```
-FRONTEND (Three.js + Vite)
-├─ Geolocation tracking (±50m noise)
-├─ Three.js scene: grid, lights, camera
-├─ GLTF model loading & per-user coloring
-└─ WebSocket connection with auto-reconnect
+```mermaid
+graph TB
+    subgraph Browser["Browser (Client)"]
+        Svelte["Svelte UI\nscreens & sidebar"]
+        ThreeJS["Three.js Scene\n3D models · grid · camera"]
+        WS_Client["WebSocket Client\nauto-reconnect 5s"]
+        GPS["LocationTracker\nGPS every 1s"]
+    end
 
-        ↕ WebSocket (Port 3000)
+    subgraph Server["Server · Node.js · port 3000"]
+        Express["Express\nstatic files · /docs"]
+        WS_Server["WebSocket Server"]
+        State["In-Memory State\nusers · sockets"]
+        API["API\nUUID · static objects"]
+    end
 
-BACKEND (Express + ws)
-├─ In-memory user/socket maps (no persistence)
-├─ Message routing & broadcasting
-└─ Static file serving (built client)
+    subgraph Lib["Shared Library (lib/)"]
+        Geo["geo: Coords · GeoObject\nmetersToLatDegrees"]
+        Units["units: Unit"]
+        Interfaces["DamageableI · MovableI"]
+    end
+
+    GPS -->|coords| WS_Client
+    WS_Client <-->|WebSocket| WS_Server
+    WS_Server --- State
+    WS_Server --- API
+    Express -.->|serves static| Browser
+    Lib --- Browser
+    Lib --- Server
 ```
 
 ## Monorepo Layout

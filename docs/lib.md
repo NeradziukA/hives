@@ -43,8 +43,60 @@ metersToLonDegrees(meters: number, latitudeDegrees: number): number
 
 ## Class Hierarchy
 
-```
-GeoObject (coords, radius)
-  └── Unit (health, applyDamage, moveTo)
-        └── UnitModel [client only] (Three.js model, scene management)
+```mermaid
+classDiagram
+    class Coords {
+        +x: number
+        +y: number
+    }
+
+    class GeoObject {
+        +coords: Coords
+        +radius: number
+    }
+
+    class Unit {
+        +health: number
+        +applyDamage(damage: Damage) void
+        +moveTo(coords: Coords) void
+    }
+
+    class UnitModel {
+        <<client only>>
+        +scene: THREE.Scene
+        +load() void
+        +setColor(palette) void
+        +setPosition(coords) void
+        +remove() void
+    }
+
+    class DamageableI {
+        <<interface>>
+        +health: number
+        +applyDamage(damage: Damage) void
+    }
+
+    class MovableI {
+        <<interface>>
+        +coords: Coords
+        +moveTo(coords: Coords) void
+    }
+
+    class Damage {
+        +type: DamageType
+        +points: number
+    }
+
+    class DamageType {
+        <<enumeration>>
+        PHYSICAL
+    }
+
+    GeoObject --> Coords : has
+    Unit --|> GeoObject : extends
+    Unit ..|> DamageableI : implements
+    Unit ..|> MovableI : implements
+    UnitModel --|> Unit : extends
+    Damage --> DamageType : uses
+    DamageableI ..> Damage : uses
 ```

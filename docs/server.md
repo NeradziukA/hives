@@ -11,6 +11,38 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 | [api/index.ts](../server/src/api/index.ts) | `getUser()` — creates a new user with UUID; `getStaticObjects()` — returns 2 hardcoded buildings near Gdansk |
 | [websocket/index.ts](../server/src/websocket/index.ts) | WebSocket server setup; delegates to connection handler |
 
+```mermaid
+graph TD
+    index["index.ts\nExpress · port 3000 · /docs"]
+    wsIndex["websocket/index.ts\nWebSocket server setup"]
+    api["api/index.ts\ngetUser · getStaticObjects"]
+    types["types.ts\nMessageType · User · StaticObject"]
+    config["config.ts"]
+    logger["logger.ts"]
+
+    subgraph Handlers["websocket/handlers/"]
+        connect["connect.ts\nnew connection → assign UUID"]
+        unitGetAll["unit-get-all.ts\nUNIT_GET_ALL → INIT_UNITS"]
+        unitMove["unit-move.ts\nUNIT_MOVED → broadcast"]
+        close["close.ts\ndisconnect → UNIT_DISCONNECTED"]
+    end
+
+    subgraph State["In-Memory State"]
+        sockets["clientsSockets\nMap&lt;id, WebSocket&gt;"]
+        users["users\nMap&lt;id, User&gt;"]
+    end
+
+    index --> wsIndex
+    wsIndex --> connect
+    connect --> unitGetAll & unitMove & close
+    unitGetAll --> api & State
+    unitMove --> State
+    close --> State
+    connect --> State
+    Handlers --> logger & types
+    api --> types
+```
+
 ## WebSocket Handlers
 
 Located in [server/src/websocket/handlers/](../server/src/websocket/handlers/)

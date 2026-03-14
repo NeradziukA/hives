@@ -2,34 +2,30 @@
 
 ## Message Flow
 
-```
-Client connects
-     │
-     ▼
-Server assigns UUID → sends UNIT_AUTHENTICATED
-     │
-     ▼
-Client starts LocationTracker (GPS every 1s)
-Client sends UNIT_GET_ALL (with current coords)
-     │
-     ▼
-Server sends INIT_UNITS (all users + static objects)
-     │
-     ▼
-Client creates 3D models for each user / building
-     │
-     ▼
-Loop every 1000ms:
-  Client sends UNIT_MOVED (new coords)
-  Server updates in-memory map
-  Server broadcasts UNIT_MOVED to all other clients
-  Other clients update 3D model positions
-     │
-     ▼
-Client disconnects
-  Server removes user from maps
-  Server broadcasts UNIT_DISCONNECTED
-  Other clients remove 3D model from scene
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant O as Other Clients
+
+    C->>S: TCP connect
+    S->>C: UNIT_AUTHENTICATED { id }
+    Note over C: Starts LocationTracker (GPS)
+
+    C->>S: UNIT_GET_ALL { coords }
+    S->>C: INIT_UNITS { users[], staticObjects[] }
+    S->>O: UNIT_CONNECTED { user }
+    Note over C: Creates 3D models for each user / building
+
+    loop Every 1000 ms
+        C->>S: UNIT_MOVED { id, coords }
+        S->>O: UNIT_MOVED { id, coords }
+        Note over O: Updates 3D model position
+    end
+
+    C->>S: disconnect
+    S->>O: UNIT_DISCONNECTED { id }
+    Note over O: Removes 3D model from scene
 ```
 
 ## WebSocket Message Types
