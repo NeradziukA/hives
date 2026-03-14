@@ -13,11 +13,12 @@ export class UnitModel extends Unit<THREE.Group> {
   private readonly desiredPos = new THREE.Vector3();
   private modelMesh: THREE.Group | null = null;
   private dotSprite: THREE.Sprite | null = null;
+  private selectionRing: THREE.Sprite | null = null;
   private boundingSphereRadius = 0; // world units
 
   static async create(
     isMainUnit: boolean = false,
-    modelPath = "/assets/funko_test_model.glb",
+    modelPath = "/assets/models-3d/funko_test_model.glb",
     heightMeters = 1.7,
   ): Promise<UnitModel> {
     const unit = new UnitModel(heightMeters);
@@ -96,10 +97,30 @@ export class UnitModel extends Unit<THREE.Group> {
           );
           this.dotSprite.visible = false;
 
+          // Selection ring sprite — visible only in LOD dot mode when selected
+          const ringCanvas = document.createElement("canvas");
+          ringCanvas.width = 64;
+          ringCanvas.height = 64;
+          const ringCtx = ringCanvas.getContext("2d")!;
+          ringCtx.beginPath();
+          ringCtx.arc(32, 32, 28, 0, Math.PI * 2);
+          ringCtx.strokeStyle = "#72b53a";
+          ringCtx.lineWidth = 6;
+          ringCtx.stroke();
+          this.selectionRing = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+              map: new THREE.CanvasTexture(ringCanvas),
+              depthTest: false,
+              transparent: true,
+            }),
+          );
+          this.selectionRing.visible = false;
+
           // Wrap both in a container group so renderObj position drives both
           const container = new THREE.Group();
           container.add(model);
           container.add(this.dotSprite);
+          container.add(this.selectionRing);
           this.modelMesh = model;
           this.renderObj = container;
           resolve();
@@ -146,10 +167,21 @@ export class UnitModel extends Unit<THREE.Group> {
         const dotWorldSize =
           (DOT_SIZE_PX / screenHeight) * 2 * halfViewportHeight;
         this.dotSprite.scale.set(dotWorldSize, dotWorldSize, 1);
+        if (this.selectionRing?.visible) {
+          this.selectionRing.scale.set(dotWorldSize * 1.8, dotWorldSize * 1.8, 1);
+        }
       } else {
         this.modelMesh.visible = true;
         this.dotSprite.visible = false;
+        if (this.selectionRing) this.selectionRing.visible = false;
       }
+    }
+  }
+
+  // Shows/hides the selection ring (used in dot LOD mode)
+  setSelected(selected: boolean): void {
+    if (this.selectionRing) {
+      this.selectionRing.visible = selected && this.dotSprite?.visible === true;
     }
   }
 }

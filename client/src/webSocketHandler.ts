@@ -51,6 +51,16 @@ export function tickAllUnits(speed: number, camera?: THREE.PerspectiveCamera, sc
   otherUnits.forEach((unit) => unit.tick(speed, camera, screenHeight));
 }
 
+export function getOtherUnitObjects(): THREE.Object3D[] {
+  return Array.from(otherUnits.values())
+    .map((u) => u.renderObj)
+    .filter((obj): obj is THREE.Group => obj !== null);
+}
+
+export function getUnitById(id: string): import("./models").UnitModel | null {
+  return otherUnits.get(id) ?? null;
+}
+
 export async function handleWebSocketMessages(
   event: MessageEvent,
   scene: THREE.Scene,

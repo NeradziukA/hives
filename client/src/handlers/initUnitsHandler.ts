@@ -12,6 +12,7 @@ export async function handleInitUnits(
     for (const [id, unitData] of Object.entries(message.payload.users)) {
       if (id !== myId.toString()) {
         const unit = await UnitModel.create();
+        unit.renderObj.userData.unitId = id;
         unit.moveTo(
           new Coords(
             (unitData as { coords: { lat: number; lon: number } }).coords.lat,
@@ -25,7 +26,8 @@ export async function handleInitUnits(
   }
   if (message.payload.staticObjects) {
     for (const o of message.payload.staticObjects) {
-      const unit = await UnitModel.create(false, "/assets/Large Building.glb", 25);
+      const unit = await UnitModel.create(false, "/assets/models-3d/Large Building.glb", 25);
+      unit.renderObj.userData.unitId = o.id;
       unit.moveTo(
         new Coords(
           (o as { coords: { lat: number; lon: number } }).coords.lat,

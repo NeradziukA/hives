@@ -31,6 +31,9 @@ graph TD
         Profile["Profile.svelte"]
         Layout["Layout.svelte"]
         Sidebar["Sidebar.svelte"]
+        GameHud["GameHud.svelte\nzoom · messages"]
+        UnitActionMenu["UnitActionMenu.svelte\nselected unit actions"]
+        gameState["gameState.svelte.ts\nshared reactive state"]
     end
 
     main --> renderer & scene & wsHandler & UI
@@ -40,6 +43,10 @@ graph TD
     init & connected & moved & disconnected --> models
     App --> Splash & MainMenu & Game & Profile
     Game & Profile --> Layout --> Sidebar
+    Game --> GameHud & UnitActionMenu
+    GameHud & UnitActionMenu --> gameState
+    scene -->|zoom · selectedUnitId| gameState
+    connected & disconnected -->|pushMessage| gameState
 ```
 
 ## Files
@@ -47,12 +54,14 @@ graph TD
 | File | Responsibility |
 |------|---------------|
 | [main.ts](../client/src/main.ts) | App entry; animation loop; raycaster for click interactions |
+| [game.ts](../client/src/game.ts) | Scene init, EffectComposer, OutlinePass, hover/click raycasting |
 | [renderer.ts](../client/src/renderer.ts) | WebGL renderer (antialiasing, transparent background) |
-| [sceneSetup.ts](../client/src/sceneSetup.ts) | Three.js scene, lights, GridHelper, camera (FOV ± keys) |
-| [models.ts](../client/src/models.ts) | `UnitModel` — loads GLTF, applies color palette, handles scale |
+| [sceneSetup.ts](../client/src/sceneSetup.ts) | Three.js scene, lights, camera; updates `gameState.zoom` on scroll |
+| [models.ts](../client/src/models.ts) | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()` |
 | [webSocketHandler.ts](../client/src/webSocketHandler.ts) | WS connect, message routing, auto-reconnect (5s) |
 | [location.ts](../client/src/location.ts) | `LocationTracker` — Geolocation API polling every 1000ms |
 | [lighting.ts](../client/src/lighting.ts) | Lighting helper (currently unused) |
+| [ui/gameState.svelte.ts](../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId |
 
 ## Handlers
 
@@ -70,8 +79,9 @@ Located in [client/src/handlers/](../client/src/handlers/)
 
 | Asset | File | Used for |
 |-------|------|---------|
-| Unit model | `public/assets/funko_test_model.glb` (5.1 MB) | All player units |
-| Building | `public/assets/Large Building.glb` (140 KB) | Static BUILDING_A objects |
+| Unit model | `public/assets/models-3d/funko_test_model.glb` (5.1 MB) | All player units |
+| Building | `public/assets/models-3d/Large Building.glb` (140 KB) | Static BUILDING_A objects |
+| Background | `public/assets/images/main-background.jpg` | Main menu / splash background |
 
 ## Color Palettes
 
@@ -79,6 +89,25 @@ Located in [client/src/handlers/](../client/src/handlers/)
 |--------|--------|
 | Own unit | Red, Orange, Gold |
 | Other users | Blue, Cyan, Green |
+
+## Game HUD
+
+A fixed bottom-center overlay visible on the Game screen.
+
+| Component | File | Displays |
+|-----------|------|---------|
+| `GameHud` | `components/hud/GameHud.svelte` | Container; reads `gameState` |
+| `ZoomDisplay` | `components/hud/ZoomDisplay.svelte` | Current camera zoom (`⊕ 1.0×`) |
+| `MessageLog` | `components/hud/MessageLog.svelte` | Last incoming event message (auto-clears after 4s) |
+
+## Unit Selection
+
+Clicking a non-own unit:
+- Highlights it with a green outline (`OutlinePass`) in 3D model mode
+- Shows a green selection ring sprite in dot LOD mode
+- Opens `UnitActionMenu` above the HUD with unit ID and action buttons
+
+Clicking empty space or pressing ✕ dismisses the selection.
 
 ## Development
 

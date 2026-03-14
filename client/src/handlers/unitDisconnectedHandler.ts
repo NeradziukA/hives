@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { UnitModel } from "../models";
+import { pushMessage } from "../ui/gameState.svelte.ts";
 
 export function handleUnitDisconnected(
   message: any,
@@ -10,5 +11,6 @@ export function handleUnitDisconnected(
   if (unitToRemove) {
     scene.remove(unitToRemove.renderObj!);
     otherUnits.delete(message.srcId);
+    pushMessage(`Unit ${message.srcId.slice(0, 6)} disconnected`);
   }
 }

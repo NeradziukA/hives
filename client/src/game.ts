@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { renderer } from "./renderer";
 import { UnitModel } from "./models";
 import {
@@ -11,8 +15,22 @@ import {
   handleWebSocketMessages,
   connectWebSocket,
   tickAllUnits,
+  getOtherUnitObjects,
+  getUnitById,
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
+import { gameState } from "./ui/gameState.svelte.ts";
+
+const MAIN_UNIT_ID = "__self__";
+
+function findUnitId(object: THREE.Object3D): string | null {
+  let node: THREE.Object3D | null = object;
+  while (node) {
+    if (node.userData.unitId) return node.userData.unitId as string;
+    node = node.parent;
+  }
+  return null;
+}
 
 export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
@@ -21,16 +39,52 @@ export async function initGame(container: HTMLElement): Promise<void> {
   const { camera, updateTarget, tickCamera } = setupCamera();
   updateScenePosition(updateTarget, light);
 
+  // Post-processing: RenderPass → OutlinePass → OutputPass
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+
+  const outlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  outlinePass.edgeStrength = 4;
+  outlinePass.edgeThickness = 1.5;
+  outlinePass.visibleEdgeColor.set("#72b53a");
+  outlinePass.hiddenEdgeColor.set("#72b53a");
+  composer.addPass(outlinePass);
+  composer.addPass(new OutputPass());
+
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   let hasColorChanged = false;
   let mainUnit: UnitModel;
 
+  window.addEventListener("mousemove", (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  renderer.domElement.addEventListener("click", () => {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(getOtherUnitObjects(), true);
+
+    if (intersects.length > 0) {
+      const unitId = findUnitId(intersects[0].object);
+      gameState.selectedUnitId = unitId;
+    } else {
+      gameState.selectedUnitId = null;
+    }
+  });
+
   function animate(): void {
     if (!mainUnit) return;
 
+    // Cursor: pointer on hover
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(mainUnit.renderObj, true);
+    const allObjects = [mainUnit.renderObj, ...getOtherUnitObjects()];
+    const intersects = raycaster.intersectObjects(allObjects, true);
+    renderer.domElement.style.cursor = intersects.length > 0 ? "pointer" : "default";
 
     if (intersects.length > 0 && !hasColorChanged) {
       mainUnit.renderObj.traverse((child: THREE.Object3D) => {
@@ -46,21 +100,38 @@ export async function initGame(container: HTMLElement): Promise<void> {
       hasColorChanged = true;
     }
 
+    // Outline selected unit (3D model) + selection ring (dot LOD)
+    if (gameState.selectedUnitId) {
+      const selectedUnit = getUnitById(gameState.selectedUnitId);
+      const selectedObj = selectedUnit?.renderObj ?? null;
+      outlinePass.selectedObjects = selectedObj ? [selectedObj] : [];
+      selectedUnit?.setSelected(true);
+    } else {
+      outlinePass.selectedObjects = [];
+      // Clear selection ring on all units
+      getOtherUnitObjects().forEach((obj) => {
+        const unit = getUnitById(obj.userData.unitId as string);
+        unit?.setSelected(false);
+      });
+    }
+
     mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
     mainUnit.tick(driftSpeed, camera, window.innerHeight);
     tickAllUnits(driftSpeed, camera, window.innerHeight);
     tickCamera();
-    renderer.render(scene, camera);
+    composer.render();
   }
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
   });
 
   mainUnit = await UnitModel.create(true);
+  mainUnit.renderObj.userData.unitId = MAIN_UNIT_ID;
   scene.add(mainUnit.renderObj);
   renderer.setAnimationLoop(animate);
 

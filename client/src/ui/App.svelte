@@ -47,7 +47,7 @@
     z-index: 1;
     background:
       linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82)),
-      url("/assets/main-background.jpg") center / cover no-repeat;
+      url("/assets/images/main-background.jpg") center / cover no-repeat;
   }
 
   .bg.hidden {

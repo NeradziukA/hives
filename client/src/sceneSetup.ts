@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { gameState } from "./ui/gameState.svelte.ts";
 
 export function setupScene() {
   const scene = new THREE.Scene();
@@ -54,6 +55,7 @@ export function setupCamera() {
   window.addEventListener("wheel", (e) => {
     zoom *= 1 + e.deltaY * 0.001;
     zoom = Math.max(0.05, Math.min(200, zoom));
+    gameState.zoom = zoom;
     // Apply zoom immediately to current camera, no drift needed for zoom
     camera.position.copy(currentTarget).add(cameraOffset());
   });
