@@ -10,7 +10,7 @@ const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const app: Express = express();
 
-const DOCS_DIR = path.join(__dirname, "..", "..", "..", "docs");
+const DOCS_DIR = path.join(__dirname, "..", "..", "docs");
 
 function renderDoc(title: string, body: string): string {
   return `<!DOCTYPE html>
