@@ -49,7 +49,8 @@ ${body}
   document.querySelectorAll('.mermaid').forEach(el => {
     const svg = el.querySelector('svg');
     if (!svg) return;
-    const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#1a1a2e;display:flex;justify-content:center;align-items:flex-start;padding:20px}svg{max-width:100%}</style></head><body>' + svg.outerHTML + '</body></html>';
+    const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
