@@ -42,21 +42,27 @@ ${body}
   document.querySelectorAll('pre code.language-mermaid').forEach(el => {
     const div = document.createElement('div');
     div.className = 'mermaid';
+    div.setAttribute('data-source', el.textContent);
     div.textContent = el.textContent;
     el.parentElement.replaceWith(div);
   });
   await mermaid.run();
+  const { deflate } = await import('https://cdn.jsdelivr.net/npm/pako@2/dist/pako.esm.mjs');
+  function toMermaidLiveUrl(code) {
+    const state = JSON.stringify({ code, mermaid: { theme: 'dark' } });
+    const bytes = new TextEncoder().encode(state);
+    const compressed = deflate(bytes, { level: 9 });
+    const b64 = btoa(String.fromCharCode(...compressed)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return 'https://mermaid.live/view#pako:' + b64;
+  }
   document.querySelectorAll('.mermaid').forEach(el => {
-    const svg = el.querySelector('svg');
-    if (!svg) return;
-    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#1a1a2e;display:flex;justify-content:center;align-items:flex-start;padding:20px}svg{max-width:100%}</style></head><body>' + svg.outerHTML + '</body></html>';
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
+    const code = el.getAttribute('data-source');
+    if (!code) return;
     const link = document.createElement('a');
-    link.href = url;
+    link.href = toMermaidLiveUrl(code);
     link.target = '_blank';
     link.rel = 'noopener';
-    link.textContent = '↗ open diagram in new tab';
+    link.textContent = '↗ open in mermaid.live';
     link.style.cssText = 'display:block; margin-top:8px; font-size:0.85em;';
     el.after(link);
   });
