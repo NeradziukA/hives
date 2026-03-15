@@ -20,6 +20,7 @@
   let searchLat = $state('');
   let searchLng = $state('');
   let searchRadius = $state('');
+  let filterOnlineOnly = $state(true);
 
   // Delete confirm
   let confirmOpen = $state(false);
@@ -45,6 +46,7 @@
     if (searchLat) params.set('lat', searchLat);
     if (searchLng) params.set('lng', searchLng);
     if (searchRadius) params.set('radius', searchRadius);
+    if (filterOnlineOnly) params.set('online', 'true');
 
     try {
       const res = await apiFetch('/admin/api/users?' + params);
@@ -64,6 +66,7 @@
     searchLat = '';
     searchLng = '';
     searchRadius = '';
+    filterOnlineOnly = true;
     currentPage = 1;
     fetchUsers();
   }
@@ -185,6 +188,16 @@
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
       />
     </div>
+    <div class="search-group check-group">
+      <label class="check-label">
+        <input
+          type="checkbox"
+          bind:checked={filterOnlineOnly}
+          onchange={() => fetchUsers(1)}
+        />
+        {i18n.t.filterOnlineOnly}
+      </label>
+    </div>
     <div class="search-actions">
       <button class="btn small" onclick={() => fetchUsers()}>{i18n.t.search}</button>
       <button class="btn small secondary" onclick={resetSearch}>{i18n.t.reset}</button>
@@ -199,6 +212,7 @@
           <th>{i18n.t.colUsername}</th>
           <th>{i18n.t.colFaction}</th>
           <th>{i18n.t.colStatus}</th>
+          <th>{i18n.t.colOnline}</th>
           <th>{i18n.t.colLocation}</th>
           <th>{i18n.t.colLastSeen}</th>
           <th>{i18n.t.colCreated}</th>
@@ -208,11 +222,11 @@
       <tbody>
         {#if loading}
           <tr class="loading-row">
-            <td colspan="7"><Spinner /></td>
+            <td colspan="8"><Spinner /></td>
           </tr>
         {:else if players.length === 0}
           <tr class="empty-row">
-            <td colspan="7">{i18n.t.noData}</td>
+            <td colspan="8">{i18n.t.noData}</td>
           </tr>
         {:else}
           {#each players as player (player.id)}
@@ -223,6 +237,7 @@
               </td>
               <td><Badge mode="faction" faction={player.faction} /></td>
               <td><Badge mode="status" alive={player.isAlive} /></td>
+              <td><Badge mode="online" online={player.isOnline} /></td>
               <td class="mono">{fmtCoords(player.lastLat, player.lastLng)}</td>
               <td class="mono">{fmtDate(player.lastSeen)}</td>
               <td class="mono">{fmtDate(player.createdAt)}</td>
@@ -295,6 +310,13 @@
   .search-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .search-group input { width: 180px; }
   .search-group.narrow input { width: 110px; }
+  .check-group { justify-content: flex-end; }
+  .check-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text); cursor: pointer;
+    user-select: none;
+  }
+  .check-label input[type="checkbox"] { accent-color: var(--accent, #4cf); cursor: pointer; }
   .search-actions { display: flex; gap: 8px; align-self: flex-end; }
   .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px; }
   table { width: 100%; border-collapse: collapse; margin-top: 4px; }

@@ -4,14 +4,19 @@
   interface Props {
     faction?: string;
     alive?: boolean;
-    mode: 'faction' | 'status';
+    online?: boolean;
+    mode: 'faction' | 'status' | 'online';
   }
 
-  const { faction, alive, mode }: Props = $props();
+  const { faction, alive, online, mode }: Props = $props();
 </script>
 
 {#if mode === 'faction'}
   <span class="badge faction-{faction}">{faction || '—'}</span>
+{:else if mode === 'online'}
+  <span class="badge" class:online={online} class:offline={!online}>
+    {online ? i18n.t.statusOnline : i18n.t.statusOffline}
+  </span>
 {:else}
   <span class="badge" class:alive={alive} class:dead={!alive}>
     {alive ? i18n.t.statusAlive : i18n.t.statusDead}
@@ -26,6 +31,8 @@
   }
   .badge.alive { color: var(--green); border-color: var(--green-dim); background: var(--green-bg); }
   .badge.dead { color: #f84; border-color: rgba(255,136,68,0.35); background: rgba(255,136,68,0.06); }
+  .badge.online { color: #4cf; border-color: rgba(68,204,255,0.35); background: rgba(68,204,255,0.06); }
+  .badge.offline { color: var(--text-dim); border-color: rgba(255,255,255,0.1); background: transparent; }
   :global(.badge.faction-humans) { color: #5af; border-color: rgba(85,170,255,0.35); background: rgba(85,170,255,0.06); }
   :global(.badge.faction-zombies) { color: #f84; border-color: rgba(255,136,68,0.35); background: rgba(255,136,68,0.06); }
 </style>

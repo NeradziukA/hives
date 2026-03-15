@@ -1,11 +1,12 @@
 import path from "path";
 import { Router, Request, Response, NextFunction } from "express";
-import { eq, ilike, or, and, gte, lte, count } from "drizzle-orm";
+import { eq, ilike, or, and, gte, lte, count, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
 import { players } from "../db/schema";
 import { verifyAccess } from "../auth/jwt";
+import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
 
 const router = Router();
 
@@ -46,11 +47,17 @@ api.get("/users", async (req: Request, res: Response) => {
   const lat    = parseFloat(req.query.lat    as string);
   const lng    = parseFloat(req.query.lng    as string);
   const radius = parseFloat(req.query.radius as string); // km
+  const onlineOnly = req.query.online === "true";
 
   const filters = [];
 
   if (q) {
     filters.push(or(ilike(players.username, `%${q}%`), eq(players.id, q)));
+  }
+
+  if (onlineOnly) {
+    const onlineIds = getOnlineIds();
+    filters.push(onlineIds.length > 0 ? inArray(players.id, onlineIds) : eq(players.id, ""));
   }
 
   if (!isNaN(lat) && !isNaN(lng) && !isNaN(radius) && radius > 0) {
@@ -90,7 +97,8 @@ api.get("/users", async (req: Request, res: Response) => {
     db.select({ total: count() }).from(players).where(whereClause),
   ]);
 
-  res.json({ users: rows, total: totals[0]?.total ?? 0, page, limit });
+  const enriched = rows.map(r => ({ ...r, isOnline: isOnline(r.id) }));
+  res.json({ users: enriched, total: totals[0]?.total ?? 0, page, limit });
 });
 
 // GET /admin/api/users/:id
@@ -106,7 +114,7 @@ api.get("/users/:id", async (req: Request, res: Response) => {
     return;
   }
   const { passwordHash: _, ...safe } = rows[0];
-  res.json(safe);
+  res.json({ ...safe, isOnline: isOnline(safe.id) });
 });
 
 // POST /admin/api/users

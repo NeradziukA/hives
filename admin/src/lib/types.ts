@@ -7,6 +7,7 @@ export interface Player {
   faction: string;
   role: string | null;
   isAlive: boolean;
+  isOnline: boolean;
   hp: number; maxHp: number;
   lastLat: number | null; lastLng: number | null;
   lastSeen: string | null; createdAt: string | null;

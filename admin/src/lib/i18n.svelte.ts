@@ -24,9 +24,13 @@ interface Translations {
   colUsername: string;
   colFaction: string;
   colStatus: string;
+  colOnline: string;
   colLocation: string;
   colLastSeen: string;
   colCreated: string;
+  filterOnlineOnly: string;
+  statusOnline: string;
+  statusOffline: string;
   noData: string;
   loading: string;
   pageInfo: PageInfoFn;
@@ -102,9 +106,13 @@ const LANGS: Record<Lang, Translations> = {
     colUsername: 'Username',
     colFaction: 'Faction',
     colStatus: 'Status',
+    colOnline: 'Online',
     colLocation: 'Location',
     colLastSeen: 'Last Seen',
     colCreated: 'Created',
+    filterOnlineOnly: 'Online only',
+    statusOnline: 'Online',
+    statusOffline: 'Offline',
     noData: 'No players found',
     loading: 'Loading...',
     pageInfo: (from, to, total) => `${from}–${to} of ${total}`,
@@ -178,9 +186,13 @@ const LANGS: Record<Lang, Translations> = {
     colUsername: 'Имя',
     colFaction: 'Фракция',
     colStatus: 'Статус',
+    colOnline: 'Онлайн',
     colLocation: 'Локация',
     colLastSeen: 'Последний вход',
     colCreated: 'Создан',
+    filterOnlineOnly: 'Только онлайн',
+    statusOnline: 'Онлайн',
+    statusOffline: 'Офлайн',
     noData: 'Игроки не найдены',
     loading: 'Загрузка...',
     pageInfo: (from, to, total) => `${from}–${to} из ${total}`,

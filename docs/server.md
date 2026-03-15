@@ -88,7 +88,7 @@ All endpoints under `/admin/api/` require `Authorization: Bearer <accessToken>`.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/admin/api/users` | Paginated player list; search by name/ID or lat/lng radius |
+| `GET` | `/admin/api/users` | Paginated player list; search by name/ID or lat/lng radius; `?online=true` filters to connected players only; each row includes `isOnline` derived from in-memory WS state |
 | `GET` | `/admin/api/users/:id` | Single player |
 | `POST` | `/admin/api/users` | Create player |
 | `PUT` | `/admin/api/users/:id` | Update player (optional password change) |

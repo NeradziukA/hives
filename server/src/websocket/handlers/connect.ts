@@ -13,6 +13,14 @@ const AUTH_TIMEOUT_MS = 10_000;
 const clientsSockets: { [key: string]: WebSocket } = {};
 const users: { [key: string]: User } = {};
 
+export function getOnlineIds(): string[] {
+  return Object.keys(clientsSockets);
+}
+
+export function isOnline(id: string): boolean {
+  return id in clientsSockets;
+}
+
 export function broadcast(message: SocketMessage, senderId?: string) {
   for (const key in clientsSockets) {
     if (senderId && key !== senderId) {
