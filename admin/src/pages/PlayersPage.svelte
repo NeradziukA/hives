@@ -312,7 +312,8 @@
   .search-group.narrow input { width: 110px; }
   .toggle-group {
     display: flex; flex-direction: row; align-items: center; gap: 8px;
-    margin-left: auto;
+    margin-left: auto; align-self: flex-end;
+    height: 28px; /* matches .btn height */
   }
   .toggle-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .toggle {
@@ -326,8 +327,8 @@
     flex-shrink: 0;
   }
   .toggle.active {
-    background: rgba(68,204,255,0.15);
-    border-color: #4cf;
+    background: var(--green-bg);
+    border-color: var(--green);
   }
   .toggle-thumb {
     position: absolute;
@@ -338,7 +339,7 @@
   }
   .toggle.active .toggle-thumb {
     left: 20px;
-    background: #4cf;
+    background: var(--green);
   }
   .search-actions { display: flex; gap: 8px; align-self: flex-end; }
   .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px; }
