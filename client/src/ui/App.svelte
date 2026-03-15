@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { initGame, connectToServer } from "../game";
   import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId, getUsername } from "../auth";
+  import { gameState } from "./gameState.svelte";
   import HivesTitle from "./components/HivesTitle.svelte";
   import Splash from "./screens/Splash.svelte";
   import MainMenu from "./screens/MainMenu.svelte";
@@ -14,6 +15,24 @@
   let gameContainer: HTMLDivElement;
   let hasSavedSession = $state(false);
   let username = $state("");
+
+  $effect(() => {
+    document.body.classList.toggle("theme-humans", gameState.faction === "humans");
+  });
+
+  async function fetchFaction(token: string) {
+    try {
+      const res = await fetch("/api/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        gameState.faction = data.faction ?? null;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   onMount(async () => {
     await initGame(gameContainer);
@@ -35,6 +54,7 @@
     const { accessToken, refreshToken, id } = await res.json();
     setTokens(accessToken, refreshToken, id);
     username = getUsername() ?? "";
+    await fetchFaction(accessToken);
     connectToServer(id, accessToken);
     screen = "game";
   }
@@ -48,6 +68,7 @@
     const id = getPlayerId()!;
     const accessToken = getAccessToken()!;
     username = getUsername() ?? "";
+    await fetchFaction(accessToken);
     connectToServer(id, accessToken);
     screen = "game";
   }

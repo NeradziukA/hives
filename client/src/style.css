@@ -1,3 +1,13 @@
+:root {
+  --accent: #72b53a;
+  --accent-rgb: 114, 181, 58;
+}
+
+.theme-humans {
+  --accent: #3a8ab5;
+  --accent-rgb: 58, 138, 181;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;

@@ -17,10 +17,10 @@
     letter-spacing: 0.3em;
     padding-left: 0.3em;
     white-space: nowrap;
-    color: #72b53a;
+    color: var(--accent);
     text-shadow:
-      0 0 20px rgba(114, 181, 58, 0.6),
-      0 0 60px rgba(114, 181, 58, 0.2);
+      0 0 20px rgba(var(--accent-rgb), 0.6),
+      0 0 60px rgba(var(--accent-rgb), 0.2);
     pointer-events: none;
     opacity: 0;
     animation: fade-in 0.6s ease forwards;
@@ -30,7 +30,7 @@
   .title.small {
     top: 28%;
     font-size: clamp(36px, 8vw, 96px);
-    text-shadow: 0 0 30px rgba(114, 181, 58, 0.4);
+    text-shadow: 0 0 30px rgba(var(--accent-rgb), 0.4);
   }
 
   @keyframes fade-in {

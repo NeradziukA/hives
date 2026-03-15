@@ -23,8 +23,8 @@
   .ring {
     width: 56px;
     height: 56px;
-    border: 3px solid rgba(114, 181, 58, 0.2);
-    border-top-color: #72b53a;
+    border: 3px solid rgba(var(--accent-rgb), 0.2);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -33,7 +33,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.3em;
-    color: rgba(114, 181, 58, 0.6);
+    color: rgba(var(--accent-rgb), 0.6);
   }
 
   @keyframes spin {
