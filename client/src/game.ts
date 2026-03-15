@@ -114,9 +114,10 @@ export async function initGame(container: HTMLElement): Promise<void> {
 
     _mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
-    _mainUnit.tick(driftSpeed, camera, window.innerHeight);
-    tickAllUnits(driftSpeed, camera, window.innerHeight);
     tickCamera();
+    const renderHeight = renderer.domElement.clientHeight;
+    _mainUnit.tick(driftSpeed, camera, renderHeight);
+    tickAllUnits(driftSpeed, camera, renderHeight);
     composer.render();
   }
 
