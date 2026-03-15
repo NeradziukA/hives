@@ -4,7 +4,7 @@
 
   const langs = ["en", "ru"] as const;
 
-  let { oncontinue }: { oncontinue: () => void } = $props();
+  let { oncontinue, username = "" }: { oncontinue: () => void; username?: string } = $props();
 
   const actions = $derived([
     { label: $_("menu.continue"), onclick: oncontinue },
@@ -15,7 +15,12 @@
 <Layout {actions}>
   <div class="profile">
     <div class="top-row">
-      <h2 class="heading">{$_("profile.title")}</h2>
+      <div>
+        <h2 class="heading">{$_("profile.title")}</h2>
+        {#if username}
+          <p class="username">{username}</p>
+        {/if}
+      </div>
       <div class="lang-switcher">
         {#each langs as lang (lang)}
           <button
@@ -98,6 +103,13 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: #fff;
+  }
+
+  .username {
+    margin: 4px 0 0;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: #72b53a;
   }
 
   .lang-switcher {

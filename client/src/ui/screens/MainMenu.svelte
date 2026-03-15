@@ -3,11 +3,13 @@
 
   let {
     hasSavedSession,
+    username = "",
     onconnect,
     oncontinue,
     onprofile,
   }: {
     hasSavedSession: boolean;
+    username?: string;
     onconnect: (username: string, password: string) => Promise<void>;
     oncontinue: () => Promise<void>;
     onprofile: () => void;
@@ -45,6 +47,9 @@
 </script>
 
 <div class="nav">
+  {#if !showLoginForm && username}
+    <p class="greeting">{username}</p>
+  {/if}
   {#if !showLoginForm}
     <button class="btn" onclick={handleContinue} disabled={status === "loading"}>
       {status === "loading" ? "..." : $_("menu.continue")}
@@ -141,6 +146,18 @@
   .btn-secondary {
     color: #888;
     border-color: rgba(255,255,255,0.15);
+  }
+
+  .greeting {
+    font-family: monospace;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #72b53a;
+    margin: 0;
+    text-align: center;
+    animation: btn-in 0.4s ease forwards;
+    opacity: 0;
   }
 
   .error {

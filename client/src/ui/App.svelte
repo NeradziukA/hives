@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { initGame, connectToServer } from "../game";
-  import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId } from "../auth";
+  import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId, getUsername } from "../auth";
   import HivesTitle from "./components/HivesTitle.svelte";
   import Splash from "./screens/Splash.svelte";
   import MainMenu from "./screens/MainMenu.svelte";
@@ -13,10 +13,12 @@
   let screen = $state<Screen>("splash");
   let gameContainer: HTMLDivElement;
   let hasSavedSession = $state(false);
+  let username = $state("");
 
   onMount(async () => {
     await initGame(gameContainer);
     hasSavedSession = hasSession();
+    username = getUsername() ?? "";
     screen = "mainmenu";
   });
 
@@ -32,6 +34,7 @@
     }
     const { accessToken, refreshToken, id } = await res.json();
     setTokens(accessToken, refreshToken, id);
+    username = getUsername() ?? "";
     connectToServer(id, accessToken);
     screen = "game";
   }
@@ -44,6 +47,7 @@
     }
     const id = getPlayerId()!;
     const accessToken = getAccessToken()!;
+    username = getUsername() ?? "";
     connectToServer(id, accessToken);
     screen = "game";
   }
@@ -63,6 +67,7 @@
 {:else if screen === "mainmenu"}
   <MainMenu
     hasSavedSession={hasSavedSession}
+    username={username}
     onconnect={handleConnect}
     oncontinue={handleContinue}
     onprofile={() => (screen = "profile")}
@@ -70,7 +75,7 @@
 {:else if screen === "game"}
   <Game onprofile={() => (screen = "profile")} />
 {:else if screen === "profile"}
-  <Profile oncontinue={() => (screen = "game")} onprofile={() => (screen = "profile")} />
+  <Profile username={username} oncontinue={() => (screen = "game")} onprofile={() => (screen = "profile")} />
 {/if}
 
 <style>
