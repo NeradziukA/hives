@@ -188,8 +188,7 @@
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
       />
     </div>
-    <div class="search-group toggle-group">
-      <span class="search-label">{i18n.t.filterOnlineOnly}</span>
+    <div class="toggle-group">
       <button
         class="toggle"
         class:active={filterOnlineOnly}
@@ -198,6 +197,7 @@
       >
         <span class="toggle-thumb"></span>
       </button>
+      <span class="toggle-label">{i18n.t.filterOnlineOnly}</span>
     </div>
     <div class="search-actions">
       <button class="btn small secondary" onclick={resetSearch}>{i18n.t.reset}</button>
@@ -306,12 +306,15 @@
     display: flex; gap: 8px; align-items: flex-end;
     flex-wrap: wrap; background: var(--bg2);
   }
-  .search-bar .toggle-group { margin-left: auto; }
   .search-group { display: flex; flex-direction: column; gap: 4px; }
   .search-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .search-group input { width: 180px; }
   .search-group.narrow input { width: 110px; }
-  .toggle-group { justify-content: flex-start; }
+  .toggle-group {
+    display: flex; flex-direction: row; align-items: center; gap: 8px;
+    margin-left: auto;
+  }
+  .toggle-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .toggle {
     width: 36px; height: 18px;
     background: var(--border);
