@@ -12,10 +12,8 @@
   { label: $_("menu.continue"), onclick: () => {}, disabled: true },
   { label: $_("menu.profile"),  onclick: onprofile },
 ]}>
-  {#snippet children()}
-    <!-- Three.js canvas is rendered in the background layer of App.svelte -->
-    <ZoomSlider />
-    <UnitActionMenu />
-    <GameHud />
-  {/snippet}
+  <!-- Three.js canvas is rendered in the background layer of App.svelte -->
+  <ZoomSlider />
+  <UnitActionMenu />
+  <GameHud />
 </Layout>

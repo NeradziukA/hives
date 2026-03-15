@@ -3,10 +3,10 @@ import request from 'supertest'
 import { WebSocket } from 'ws'
 import express from 'express'
 import http from 'http'
+import type { AddressInfo } from 'net'
 import { setupWebSocket } from '../websocket'
 import authRouter from '../auth-router'
-
-// --- Unit tests: verifyPlayerCredentials ---
+import { signAccess } from '../auth/jwt'
 
 vi.mock('../db/queries', async (importOriginal) => {
   const bcrypt = await import('bcryptjs')
@@ -27,8 +27,12 @@ vi.mock('../db/queries', async (importOriginal) => {
       }
       return null
     },
+    handlePositionUpdate: vi.fn().mockResolvedValue(undefined),
+    clearPositionBuffer: vi.fn(),
   }
 })
+
+// --- Unit tests: verifyPlayerCredentials ---
 
 describe('verifyPlayerCredentials (unit)', () => {
   it('returns { id } for valid credentials', async () => {
@@ -50,7 +54,7 @@ describe('verifyPlayerCredentials (unit)', () => {
   })
 })
 
-// --- Integration tests: HTTP + WebSocket ---
+// --- Integration tests: HTTP ---
 
 let server: http.Server
 let baseUrl: string
@@ -63,7 +67,7 @@ beforeAll(async () => {
   server = http.createServer(app)
   setupWebSocket(server)
   await new Promise<void>(resolve => server.listen(0, resolve))
-  const port = (server.address() as any).port
+  const port = (server.address() as AddressInfo).port
   baseUrl = `http://localhost:${port}`
   wsUrl = `ws://localhost:${port}`
 })
@@ -73,12 +77,14 @@ afterAll(() => new Promise<void>((resolve, reject) =>
 ))
 
 describe('POST /api/login', () => {
-  it('returns 200 and { id } for valid credentials', async () => {
+  it('returns 200 with tokens for valid credentials', async () => {
     const res = await request(baseUrl)
       .post('/api/login')
       .send({ username: 'testuser', password: 'secret' })
     expect(res.status).toBe(200)
     expect(res.body.id).toBe('test-uuid-1234')
+    expect(res.body.accessToken).toBeTruthy()
+    expect(res.body.refreshToken).toBeTruthy()
   })
 
   it('returns 401 for wrong password', async () => {
@@ -96,12 +102,15 @@ describe('POST /api/login', () => {
   })
 })
 
+// --- Integration tests: WebSocket UNIT_AUTH ---
+
 describe('WebSocket UNIT_AUTH flow', () => {
-  it('authenticates with valid player id and receives UNIT_AUTHENTICATED', async () => {
+  it('authenticates with valid token and receives UNIT_AUTHENTICATED', async () => {
+    const token = signAccess('test-uuid-1234', 'testuser')
     const ws = new WebSocket(wsUrl)
     await new Promise<void>(resolve => ws.once('open', resolve))
-    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'test-uuid-1234' }))
-    const msg = await new Promise<any>(resolve =>
+    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'test-uuid-1234', token }))
+    const msg = await new Promise<{ type: string; srcId?: string }>(resolve =>
       ws.once('message', data => resolve(JSON.parse(data.toString())))
     )
     expect(msg.type).toBe('UNIT_AUTHENTICATED')
@@ -109,24 +118,48 @@ describe('WebSocket UNIT_AUTH flow', () => {
     ws.close()
   })
 
-  it('closes connection with AUTH_ERROR for unknown player id', async () => {
+  it('sends AUTH_ERROR when no token provided', async () => {
     const ws = new WebSocket(wsUrl)
     await new Promise<void>(resolve => ws.once('open', resolve))
-    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'unknown-id' }))
-    const msg = await new Promise<any>(resolve =>
+    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'test-uuid-1234' }))
+    const msg = await new Promise<{ type: string; payload?: { error: string } }>(resolve =>
       ws.once('message', data => resolve(JSON.parse(data.toString())))
     )
     expect(msg.type).toBe('AUTH_ERROR')
+    expect(msg.payload?.error).toBe('Token required')
     await new Promise<void>(resolve => ws.once('close', resolve))
   })
 
-  it('closes connection after timeout when no UNIT_AUTH is sent', async () => {
+  it('sends AUTH_ERROR for invalid token', async () => {
     const ws = new WebSocket(wsUrl)
     await new Promise<void>(resolve => ws.once('open', resolve))
-    // Wait for close without sending anything (timeout is 10s in prod, but we just verify the mechanism)
-    // Send wrong type to trigger immediate close instead of waiting full 10s
+    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'test-uuid-1234', token: 'not-a-valid-jwt' }))
+    const msg = await new Promise<{ type: string; payload?: { error: string } }>(resolve =>
+      ws.once('message', data => resolve(JSON.parse(data.toString())))
+    )
+    expect(msg.type).toBe('AUTH_ERROR')
+    expect(msg.payload?.error).toBe('Invalid or expired token')
+    await new Promise<void>(resolve => ws.once('close', resolve))
+  })
+
+  it('sends AUTH_ERROR for valid token with unknown player id', async () => {
+    const token = signAccess('unknown-player', 'ghost')
+    const ws = new WebSocket(wsUrl)
+    await new Promise<void>(resolve => ws.once('open', resolve))
+    ws.send(JSON.stringify({ type: 'UNIT_AUTH', srcId: 'unknown-player', token }))
+    const msg = await new Promise<{ type: string; payload?: { error: string } }>(resolve =>
+      ws.once('message', data => resolve(JSON.parse(data.toString())))
+    )
+    expect(msg.type).toBe('AUTH_ERROR')
+    expect(msg.payload?.error).toBe('Unknown player')
+    await new Promise<void>(resolve => ws.once('close', resolve))
+  })
+
+  it('closes connection when non-auth message type is sent first', async () => {
+    const ws = new WebSocket(wsUrl)
+    await new Promise<void>(resolve => ws.once('open', resolve))
     ws.send(JSON.stringify({ type: 'UNIT_MOVED', srcId: 'x' }))
     await new Promise<void>(resolve => ws.once('close', resolve))
     expect(ws.readyState).toBe(WebSocket.CLOSED)
-  }, 15_000)
+  })
 })

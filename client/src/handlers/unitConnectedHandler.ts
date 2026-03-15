@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { UnitModel } from "../models";
 import { pushMessage } from "../ui/gameState.svelte.ts";
 
+type UnitConnectedMessage = { srcId: string };
+
 export async function handleUnitConnected(
-  message: any,
+  message: UnitConnectedMessage,
   scene: THREE.Scene,
   otherUnits: Map<string, UnitModel>
 ): Promise<void> {

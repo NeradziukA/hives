@@ -25,9 +25,9 @@
     errorMsg = "";
     try {
       await onconnect(username, password);
-    } catch (e: any) {
+    } catch (e) {
       status = "error";
-      errorMsg = e.message ?? "Connection failed";
+      errorMsg = e instanceof Error ? e.message : "Connection failed";
     }
   }
 
@@ -36,9 +36,9 @@
     errorMsg = "";
     try {
       await oncontinue();
-    } catch (e: any) {
+    } catch (e) {
       status = "error";
-      errorMsg = e.message ?? "Session expired";
+      errorMsg = e instanceof Error ? e.message : "Session expired";
       showLoginForm = true;
     }
   }
@@ -62,7 +62,9 @@
   {#if errorMsg}
     <p class="error">{errorMsg}</p>
   {/if}
-  <button class="btn btn-secondary" onclick={onprofile}>{$_("menu.profile")}</button>
+  {#if !showLoginForm}
+    <button class="btn btn-secondary" onclick={onprofile}>{$_("menu.profile")}</button>
+  {/if}
 </div>
 
 <style>

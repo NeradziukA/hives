@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 
 import { handleUnitGetAll, handleUnitMoved } from ".";
-import { MessageType, SocketMessage, User } from "../../types";
+import { MessageType, ObjectType, SocketMessage, User } from "../../types";
 import { handleClose } from "./close";
 import { findPlayerById } from "../../db/queries";
 import { verifyAccess } from "../../auth/jwt";
@@ -68,7 +68,7 @@ export function handleConnection(ws: WebSocket) {
       return;
     }
 
-    users[id] = { id, type: player.unitType as any, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
+    users[id] = { id, type: player.unitType as ObjectType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
     clientsSockets[id] = ws;
     logger.info("Authenticated: " + id);
 

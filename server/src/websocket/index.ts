@@ -1,9 +1,9 @@
-import { Server, WebSocket } from "ws";
+import { WebSocketServer } from "ws";
 import { Server as HttpServer } from "http";
 import { handleConnection } from "./handlers/connect";
 
-function setupWebSocket(server: HttpServer): Server {
-  const wss = new Server({ server });
+function setupWebSocket(server: HttpServer): WebSocketServer {
+  const wss = new WebSocketServer({ server });
   wss.on("connection", handleConnection);
   return wss;
 }

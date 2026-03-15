@@ -129,6 +129,23 @@ Clicking a non-own unit:
 
 Clicking empty space or pressing ✕ dismisses the selection.
 
+## Testing
+
+Tests use [Vitest](https://vitest.dev/) with the `jsdom` environment (for `localStorage`, `fetch`).
+
+```bash
+cd client && npm test              # run all tests
+cd client && npm run test:coverage # run with HTML coverage report
+```
+
+| Test file | Covers |
+|-----------|--------|
+| [`__tests__/auth.test.ts`](../client/src/__tests__/auth.test.ts) | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken` |
+| [`__tests__/handlers.test.ts`](../client/src/__tests__/handlers.test.ts) | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits` |
+| [`__tests__/unitAuthenticatedHandler.test.ts`](../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour |
+
+Coverage reports are written to `client/coverage/` (git-ignored).
+
 ## Development
 
 ```bash

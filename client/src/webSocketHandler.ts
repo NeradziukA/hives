@@ -14,7 +14,7 @@ export function connectWebSocket(
   playerId: string,
   accessToken: string,
   scene: THREE.Scene,
-  messageHandler: Function,
+  messageHandler: (event: MessageEvent, scene: THREE.Scene, socket: WebSocket, otherUnits: Map<string, UnitModel>, setMyId: (id: string) => void, onOwnMove?: (coords: { lat: number; lon: number }) => void) => Promise<void> | void,
   onOwnMove?: (coords: { lat: number; lon: number }) => void
 ): void {
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";

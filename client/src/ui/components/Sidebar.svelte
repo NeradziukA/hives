@@ -19,7 +19,7 @@
 <div class="sidebar" class:open>
   <button class="close-btn" onclick={onclose}>✕</button>
   <nav class="nav">
-    {#each actions as action}
+    {#each actions as action (action.label)}
       <button
         class="btn"
         disabled={action.disabled}

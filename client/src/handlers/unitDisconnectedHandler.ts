@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { UnitModel } from "../models";
 import { pushMessage } from "../ui/gameState.svelte.ts";
 
+type UnitDisconnectedMessage = { srcId: string };
+
 export function handleUnitDisconnected(
-  message: any,
+  message: UnitDisconnectedMessage,
   scene: THREE.Scene,
   otherUnits: Map<string, UnitModel>
 ): void {

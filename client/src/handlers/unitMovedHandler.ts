@@ -1,8 +1,10 @@
 import { Coords } from "../../../lib/geo/coords";
 import { UnitModel } from "../models";
 
+type UnitMovedMessage = { srcId: string; payload: { coords: { lat: number; lon: number } } };
+
 export function handleUnitMoved(
-  message: any,
+  message: UnitMovedMessage,
   otherUnits: Map<string, UnitModel>
 ): void {
   const movingUnit = otherUnits.get(message.srcId);

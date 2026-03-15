@@ -112,6 +112,25 @@ clientsSockets: { [id: string]: WebSocket }  // online connections
 users: { [id: string]: User }                // online player state
 ```
 
+## Testing
+
+Tests use [Vitest](https://vitest.dev/) with the `node` environment.
+
+```bash
+cd server && npm test              # run all tests
+cd server && npm run test:coverage # run with HTML coverage report
+```
+
+| Test file | Covers |
+|-----------|--------|
+| [`__tests__/auth.test.ts`](../server/src/__tests__/auth.test.ts) | WS authentication flow: valid JWT, missing token, invalid token |
+| [`__tests__/jwt.test.ts`](../server/src/__tests__/jwt.test.ts) | `signAccess`, `verifyAccess`, `signRefresh`, `verifyRefresh`; expired and cross-secret rejection |
+| [`__tests__/refresh.test.ts`](../server/src/__tests__/refresh.test.ts) | `POST /api/refresh`: missing token, invalid token, unknown player, success |
+| [`__tests__/websocket-messages.test.ts`](../server/src/__tests__/websocket-messages.test.ts) | Post-auth WS messages: `UNIT_GET_ALL→INIT_UNITS`, `UNIT_MOVED` broadcast, `UNIT_DISCONNECTED`, invalid JSON |
+| [`__tests__/db-queries.test.ts`](../server/src/__tests__/db-queries.test.ts) | Position buffer: deduplication, 30 s window, insert/update routing |
+
+Coverage reports are written to `server/coverage/` (git-ignored).
+
 ## Development
 
 ```bash
