@@ -2,9 +2,9 @@ import { Router, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 import { marked } from "marked";
-import { renderDoc } from "./docs-render";
+import { renderDoc } from "../docs-render";
 
-const DOCS_DIR = path.join(__dirname, "..", "..", "docs");
+const DOCS_DIR = path.join(__dirname, "..", "..", "..", "docs");
 
 const router = Router();
 

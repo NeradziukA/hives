@@ -11,7 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-static/*
+static/client
+static/admin
 coverage
 
 # Editor directories and files

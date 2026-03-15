@@ -6,11 +6,8 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 
 | File | Responsibility |
 |------|---------------|
-| [index.ts](../server/src/index.ts) | Express app; mounts routers; serves `static/`; starts HTTP + WS |
-| [auth-router.ts](../server/src/auth-router.ts) | `POST /api/login` — verifies credentials, returns JWT tokens; `POST /api/refresh` — issues new access token |
+| [index.ts](../server/src/index.ts) | Express app; mounts routers; serves `static/` and `static/client/`; starts HTTP + WS |
 | [auth/jwt.ts](../server/src/auth/jwt.ts) | JWT sign/verify helpers for access (15m) and refresh (7d) tokens |
-| [status-router.ts](../server/src/status-router.ts) | `GET /status` (JSON), `GET /status/ui` (dashboard) |
-| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` |
 | [docs-render.ts](../server/src/docs-render.ts) | `renderDoc(title, body, nav)` — fills HTML shell |
 | [types.ts](../server/src/types.ts) | Shared TypeScript types: `MessageType`, `User`, `Coordinates`, `SocketMessage` |
 | [api/index.ts](../server/src/api/index.ts) | Re-exports `getStaticObjects()` from `db/queries` |
@@ -18,11 +15,23 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 | [db/schema.ts](../server/src/db/schema.ts) | Drizzle ORM schema: `players`, `static_objects`, `inventory`, etc. |
 | [db/queries.ts](../server/src/db/queries.ts) | DB helper functions |
 
+### Routers (`server/src/routers/`)
+
+| File | Responsibility |
+|------|---------------|
+| [routers/auth.ts](../server/src/routers/auth.ts) | `POST /api/login`, `POST /api/refresh`, `GET /api/profile` |
+| [routers/admin.ts](../server/src/routers/admin.ts) | Serves admin SPA at `GET /admin/`; CRUD API at `/admin/api/users` (JWT-protected) |
+| [routers/status.ts](../server/src/routers/status.ts) | `GET /status` (JSON), `GET /status/ui` (dashboard) |
+| [routers/docs.ts](../server/src/routers/docs.ts) | `GET /docs` — renders Markdown docs as HTML |
+
 ```mermaid
 graph TD
     index["index.ts\nExpress · port 3000"]
-    authRouter["auth-router.ts\nPOST /api/login"]
-    statusRouter["status-router.ts\nGET /status"]
+    authRouter["routers/auth.ts\nPOST /api/login\nPOST /api/refresh"]
+    adminRouter["routers/admin.ts\nGET /admin/ → SPA\n/admin/api/users CRUD"]
+    statusRouter["routers/status.ts\nGET /status"]
+    staticClient["static/client/\nGame SPA (Svelte)"]
+    staticAdmin["static/admin/\nAdmin SPA (Svelte)"]
     wsIndex["websocket/index.ts\nWebSocket server setup"]
     db["db/\nDrizzle + PostgreSQL"]
     types["types.ts\nMessageType · User · StaticObject"]
@@ -40,7 +49,9 @@ graph TD
         users["users\nMap&lt;id, User&gt;"]
     end
 
-    index --> authRouter & statusRouter & wsIndex
+    index --> authRouter & adminRouter & statusRouter & wsIndex
+    index --> staticClient & staticAdmin
+    adminRouter --> staticAdmin & db
     wsIndex --> connect
     connect --> unitGetAll & unitMove & close
     connect --> db
@@ -51,6 +62,45 @@ graph TD
     connect --> State
     Handlers --> logger & types
 ```
+
+## Admin Panel
+
+A standalone Svelte 5 SPA served at `/admin/`. Source: [admin/src/](../admin/src/)
+
+### Structure
+
+```
+admin/src/
+├── lib/            # Logic layer: types, i18n, auth tokens, api client, toast store
+├── components/ui/  # Stateless presentational: Badge, Spinner
+├── components/     # Stateful UI: Sidebar, Toast
+├── dialogs/        # Modal dialogs: LoginDialog, ConfirmDialog, PlayerModal
+└── pages/          # PlayersPage — search, table, pagination
+```
+
+### Auth
+
+Uses the same JWT tokens as the game client (`POST /api/login`, `POST /api/refresh`). The access token is stored in memory, the refresh token in `localStorage`. On 401 the SPA silently refreshes before retrying.
+
+### API
+
+All endpoints under `/admin/api/` require `Authorization: Bearer <accessToken>`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/admin/api/users` | Paginated player list; search by name/ID or lat/lng radius |
+| `GET` | `/admin/api/users/:id` | Single player |
+| `POST` | `/admin/api/users` | Create player |
+| `PUT` | `/admin/api/users/:id` | Update player (optional password change) |
+| `DELETE` | `/admin/api/users/:id` | Delete player |
+
+### Build
+
+```bash
+npm run build --prefix ./admin   # outputs to server/static/admin/
+```
+
+The `scripts/build.sh` (and `build.bat`) run the admin build automatically after the client build.
 
 ## Authentication
 
@@ -173,6 +223,8 @@ cd server && npm run build
 npx pm2 start dist/index.js --name hives
 ```
 
-The built client is served by Express from `server/static/` at the root URL.
+Static files layout (all git-ignored, populated by build scripts):
+- `server/static/client/` — game SPA, served at `/`
+- `server/static/admin/` — admin SPA, served at `/admin/`
 
 See [VDS_RUN.md](../VDS_RUN.md) for the full setup guide.

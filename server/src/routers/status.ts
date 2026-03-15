@@ -1,13 +1,13 @@
 import path from "path";
 import { Router, Request, Response } from "express";
-import { db } from "./db";
-import { players, playerTracks, staticObjects } from "./db/schema";
+import { db } from "../db";
+import { players, playerTracks, staticObjects } from "../db/schema";
 import { desc, gte } from "drizzle-orm";
 
 const router = Router();
 
 router.get("/ui", (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "templates", "status.html"));
+  res.sendFile(path.join(__dirname, "..", "templates", "status.html"));
 });
 
 router.get("/", async (_req: Request, res: Response) => {

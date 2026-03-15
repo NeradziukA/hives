@@ -4,7 +4,7 @@ import express from 'express'
 import http from 'http'
 import type { AddressInfo } from 'net'
 import { signRefresh } from '../auth/jwt'
-import authRouter from '../auth-router'
+import authRouter from '../routers/auth'
 
 vi.mock('../db/queries', async (importOriginal) => {
   const original = await importOriginal<typeof import('../db/queries')>()

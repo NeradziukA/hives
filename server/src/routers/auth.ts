@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { verifyPlayerCredentials, findPlayerById } from "./db/queries";
-import { signAccess, signRefresh, verifyRefresh, verifyAccess } from "./auth/jwt";
+import { verifyPlayerCredentials, findPlayerById } from "../db/queries";
+import { signAccess, signRefresh, verifyRefresh, verifyAccess } from "../auth/jwt";
 
 const router = Router();
 

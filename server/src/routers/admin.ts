@@ -3,9 +3,9 @@ import { Router, Request, Response, NextFunction } from "express";
 import { eq, ilike, or, and, gte, lte, count } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "./db";
-import { players } from "./db/schema";
-import { verifyAccess } from "./auth/jwt";
+import { db } from "../db";
+import { players } from "../db/schema";
+import { verifyAccess } from "../auth/jwt";
 
 const router = Router();
 
@@ -28,7 +28,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
 // ── Serve admin SPA ──────────────────────────────────────────────────────────
 
 router.get("/", (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "..", "static", "admin.html"));
+  res.sendFile(path.join(__dirname, "..", "..", "static", "admin", "index.html"));
 });
 
 // ── API – all routes below require auth ─────────────────────────────────────
@@ -98,7 +98,7 @@ api.get("/users/:id", async (req: Request, res: Response) => {
   const rows = await db
     .select()
     .from(players)
-    .where(eq(players.id, req.params.id))
+    .where(eq(players.id, req.params.id as string))
     .limit(1);
 
   if (!rows[0]) {
@@ -180,7 +180,7 @@ api.put("/users/:id", async (req: Request, res: Response) => {
   const rows = await db
     .update(players)
     .set(updates)
-    .where(eq(players.id, req.params.id))
+    .where(eq(players.id, req.params.id as string))
     .returning();
 
   if (rows.length === 0) {
@@ -196,7 +196,7 @@ api.put("/users/:id", async (req: Request, res: Response) => {
 api.delete("/users/:id", async (req: Request, res: Response) => {
   const rows = await db
     .delete(players)
-    .where(eq(players.id, req.params.id))
+    .where(eq(players.id, req.params.id as string))
     .returning({ id: players.id });
 
   if (rows.length === 0) {

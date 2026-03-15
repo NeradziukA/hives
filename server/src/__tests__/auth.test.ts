@@ -5,7 +5,7 @@ import express from 'express'
 import http from 'http'
 import type { AddressInfo } from 'net'
 import { setupWebSocket } from '../websocket'
-import authRouter from '../auth-router'
+import authRouter from '../routers/auth'
 import { signAccess } from '../auth/jwt'
 
 vi.mock('../db/queries', async (importOriginal) => {
