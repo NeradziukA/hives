@@ -10,6 +10,7 @@
     "build": "bash scripts/build.sh",
     "build:win": "scripts\\build.bat",
     "install:all": "bash scripts/install.sh",
+    "lint": "npm run lint --prefix ./client && npm run lint --prefix ./server",
     "heroku-postbuild": "bash scripts/heroku-postbuild.sh"
   },
   "author": "",
