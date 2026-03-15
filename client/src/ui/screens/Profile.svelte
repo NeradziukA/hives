@@ -2,7 +2,7 @@
   import { _, locale } from "svelte-i18n";
   import { onMount } from "svelte";
   import Layout from "../components/Layout.svelte";
-  import { getAccessToken } from "../../auth";
+  import { getAccessToken, refreshAccessToken } from "../../auth";
 
   const langs = ["en", "ru"] as const;
 
@@ -44,7 +44,12 @@
   }
 
   onMount(async () => {
-    const token = getAccessToken();
+    let token = getAccessToken();
+    if (!token) {
+      const ok = await refreshAccessToken();
+      if (!ok) return;
+      token = getAccessToken();
+    }
     if (!token) return;
     try {
       const res = await fetch("/api/profile", {
@@ -188,7 +193,7 @@
     font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(114, 181, 58, 0.5);
+    color: rgba(114, 181, 58, 0.85);
     margin: 0 0 10px;
   }
 
@@ -211,6 +216,6 @@
   }
 
   .val {
-    color: rgba(114, 181, 58, 0.5);
+    color: #72b53a;
   }
 </style>
