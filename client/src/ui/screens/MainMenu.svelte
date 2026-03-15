@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import { _ } from "svelte-i18n";
 
   let {
@@ -15,18 +16,18 @@
     onprofile: () => void;
   } = $props();
 
-  let username = $state("");
+  let loginUsername = $state("");
   let password = $state("");
   let status = $state<"idle" | "loading" | "error">("idle");
   let errorMsg = $state("");
-  let showLoginForm = $state(!hasSavedSession);
+  let showLoginForm = $state(untrack(() => !hasSavedSession));
 
   async function submit() {
-    if (!username || !password) return;
+    if (!loginUsername || !password) return;
     status = "loading";
     errorMsg = "";
     try {
-      await onconnect(username, password);
+      await onconnect(loginUsername, password);
     } catch (e) {
       status = "error";
       errorMsg = e instanceof Error ? e.message : "Connection failed";
@@ -58,7 +59,7 @@
       {$_("menu.connect")}
     </button>
   {:else}
-    <input class="input" type="text" placeholder={$_("menu.username")} bind:value={username} disabled={status === "loading"} />
+    <input class="input" type="text" placeholder={$_("menu.username")} bind:value={loginUsername} disabled={status === "loading"} />
     <input class="input" type="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
     <button class="btn" onclick={submit} disabled={status === "loading"}>
       {status === "loading" ? "..." : $_("menu.connect")}

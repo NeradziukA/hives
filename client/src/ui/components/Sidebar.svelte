@@ -13,7 +13,7 @@
 </script>
 
 {#if open}
-  <div class="backdrop" onclick={onclose}></div>
+  <button class="backdrop" onclick={onclose} aria-label="Close sidebar"></button>
 {/if}
 
 <div class="sidebar" class:open>
@@ -37,6 +37,7 @@
     inset: 0;
     z-index: 90;
     background: rgba(0, 0, 0, 0.4);
+    cursor: default;
   }
 
   .sidebar {

@@ -22,11 +22,11 @@
     screen = "mainmenu";
   });
 
-  async function handleConnect(username: string, password: string): Promise<void> {
+  async function handleConnect(loginUser: string, password: string): Promise<void> {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: loginUser, password }),
     });
     if (!res.ok) {
       const { error } = await res.json();

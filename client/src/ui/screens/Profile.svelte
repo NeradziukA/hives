@@ -99,16 +99,16 @@
     margin: 0;
     border: none;
     padding: 0;
-    font-size: 20px;
-    letter-spacing: 0.2em;
+    font-size: 13px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #fff;
   }
 
   .username {
     margin: 4px 0 0;
-    font-size: 13px;
-    letter-spacing: 0.1em;
+    font-size: 20px;
+    letter-spacing: 0.2em;
     color: #72b53a;
   }
 
