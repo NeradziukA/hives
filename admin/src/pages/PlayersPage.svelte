@@ -188,15 +188,16 @@
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
       />
     </div>
-    <div class="search-group check-group">
-      <label class="check-label">
-        <input
-          type="checkbox"
-          bind:checked={filterOnlineOnly}
-          onchange={() => fetchUsers(1)}
-        />
-        {i18n.t.filterOnlineOnly}
-      </label>
+    <div class="search-group toggle-group">
+      <span class="search-label">{i18n.t.filterOnlineOnly}</span>
+      <button
+        class="toggle"
+        class:active={filterOnlineOnly}
+        onclick={() => { filterOnlineOnly = !filterOnlineOnly; fetchUsers(1); }}
+        aria-pressed={filterOnlineOnly}
+      >
+        <span class="toggle-thumb"></span>
+      </button>
     </div>
     <div class="search-actions">
       <button class="btn small" onclick={() => fetchUsers()}>{i18n.t.search}</button>
@@ -310,13 +311,32 @@
   .search-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .search-group input { width: 180px; }
   .search-group.narrow input { width: 110px; }
-  .check-group { justify-content: flex-end; }
-  .check-label {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--text); cursor: pointer;
-    user-select: none;
+  .toggle-group { justify-content: flex-start; }
+  .toggle {
+    width: 36px; height: 18px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 0; cursor: pointer;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
   }
-  .check-label input[type="checkbox"] { accent-color: var(--accent, #4cf); cursor: pointer; }
+  .toggle.active {
+    background: rgba(68,204,255,0.15);
+    border-color: #4cf;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    background: var(--text-dim);
+    transition: left 0.15s, background 0.15s;
+  }
+  .toggle.active .toggle-thumb {
+    left: 20px;
+    background: #4cf;
+  }
   .search-actions { display: flex; gap: 8px; align-self: flex-end; }
   .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px; }
   table { width: 100%; border-collapse: collapse; margin-top: 4px; }
