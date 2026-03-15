@@ -307,6 +307,7 @@
     display: flex; gap: 8px; align-items: flex-end;
     flex-wrap: wrap; background: var(--bg2);
   }
+  .search-bar .toggle-group { margin-left: auto; }
   .search-group { display: flex; flex-direction: column; gap: 4px; }
   .search-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .search-group input { width: 180px; }
