@@ -70,6 +70,14 @@
     display: flex; flex-direction: column;
     flex-shrink: 0;
   }
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100dvh;
+      z-index: 100;
+    }
+  }
   .sidebar-logo {
     padding: 24px 20px 16px;
     font-size: 16px; font-weight: 700;

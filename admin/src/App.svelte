@@ -70,6 +70,7 @@
 {:else}
   <div class="app-shell">
     {#if sidebarOpen}
+      <button class="sidebar-backdrop" onclick={() => sidebarOpen = false} aria-label="Закрыть меню"></button>
       <Sidebar
         activeSection={activeSection}
         onsectionChange={onSectionChange}
@@ -96,7 +97,19 @@
 <style>
   .app-shell {
     display: flex;
-    height: 100vh;
+    height: 100dvh;
+  }
+  .sidebar-backdrop {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
   }
   .main {
     flex: 1;
