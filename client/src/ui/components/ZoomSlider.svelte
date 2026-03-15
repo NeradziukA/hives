@@ -35,6 +35,7 @@
   <span class="label">+</span>
   <input
     type="range"
+    name="zoom"
     min="0"
     max="1"
     step="0.001"

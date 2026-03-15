@@ -48,6 +48,7 @@
     <p class="login-title">{i18n.t.loginTitle}</p>
     <input
       type="text"
+      name="username"
       placeholder={i18n.t.loginUser}
       autocomplete="username"
       bind:value={username}
@@ -56,6 +57,7 @@
     />
     <input
       type="password"
+      name="password"
       placeholder={i18n.t.loginPass}
       autocomplete="current-password"
       bind:value={password}

@@ -59,8 +59,8 @@
       {$_("menu.switch_user")}
     </button>
   {:else}
-    <input class="input" type="text" placeholder={$_("menu.username")} bind:value={loginUsername} disabled={status === "loading"} />
-    <input class="input" type="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
+    <input class="input" type="text" name="username" placeholder={$_("menu.username")} bind:value={loginUsername} disabled={status === "loading"} />
+    <input class="input" type="password" name="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
     <button class="btn" onclick={submit} disabled={status === "loading"}>
       {status === "loading" ? "..." : $_("menu.connect")}
     </button>

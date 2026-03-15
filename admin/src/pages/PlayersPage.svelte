@@ -155,6 +155,7 @@
       <span class="search-label">{i18n.t.searchName}</span>
       <input
         type="text"
+        name="search-name"
         bind:value={searchQ}
         oninput={debounceSearch}
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
@@ -164,6 +165,7 @@
       <span class="search-label">{i18n.t.searchLat}</span>
       <input
         type="number"
+        name="search-lat"
         step="any"
         bind:value={searchLat}
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
@@ -173,6 +175,7 @@
       <span class="search-label">{i18n.t.searchLng}</span>
       <input
         type="number"
+        name="search-lng"
         step="any"
         bind:value={searchLng}
         onkeydown={(e) => e.key === 'Enter' && fetchUsers()}
@@ -182,6 +185,7 @@
       <span class="search-label">{i18n.t.searchRad}</span>
       <input
         type="number"
+        name="search-radius"
         step="any"
         min="0"
         bind:value={searchRadius}

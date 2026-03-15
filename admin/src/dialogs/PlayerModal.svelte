@@ -209,19 +209,19 @@
 
             <div class="form-group full">
               <label class="form-label">{i18n.t.fieldUsername}</label>
-              <input type="text" bind:value={username} />
+              <input type="text" name="username" bind:value={username} />
             </div>
 
             <div class="form-group full">
               <label class="form-label">
                 {isEdit ? i18n.t.fieldNewPassword : i18n.t.fieldPassword}
               </label>
-              <input type="password" autocomplete="new-password" bind:value={password} />
+              <input type="password" name="password" autocomplete="new-password" bind:value={password} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldUnitType}</label>
-              <select bind:value={unitType}>
+              <select name="unit-type" bind:value={unitType}>
                 {#each UNIT_TYPES as ut}
                   <option value={ut}>{ut}</option>
                 {/each}
@@ -230,7 +230,7 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldFaction}</label>
-              <select bind:value={faction}>
+              <select name="faction" bind:value={faction}>
                 {#each FACTIONS as f}
                   <option value={f}>{f}</option>
                 {/each}
@@ -239,7 +239,7 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldRole}</label>
-              <select bind:value={role}>
+              <select name="role" bind:value={role}>
                 {#each ROLES as r}
                   <option value={r}>{r || '—'}</option>
                 {/each}
@@ -248,7 +248,7 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldIsAlive}</label>
-              <select bind:value={isAlive}>
+              <select name="is-alive" bind:value={isAlive}>
                 <option value="true">{i18n.t.optionAlive}</option>
                 <option value="false">{i18n.t.optionDead}</option>
               </select>
@@ -256,12 +256,12 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldHp}</label>
-              <input type="number" bind:value={hp} />
+              <input type="number" name="hp" bind:value={hp} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldMaxHp}</label>
-              <input type="number" bind:value={maxHp} />
+              <input type="number" name="max-hp" bind:value={maxHp} />
             </div>
 
             <!-- Attributes section -->
@@ -269,52 +269,52 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldStrength}</label>
-              <input type="number" bind:value={strength} />
+              <input type="number" name="strength" bind:value={strength} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldDefense}</label>
-              <input type="number" bind:value={defense} />
+              <input type="number" name="defense" bind:value={defense} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldAgility}</label>
-              <input type="number" bind:value={agility} />
+              <input type="number" name="agility" bind:value={agility} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldSpeed}</label>
-              <input type="number" bind:value={speed} />
+              <input type="number" name="speed" bind:value={speed} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldIntelligence}</label>
-              <input type="number" bind:value={intelligence} />
+              <input type="number" name="intelligence" bind:value={intelligence} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldLeadership}</label>
-              <input type="number" bind:value={leadership} />
+              <input type="number" name="leadership" bind:value={leadership} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldVision}</label>
-              <input type="number" bind:value={vision} />
+              <input type="number" name="vision" bind:value={vision} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldVaccineLevel}</label>
-              <input type="number" bind:value={vaccineLevel} />
+              <input type="number" name="vaccine-level" bind:value={vaccineLevel} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldBagSize}</label>
-              <input type="number" bind:value={bagSize} />
+              <input type="number" name="bag-size" bind:value={bagSize} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldMutation}</label>
-              <input type="number" bind:value={mutation} />
+              <input type="number" name="mutation" bind:value={mutation} />
             </div>
 
             <!-- Skills section -->
@@ -322,27 +322,27 @@
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldHeavyWeapon}</label>
-              <input type="number" bind:value={heavyWeapon} />
+              <input type="number" name="heavy-weapon" bind:value={heavyWeapon} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldTwoHanded}</label>
-              <input type="number" bind:value={twoHanded} />
+              <input type="number" name="two-handed" bind:value={twoHanded} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldCamouflage}</label>
-              <input type="number" bind:value={camouflage} />
+              <input type="number" name="camouflage" bind:value={camouflage} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldRegeneration}</label>
-              <input type="number" bind:value={regeneration} />
+              <input type="number" name="regeneration" bind:value={regeneration} />
             </div>
 
             <div class="form-group">
               <label class="form-label">{i18n.t.fieldStench}</label>
-              <input type="number" bind:value={stench} />
+              <input type="number" name="stench" bind:value={stench} />
             </div>
           </div>
         {/if}
