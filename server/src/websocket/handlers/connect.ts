@@ -3,11 +3,12 @@ import { WebSocket } from "ws";
 import { handleUnitGetAll, handleUnitMoved } from ".";
 import { MessageType, SocketMessage, User } from "../../types";
 import { handleClose } from "./close";
-import { getUser } from "../../api";
+import { findPlayerById } from "../../db/queries";
 import { logger } from "../../logger";
 import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL } from "../../config";
 
-// TODO move to DB
+const AUTH_TIMEOUT_MS = 10_000;
+
 const clientsSockets: { [key: string]: WebSocket } = {};
 const users: { [key: string]: User } = {};
 
@@ -20,51 +21,72 @@ export function broadcast(message: SocketMessage, senderId?: string) {
 }
 
 export function handleConnection(ws: WebSocket) {
-  const user = getUser();
-  const id = user.id;
-  users[id] = user;
-  clientsSockets[id] = ws;
-  logger.info("New connection: " + id);
+  logger.info("New WS connection — waiting for UNIT_AUTH");
 
-  let message: SocketMessage = {
-    type: MessageType.UNIT_AUTHENTICATED,
-    srcId: id,
-    payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
-  };
+  const timeout = setTimeout(() => {
+    logger.warn("UNIT_AUTH timeout — closing connection");
+    ws.close();
+  }, AUTH_TIMEOUT_MS);
 
-  ws.send(JSON.stringify(message));
-
-  message = {
-    type: MessageType.UNIT_CONNECTED,
-    srcId: id,
-  };
-
-  broadcast(message, id);
-
-  ws.on("message", function (wsMessage: string) {
-    logger.debug("Incoming message: " + wsMessage);
+  ws.once("message", async function (raw: string) {
+    clearTimeout(timeout);
 
     let message: SocketMessage;
     try {
-      message = JSON.parse(wsMessage.toString());
-    } catch (e) {
-      return logger.error("Can't parse wsMessage");
+      message = JSON.parse(raw.toString());
+    } catch {
+      ws.close();
+      return;
     }
 
-    switch (message.type) {
-      case MessageType.UNIT_GET_ALL: {
-        handleUnitGetAll(message, clientsSockets[message.srcId], users);
-        break;
-      }
-
-      case MessageType.UNIT_MOVED: {
-        handleUnitMoved(message, users);
-        break;
-      }
+    if (message.type !== MessageType.UNIT_AUTH) {
+      ws.close();
+      return;
     }
-  });
 
-  ws.on("close", function () {
-    handleClose(id, clientsSockets, users);
+    const id = message.srcId;
+    const player = await findPlayerById(id);
+    if (!player) {
+      logger.warn("Unknown player id: " + id);
+      ws.send(JSON.stringify({ type: MessageType.AUTH_ERROR, srcId: id, payload: { error: "Unknown player" } }));
+      ws.close();
+      return;
+    }
+
+    users[id] = { id, type: player.unitType as any, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
+    clientsSockets[id] = ws;
+    logger.info("Authenticated: " + id);
+
+    ws.send(JSON.stringify({
+      type: MessageType.UNIT_AUTHENTICATED,
+      srcId: id,
+      payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
+    }));
+
+    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id }, id);
+
+    ws.on("message", function (wsMessage: string) {
+      logger.debug("Incoming message: " + wsMessage);
+
+      let msg: SocketMessage;
+      try {
+        msg = JSON.parse(wsMessage.toString());
+      } catch {
+        return logger.error("Can't parse wsMessage");
+      }
+
+      switch (msg.type) {
+        case MessageType.UNIT_GET_ALL:
+          handleUnitGetAll(msg, clientsSockets[msg.srcId], users);
+          break;
+        case MessageType.UNIT_MOVED:
+          handleUnitMoved(msg, users);
+          break;
+      }
+    });
+
+    ws.on("close", function () {
+      handleClose(id, clientsSockets, users);
+    });
   });
 }

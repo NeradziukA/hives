@@ -3,7 +3,9 @@
     "loading": "LOADING..."
   },
   "menu": {
-    "continue": "Continue",
+    "connect": "Connect",
+    "username": "Username",
+    "password": "Password",
     "profile": "Player Profile",
     "main_menu": "Main Menu"
   },

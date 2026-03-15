@@ -10,6 +10,7 @@ export function handleUnitAuthenticated(
   let isAuthenticated = false;
   const srcId = message.srcId;
   setMyId(srcId);
+  localStorage.setItem("playerId", srcId);
 
   if (message.payload?.config?.cameraDriftSpeed !== undefined) {
     setDriftSpeed(message.payload.config.cameraDriftSpeed);

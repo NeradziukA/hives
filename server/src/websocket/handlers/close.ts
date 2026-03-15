@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { MessageType, SocketMessage } from "../../types";
 import { broadcast } from "./connect";
 import { logger } from "../../logger";
+import { clearPositionBuffer } from "../../db/queries";
 
 export function handleClose(
   srcId: string,
@@ -14,6 +15,7 @@ export function handleClose(
   };
   delete clientsSockets[srcId];
   delete users[srcId];
+  clearPositionBuffer(srcId);
   logger.info("Connection closed: " + srcId);
   broadcast(message, srcId);
 }

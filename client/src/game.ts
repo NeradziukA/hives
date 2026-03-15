@@ -33,6 +33,11 @@ function findUnitId(object: THREE.Object3D): string | null {
   return null;
 }
 
+let _scene: THREE.Scene;
+let _mainUnit: UnitModel;
+let _updateTarget: (lat: number, lon: number) => void;
+let _hexGrid: THREE.Object3D;
+
 export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
 
@@ -40,6 +45,9 @@ export async function initGame(container: HTMLElement): Promise<void> {
   const { camera, updateTarget, tickCamera, setZoom } = setupCamera();
   wireSetZoom(setZoom);
   updateScenePosition(updateTarget, light);
+
+  _scene = scene;
+  _updateTarget = updateTarget;
 
   // Post-processing: RenderPass → OutlinePass → OutputPass
   const composer = new EffectComposer(renderer);
@@ -57,12 +65,11 @@ export async function initGame(container: HTMLElement): Promise<void> {
   composer.addPass(outlinePass);
   composer.addPass(new OutputPass());
 
-  renderer.domElement.style.touchAction = "none"; // disable browser pinch-zoom on canvas
-  renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault()); // block long-press context menu
+  renderer.domElement.style.touchAction = "none";
+  renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
 
   const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2(-2, -2); // off-screen until first mousemove
-  let mainUnit: UnitModel;
+  const mouse = new THREE.Vector2(-2, -2);
   let prevSelectedUnitId: string | null = null;
 
   window.addEventListener("mousemove", (e) => {
@@ -87,36 +94,27 @@ export async function initGame(container: HTMLElement): Promise<void> {
   });
 
   function animate(): void {
-    if (!mainUnit) return;
+    if (!_mainUnit) return;
 
-    // Cursor: pointer on hover
     raycaster.setFromCamera(mouse, camera);
-    const allObjects = [mainUnit.renderObj, ...getOtherUnitObjects()];
+    const allObjects = [_mainUnit.renderObj, ...getOtherUnitObjects()];
     const intersects = raycaster.intersectObjects(allObjects, true);
     renderer.domElement.style.cursor = intersects.length > 0 ? "pointer" : "default";
 
-
-    // Outline selected unit (3D model) + selection ring (dot LOD)
     if (gameState.selectedUnitId !== prevSelectedUnitId) {
-      // Deselect previous
-      if (prevSelectedUnitId) {
-        getUnitById(prevSelectedUnitId)?.setSelected(false);
-      }
-      // Select new
-      if (gameState.selectedUnitId) {
-        getUnitById(gameState.selectedUnitId)?.setSelected(true);
-      }
+      if (prevSelectedUnitId) getUnitById(prevSelectedUnitId)?.setSelected(false);
+      if (gameState.selectedUnitId) getUnitById(gameState.selectedUnitId)?.setSelected(true);
       prevSelectedUnitId = gameState.selectedUnitId;
     }
 
     const selectedUnit = gameState.selectedUnitId ? getUnitById(gameState.selectedUnitId) : null;
     outlinePass.selectedObjects = selectedUnit?.renderObj ? [selectedUnit.renderObj] : [];
 
-    hexGrid.visible = gameState.zoom <= 25;
+    _hexGrid.visible = gameState.zoom <= 25;
 
-    mainUnit.renderObj.rotation.y += 0.02;
+    _mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
-    mainUnit.tick(driftSpeed, camera, window.innerHeight);
+    _mainUnit.tick(driftSpeed, camera, window.innerHeight);
     tickAllUnits(driftSpeed, camera, window.innerHeight);
     tickCamera();
     composer.render();
@@ -129,18 +127,20 @@ export async function initGame(container: HTMLElement): Promise<void> {
     composer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  const hexGrid = createHexGrid();
-  scene.add(hexGrid);
-  updateHexGrid(hexGrid, 54.3761, 18.5694); // render immediately at default scene position
+  _hexGrid = createHexGrid();
+  scene.add(_hexGrid);
+  updateHexGrid(_hexGrid, 54.3761, 18.5694);
 
-  mainUnit = await UnitModel.create(true);
-  mainUnit.renderObj.userData.unitId = MAIN_UNIT_ID;
-  scene.add(mainUnit.renderObj);
+  _mainUnit = await UnitModel.create(true);
+  _mainUnit.renderObj.userData.unitId = MAIN_UNIT_ID;
+  scene.add(_mainUnit.renderObj);
   renderer.setAnimationLoop(animate);
+}
 
-  connectWebSocket(scene, handleWebSocketMessages, (coords) => {
-    if (mainUnit?.renderObj) mainUnit.moveTo(new Coords(coords.lat, coords.lon));
-    updateTarget(coords.lat, coords.lon);
-    updateHexGrid(hexGrid, coords.lat, coords.lon);
+export function connectToServer(playerId: string): void {
+  connectWebSocket(playerId, _scene, handleWebSocketMessages, (coords) => {
+    if (_mainUnit?.renderObj) _mainUnit.moveTo(new Coords(coords.lat, coords.lon));
+    _updateTarget(coords.lat, coords.lon);
+    updateHexGrid(_hexGrid, coords.lat, coords.lon);
   });
 }

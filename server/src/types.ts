@@ -1,6 +1,8 @@
 export enum MessageType {
   INIT_UNITS = "INIT_UNITS",
+  UNIT_AUTH = "UNIT_AUTH",
   UNIT_AUTHENTICATED = "UNIT_AUTHENTICATED",
+  AUTH_ERROR = "AUTH_ERROR",
   UNIT_CONNECTED = "UNIT_CONNECTED",
   UNIT_DISCONNECTED = "UNIT_DISCONNECTED",
   UNIT_GET_ALL = "UNIT_GET_ALL",
@@ -44,5 +46,6 @@ export type SocketMessage = {
     users?: UserList;
     staticObjects?: StaticObject[];
     config?: GameConfig;
+    error?: string;
   };
 };

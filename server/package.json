@@ -7,15 +7,24 @@
     "start": "npm run build && node ./dist/index.js",
     "build": "node scripts/build.js",
     "dev": "nodemon ./dist/index.js",
-    "watch-ts": "tsc --watch"
+    "watch-ts": "tsc --watch",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "user:create": "node scripts/create-user.js",
+    "test": "vitest run"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/marked": "^5.0.2",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.1",
     "express": "^4.21.2",
     "hives": "file:..",
     "marked": "^17.0.4",
+    "postgres": "^3.4.8",
     "tslog": "^4.10.2",
     "uuid": "^11.1.0",
     "ws": "^8.18.1"
@@ -24,11 +33,16 @@
     "node": ">=24.x"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.1",
     "@types/node": "^24.12.0",
+    "@types/supertest": "^7.2.0",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.0",
+    "drizzle-kit": "^0.31.9",
     "nodemon": "^3.0.2",
-    "typescript": "^5.9.3"
+    "supertest": "^7.2.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   }
 }

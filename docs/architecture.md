@@ -1,30 +1,35 @@
 # Architecture
 
-## Message Flow
+## Auth + Connection Flow
 
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant S as Server
+    participant S as Server (HTTP)
+    participant WS as Server (WebSocket)
     participant O as Other Clients
 
-    C->>S: TCP connect
-    S->>C: UNIT_AUTHENTICATED { id }
+    C->>S: POST /api/login { username, password }
+    S->>C: 200 { id }
+
+    C->>WS: TCP connect
+    C->>WS: UNIT_AUTH { srcId: id }
+    WS->>C: UNIT_AUTHENTICATED { id, config }
     Note over C: Starts LocationTracker (GPS)
 
-    C->>S: UNIT_GET_ALL { coords }
-    S->>C: INIT_UNITS { users[], staticObjects[] }
-    S->>O: UNIT_CONNECTED { user }
+    C->>WS: UNIT_GET_ALL { coords }
+    WS->>C: INIT_UNITS { users[], staticObjects[] }
+    WS->>O: UNIT_CONNECTED { user }
     Note over C: Creates 3D models for each user / building
 
-    loop Every 1000 ms
-        C->>S: UNIT_MOVED { id, coords }
-        S->>O: UNIT_MOVED { id, coords }
+    loop Every 10 000 ms
+        C->>WS: UNIT_MOVED { id, coords }
+        WS->>O: UNIT_MOVED { id, coords }
         Note over O: Updates 3D model position
     end
 
-    C->>S: disconnect
-    S->>O: UNIT_DISCONNECTED { id }
+    C->>WS: disconnect
+    WS->>O: UNIT_DISCONNECTED { id }
     Note over O: Removes 3D model from scene
 ```
 
@@ -32,7 +37,9 @@ sequenceDiagram
 
 | Type | Direction | Payload | Description |
 |------|-----------|---------|-------------|
-| `UNIT_AUTHENTICATED` | S → C | `{ id }` | Server-assigned UUID |
+| `UNIT_AUTH` | C → S | `{ srcId: id }` | Client identifies itself after connect |
+| `UNIT_AUTHENTICATED` | S → C | `{ id, config }` | Auth confirmed, game config sent |
+| `AUTH_ERROR` | S → C | `{ error }` | Auth failed; connection closed |
 | `UNIT_GET_ALL` | C → S | `{ coords }` | Request full state |
 | `INIT_UNITS` | S → C | `{ users[], staticObjects[] }` | Full snapshot |
 | `UNIT_MOVED` | C → S, S → C | `{ id, coords }` | Position update |
@@ -42,20 +49,14 @@ sequenceDiagram
 ## Server Data Structures
 
 ```typescript
-// Both keyed by socket UUID
-clientsSockets: Map<string, WebSocket>
-users: Map<string, User>
+// In-memory (real-time positions)
+clientsSockets: { [id: string]: WebSocket }
+users: { [id: string]: User }
 
 interface User {
-  id: string          // UUID
-  type: string        // e.g. "ZOMBI_A"
-  coords: { x: number, y: number }  // lat/lon
-}
-
-interface StaticObject {
-  id: string
-  type: string        // e.g. "BUILDING_A"
-  coords: { x: number, y: number }
+  id: string          // UUID (from players table)
+  type: string        // e.g. "HUMAN_A"
+  coords: { lat: number, lon: number }
 }
 ```
 

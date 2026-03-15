@@ -11,19 +11,20 @@ let myId: string;
 const otherUnits: Map<string, UnitModel> = new Map();
 
 export function connectWebSocket(
+  playerId: string,
   scene: THREE.Scene,
   messageHandler: Function,
   onOwnMove?: (coords: { lat: number; lon: number }) => void
 ): void {
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  // Vite dev (5173) → WS server on 3000; built server → use page port; production → no port
   const wsPort = window.location.port === "5173" ? ":3000"
     : window.location.port ? `:${window.location.port}` : "";
   const wsUrl = `${wsProtocol}//${window.location.hostname}${wsPort}`;
   socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
-    console.log("Connected to server");
+    console.log("Connected to server, authenticating...");
+    socket.send(JSON.stringify({ type: "UNIT_AUTH", srcId: playerId }));
   };
 
   socket.onerror = (error) => {
@@ -32,7 +33,7 @@ export function connectWebSocket(
 
   socket.onclose = (event) => {
     console.log("WebSocket closed:", event.reason);
-    setTimeout(() => connectWebSocket(scene, messageHandler, onOwnMove), 5000);
+    setTimeout(() => connectWebSocket(playerId, scene, messageHandler, onOwnMove), 5000);
   };
 
   socket.onmessage = (event: MessageEvent) => {
@@ -91,6 +92,10 @@ export async function handleWebSocketMessages(
 
       case "INIT_UNITS":
         await handleInitUnits(message, scene, otherUnits, myId);
+        break;
+
+      case "AUTH_ERROR":
+        console.error("Auth error:", message.payload?.error);
         break;
     }
   } catch (error) {

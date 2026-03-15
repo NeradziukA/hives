@@ -2,28 +2,82 @@
   import { _ } from "svelte-i18n";
 
   let {
-    oncontinue,
+    onconnect,
     onprofile,
-  }: { oncontinue: () => void; onprofile: () => void } = $props();
+  }: {
+    onconnect: (username: string, password: string) => Promise<void>;
+    onprofile: () => void;
+  } = $props();
+
+  let username = $state("");
+  let password = $state("");
+  let status = $state<"idle" | "loading" | "error">("idle");
+  let errorMsg = $state("");
+
+  async function submit() {
+    if (!username || !password) return;
+    status = "loading";
+    errorMsg = "";
+    try {
+      await onconnect(username, password);
+    } catch (e: any) {
+      status = "error";
+      errorMsg = e.message ?? "Connection failed";
+    }
+  }
 </script>
 
-<nav class="nav">
-  <button class="btn" onclick={oncontinue}>{$_("menu.continue")}</button>
-  <button class="btn" onclick={onprofile}>{$_("menu.profile")}</button>
-</nav>
+<div class="nav">
+  <input class="input" type="text" placeholder={$_("menu.username")} bind:value={username} disabled={status === "loading"} />
+  <input class="input" type="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
+  {#if errorMsg}
+    <p class="error">{errorMsg}</p>
+  {/if}
+  <button class="btn" onclick={submit} disabled={status === "loading"}>
+    {status === "loading" ? "..." : $_("menu.connect")}
+  </button>
+  <button class="btn btn-secondary" onclick={onprofile}>{$_("menu.profile")}</button>
+</div>
 
 <style>
   .nav {
     position: fixed;
-    top: 48%;
+    top: 44%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     width: 260px;
   }
+
+  .input {
+    width: 100%;
+    padding: 12px 16px;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(114, 181, 58, 0.4);
+    color: #ccc;
+    outline: none;
+    box-sizing: border-box;
+    animation: btn-in 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  .input:focus {
+    border-color: #72b53a;
+    color: #fff;
+  }
+
+  .input:disabled {
+    opacity: 0.5;
+  }
+
+  .input:nth-child(1) { animation-delay: 0.6s; }
+  .input:nth-child(2) { animation-delay: 0.8s; }
 
   .btn {
     width: 100%;
@@ -38,23 +92,38 @@
     cursor: pointer;
     opacity: 0;
     animation: btn-in 0.4s ease forwards;
-    transition:
-      background 0.15s,
-      border-color 0.15s,
-      color 0.15s;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
 
-  .btn:nth-child(1) { animation-delay: 0.8s; }
-  .btn:nth-child(2) { animation-delay: 1.1s; }
+  .btn:nth-of-type(1) { animation-delay: 1.0s; }
+  .btn:nth-of-type(2) { animation-delay: 1.2s; }
+
+  .btn:hover:not(:disabled) {
+    background: rgba(114, 181, 58, 0.12);
+    border-color: #72b53a;
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .btn-secondary {
+    color: #888;
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .error {
+    color: #f44;
+    font-family: monospace;
+    font-size: 12px;
+    margin: 0;
+    animation: btn-in 0.2s ease forwards;
+  }
 
   @keyframes btn-in {
     from { transform: scale(0); opacity: 0; }
     to   { transform: scale(1); opacity: 1; }
-  }
-
-  .btn:hover {
-    background: rgba(114, 181, 58, 0.12);
-    border-color: #72b53a;
-    color: #fff;
   }
 </style>

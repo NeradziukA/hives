@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { initGame } from "../game";
+  import { initGame, connectToServer } from "../game";
   import HivesTitle from "./components/HivesTitle.svelte";
   import Splash from "./screens/Splash.svelte";
   import MainMenu from "./screens/MainMenu.svelte";
@@ -17,6 +17,21 @@
     screen = "mainmenu";
   });
 
+  async function handleConnect(username: string, password: string): Promise<void> {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      throw new Error(error ?? "Login failed");
+    }
+    const { id } = await res.json();
+    connectToServer(id);
+    screen = "game";
+  }
+
   const showTitle = $derived(screen === "splash" || screen === "mainmenu");
 </script>
 
@@ -31,7 +46,7 @@
   <Splash />
 {:else if screen === "mainmenu"}
   <MainMenu
-    oncontinue={() => (screen = "game")}
+    onconnect={handleConnect}
     onprofile={() => (screen = "profile")}
   />
 {:else if screen === "game"}

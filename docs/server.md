@@ -6,27 +6,29 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 
 | File | Responsibility |
 |------|---------------|
-| [index.ts](../server/src/index.ts) | Express app; mounts docs router; serves `static/`; error handler; starts HTTP + WS |
-| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` — reads `docs/*.md`, rewrites relative links, builds global nav, serves HTML |
-| [docs-render.ts](../server/src/docs-render.ts) | `renderDoc(title, body, nav)` — fills `docs-template.html` with content and sidebar nav |
-| [docs-template.html](../server/src/docs-template.html) | HTML/CSS/JS shell for all doc pages; includes Mermaid CDN renderer |
-| [types.ts](../server/src/types.ts) | Shared TypeScript types: `MessageType`, `User`, `Coordinates`, `SocketMessage`, `StaticObject` |
-| [api/index.ts](../server/src/api/index.ts) | `getUser()` — creates a new user with UUID; `getStaticObjects()` — returns 2 hardcoded buildings near Gdansk |
+| [index.ts](../server/src/index.ts) | Express app; mounts routers; serves `static/`; starts HTTP + WS |
+| [auth-router.ts](../server/src/auth-router.ts) | `POST /api/login` — verifies username/password, returns player `id` |
+| [status-router.ts](../server/src/status-router.ts) | `GET /status` (JSON), `GET /status/ui` (dashboard) |
+| [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` |
+| [docs-render.ts](../server/src/docs-render.ts) | `renderDoc(title, body, nav)` — fills HTML shell |
+| [types.ts](../server/src/types.ts) | Shared TypeScript types: `MessageType`, `User`, `Coordinates`, `SocketMessage` |
+| [api/index.ts](../server/src/api/index.ts) | Re-exports `getStaticObjects()` from `db/queries` |
 | [websocket/index.ts](../server/src/websocket/index.ts) | WebSocket server setup; delegates to connection handler |
+| [db/schema.ts](../server/src/db/schema.ts) | Drizzle ORM schema: `players`, `static_objects`, `inventory`, etc. |
+| [db/queries.ts](../server/src/db/queries.ts) | DB helper functions |
 
 ```mermaid
 graph TD
     index["index.ts\nExpress · port 3000"]
-    docsRouter["docs-router.ts\n/docs routes"]
-    docsRender["docs-render.ts\nrenderDoc"]
-    docsTemplate["docs-template.html\nHTML shell"]
+    authRouter["auth-router.ts\nPOST /api/login"]
+    statusRouter["status-router.ts\nGET /status"]
     wsIndex["websocket/index.ts\nWebSocket server setup"]
-    api["api/index.ts\ngetUser · getStaticObjects"]
+    db["db/\nDrizzle + PostgreSQL"]
     types["types.ts\nMessageType · User · StaticObject"]
     logger["logger.ts"]
 
     subgraph Handlers["websocket/handlers/"]
-        connect["connect.ts\nnew connection → assign UUID"]
+        connect["connect.ts\nwait UNIT_AUTH → authenticate"]
         unitGetAll["unit-get-all.ts\nUNIT_GET_ALL → INIT_UNITS"]
         unitMove["unit-move.ts\nUNIT_MOVED → broadcast"]
         close["close.ts\ndisconnect → UNIT_DISCONNECTED"]
@@ -37,18 +39,36 @@ graph TD
         users["users\nMap&lt;id, User&gt;"]
     end
 
-    index --> docsRouter & wsIndex
-    docsRouter --> docsRender
-    docsRender --> docsTemplate
+    index --> authRouter & statusRouter & wsIndex
     wsIndex --> connect
     connect --> unitGetAll & unitMove & close
-    unitGetAll --> api & State
-    unitMove --> State
+    connect --> db
+    authRouter --> db
+    unitGetAll --> State
+    unitMove --> State & db
     close --> State
     connect --> State
     Handlers --> logger & types
-    api --> types
 ```
+
+## Authentication
+
+Players are created manually. Connections require username+password login.
+
+### Create a player
+
+```bash
+cd server && npm run user:create <username> <password>
+```
+
+This inserts a new row into the `players` table with a bcrypt-hashed password.
+
+### Login flow
+
+1. Client POSTs `{ username, password }` to `POST /api/login`
+2. Server verifies password with bcrypt → returns `{ id }`
+3. Client opens WebSocket, sends `UNIT_AUTH { srcId: id }`
+4. Server looks up player in DB → sends `UNIT_AUTHENTICATED` or `AUTH_ERROR`
 
 ## WebSocket Handlers
 
@@ -56,10 +76,10 @@ Located in [server/src/websocket/handlers/](../server/src/websocket/handlers/)
 
 | Handler | Trigger | Action |
 |---------|---------|--------|
-| `connect.ts` | New WS connection | Assigns UUID, adds to maps, routes messages, registers close handler |
+| `connect.ts` | New WS connection | Waits for `UNIT_AUTH`, verifies player in DB, registers in memory |
 | `unit-get-all.ts` | `UNIT_GET_ALL` message | Sends `INIT_UNITS` with all users + static objects |
-| `unit-move.ts` | `UNIT_MOVED` message | Updates user coords in map; broadcasts to all other clients |
-| `close.ts` | Connection closed | Removes user from maps; broadcasts `UNIT_DISCONNECTED` |
+| `unit-move.ts` | `UNIT_MOVED` message | Updates user coords in map; broadcasts to all other clients; persists to DB |
+| `close.ts` | Connection closed | Removes user from maps; broadcasts `UNIT_DISCONNECTED`; clears position buffer |
 
 ## Port
 
@@ -67,20 +87,21 @@ Server listens on **port 3000** (or `process.env.PORT` if set).
 
 ## State
 
-All state is in-memory (no database). Two `Map` objects:
+Real-time positions are in-memory. Player data and history are persisted to PostgreSQL.
 
 ```typescript
-clientsSockets: Map<string, WebSocket>  // socketId → socket
-users: Map<string, User>                // socketId → user data
+clientsSockets: { [id: string]: WebSocket }  // online connections
+users: { [id: string]: User }                // online player state
 ```
-
-State is lost on server restart.
 
 ## Development
 
 ```bash
 # Compile TypeScript
 cd server && npm run build
+
+# Run tests
+cd server && npm run test
 
 # Watch TypeScript changes
 cd server && npm run watch-ts
@@ -90,24 +111,27 @@ cd server && npm run dev
 
 # Build + run (used in production)
 npm run server  # from project root
+
+# DB migrations
+cd server && npm run db:generate
+cd server && npm run db:migrate
 ```
 
-## Static Objects
+## Environment
 
-Two buildings are hardcoded in `api/index.ts`:
-- `building-1` at approximately (54.376°N, 18.569°E) offset by 150m N/E
-- `building-2` at approximately (54.376°N, 18.569°E) offset by 100m S/W
+Requires `DATABASE_URL` in `.env` (local) or Heroku Config Vars:
+
+```
+DATABASE_URL=postgresql://user:password@host:5432/hives
+```
 
 ## Deployment
 
 Both client and server deploy to **Heroku** from a single dyno.
 
-`Procfile` (server process):
+`Procfile`:
 ```
 web: cd server && npm install --include=dev && npm start
 ```
-
-Root `package.json` `heroku-postbuild` delegates to `scripts/heroku-postbuild.sh`:
-installs client and server dev deps, builds client, copies dist to `server/static/`.
 
 The built client ends up in `server/static/` and is served by Express at the root URL.

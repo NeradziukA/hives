@@ -1,15 +1,21 @@
+import "dotenv/config";
 import express, { Express, Request, Response, NextFunction } from "express";
 import path from "path";
 import { Server } from "http";
 import { setupWebSocket } from "./websocket";
 import { logger } from "./logger";
 import docsRouter from "./docs-router";
+import statusRouter from "./status-router";
+import authRouter from "./auth-router";
 
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const app: Express = express();
 
+app.use(express.json());
 app.use("/docs", docsRouter);
+app.use("/status", statusRouter);
+app.use("/api", authRouter);
 app.use(express.static(path.join(__dirname, "..", "static")));
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

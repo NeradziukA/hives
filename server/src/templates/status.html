@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hives Status</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #ccc; padding: 24px; margin: 0; }
+    h1 { color: #fff; }
+    h2 { color: #4af; margin-top: 32px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th { background: #222; color: #4af; text-align: left; padding: 6px 10px; }
+    td { padding: 5px 10px; border-bottom: 1px solid #222; font-size: 0.9em; }
+    tr:hover td { background: #1a1a1a; }
+    .alive { color: #4f4; }
+    .dead  { color: #f44; }
+    .meta  { color: #666; font-size: 0.85em; margin-bottom: 24px; }
+    .empty { color: #555; padding: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Hives Status</h1>
+  <p class="meta" id="ts">Loading...</p>
+
+  <h2>Players (<span id="players-count">0</span>)</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Type</th><th>Faction</th><th>Alive</th><th>Last position</th><th>Last seen</th><th>Created</th></tr></thead>
+    <tbody id="players-body"></tbody>
+  </table>
+
+  <h2>Track points — last 1h (<span id="tracks-count">0</span>)</h2>
+  <table>
+    <thead><tr><th>Player</th><th>Lat</th><th>Lng</th><th>Hex</th><th>Recorded</th></tr></thead>
+    <tbody id="tracks-body"></tbody>
+  </table>
+
+  <h2>Static objects (<span id="objects-count">0</span>)</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Type</th><th>Name</th><th>Lat</th><th>Lng</th><th>Faction</th><th>Active</th></tr></thead>
+    <tbody id="objects-body"></tbody>
+  </table>
+
+  <script>
+    function fmt(ts) { return ts ? new Date(ts).toISOString() : '—'; }
+    function coord(v) { return v != null ? v.toFixed(5) : '—'; }
+
+    async function load() {
+      const data = await fetch('/status').then(r => r.json());
+
+      document.getElementById('ts').textContent = 'Updated: ' + new Date().toISOString() + ' (auto-refresh 10s)';
+      document.getElementById('players-count').textContent = data.players.length;
+      document.getElementById('tracks-count').textContent = data.recentTracks.length;
+      document.getElementById('objects-count').textContent = data.staticObjects.length;
+
+      document.getElementById('players-body').innerHTML = data.players.length === 0
+        ? '<tr><td colspan="7" class="empty">No players yet</td></tr>'
+        : data.players.map(p => `<tr>
+            <td>${p.id}</td>
+            <td>${p.unitType}</td>
+            <td>${p.faction}</td>
+            <td class="${p.isAlive ? 'alive' : 'dead'}">${p.isAlive ? '✓' : '✗'}</td>
+            <td>${coord(p.lastLat)}, ${coord(p.lastLng)}</td>
+            <td>${fmt(p.lastSeen)}</td>
+            <td>${fmt(p.createdAt)}</td>
+          </tr>`).join('');
+
+      document.getElementById('tracks-body').innerHTML = data.recentTracks.length === 0
+        ? '<tr><td colspan="5" class="empty">No tracks yet</td></tr>'
+        : data.recentTracks.map(t => `<tr>
+            <td>${t.playerId}</td>
+            <td>${t.lat.toFixed(5)}</td>
+            <td>${t.lng.toFixed(5)}</td>
+            <td>${t.hexId ?? '—'}</td>
+            <td>${fmt(t.recordedAt)}</td>
+          </tr>`).join('');
+
+      document.getElementById('objects-body').innerHTML = data.staticObjects.length === 0
+        ? '<tr><td colspan="7" class="empty">No objects yet</td></tr>'
+        : data.staticObjects.map(o => `<tr>
+            <td>${o.id}</td>
+            <td>${o.type}</td>
+            <td>${o.name ?? '—'}</td>
+            <td>${o.lat.toFixed(5)}</td>
+            <td>${o.lng.toFixed(5)}</td>
+            <td>${o.faction ?? '—'}</td>
+            <td>${o.active ? '✓' : '✗'}</td>
+          </tr>`).join('');
+    }
+
+    load();
+    setInterval(load, 10000);
+  </script>
+</body>
+</html>
