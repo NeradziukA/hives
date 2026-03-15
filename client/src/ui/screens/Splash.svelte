@@ -30,7 +30,7 @@
   }
 
   .label {
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.3em;
     color: rgba(114, 181, 58, 0.6);

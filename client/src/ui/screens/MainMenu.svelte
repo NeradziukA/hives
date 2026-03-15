@@ -89,7 +89,7 @@
   .input {
     width: 100%;
     padding: 12px 16px;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     letter-spacing: 0.05em;
     background: rgba(0, 0, 0, 0.7);
@@ -116,7 +116,7 @@
   .btn {
     width: 100%;
     padding: 14px 24px;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -150,7 +150,7 @@
   }
 
   .greeting {
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 16px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -163,7 +163,7 @@
 
   .error {
     color: #f44;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     margin: 0;
     animation: btn-in 0.2s ease forwards;

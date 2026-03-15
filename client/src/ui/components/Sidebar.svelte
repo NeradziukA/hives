@@ -87,7 +87,7 @@
   .btn {
     width: 100%;
     padding: 14px 24px;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     letter-spacing: 0.15em;
     text-transform: uppercase;

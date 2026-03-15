@@ -61,7 +61,7 @@
     z-index: 5;
     pointer-events: auto;
     color: #72b53a;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
   }

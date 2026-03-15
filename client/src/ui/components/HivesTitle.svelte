@@ -11,7 +11,7 @@
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     z-index: 15;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: clamp(84px, 13vw, 150px);
     font-weight: 900;
     letter-spacing: 0.3em;

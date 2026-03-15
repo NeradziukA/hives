@@ -83,7 +83,7 @@
     padding: 24px 32px;
     overflow-y: auto;
     color: #72b53a;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .top-row {
@@ -118,7 +118,7 @@
   }
 
   .lang-btn {
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.1em;
     padding: 3px 8px;

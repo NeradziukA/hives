@@ -34,7 +34,7 @@
     background: rgba(0, 0, 0, 0.88);
     border: 1px solid rgba(114, 181, 58, 0.5);
     color: #72b53a;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     letter-spacing: 0.08em;
     padding: 10px 18px;
@@ -59,7 +59,7 @@
     background: transparent;
     border: 1px solid rgba(114, 181, 58, 0.4);
     color: #72b53a;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.08em;
     padding: 4px 10px;
