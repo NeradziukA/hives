@@ -4,6 +4,7 @@ import { handleUnitGetAll, handleUnitMoved } from ".";
 import { MessageType, SocketMessage, User } from "../../types";
 import { handleClose } from "./close";
 import { findPlayerById } from "../../db/queries";
+import { verifyAccess } from "../../auth/jwt";
 import { logger } from "../../logger";
 import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL } from "../../config";
 
@@ -44,7 +45,21 @@ export function handleConnection(ws: WebSocket) {
       return;
     }
 
-    const id = message.srcId;
+    const token = message.token as string | undefined;
+    if (!token) {
+      ws.send(JSON.stringify({ type: MessageType.AUTH_ERROR, srcId: "", payload: { error: "Token required" } }));
+      ws.close();
+      return;
+    }
+
+    const tokenPayload = verifyAccess(token);
+    if (!tokenPayload) {
+      ws.send(JSON.stringify({ type: MessageType.AUTH_ERROR, srcId: "", payload: { error: "Invalid or expired token" } }));
+      ws.close();
+      return;
+    }
+
+    const id = tokenPayload.id;
     const player = await findPlayerById(id);
     if (!player) {
       logger.warn("Unknown player id: " + id);

@@ -7,7 +7,8 @@ Express + WebSocket backend. Source: [server/src/](../server/src/)
 | File | Responsibility |
 |------|---------------|
 | [index.ts](../server/src/index.ts) | Express app; mounts routers; serves `static/`; starts HTTP + WS |
-| [auth-router.ts](../server/src/auth-router.ts) | `POST /api/login` — verifies username/password, returns player `id` |
+| [auth-router.ts](../server/src/auth-router.ts) | `POST /api/login` — verifies credentials, returns JWT tokens; `POST /api/refresh` — issues new access token |
+| [auth/jwt.ts](../server/src/auth/jwt.ts) | JWT sign/verify helpers for access (15m) and refresh (7d) tokens |
 | [status-router.ts](../server/src/status-router.ts) | `GET /status` (JSON), `GET /status/ui` (dashboard) |
 | [docs-router.ts](../server/src/docs-router.ts) | Express `Router` for `/docs` |
 | [docs-render.ts](../server/src/docs-render.ts) | `renderDoc(title, body, nav)` — fills HTML shell |
@@ -66,9 +67,26 @@ This inserts a new row into the `players` table with a bcrypt-hashed password.
 ### Login flow
 
 1. Client POSTs `{ username, password }` to `POST /api/login`
-2. Server verifies password with bcrypt → returns `{ id }`
-3. Client opens WebSocket, sends `UNIT_AUTH { srcId: id }`
-4. Server looks up player in DB → sends `UNIT_AUTHENTICATED` or `AUTH_ERROR`
+2. Server verifies password with bcrypt → returns `{ accessToken, refreshToken, id }`
+   - `accessToken` — JWT, expires in **15 minutes**
+   - `refreshToken` — JWT, expires in **7 days** (stored in `localStorage`)
+3. Client opens WebSocket, sends `UNIT_AUTH { srcId: id, token: accessToken }`
+4. Server validates JWT signature → sends `UNIT_AUTHENTICATED` or `AUTH_ERROR`
+
+### Refresh flow
+
+On page reload the access token is gone (in-memory only). The client uses the saved refresh token:
+
+1. Client POSTs `{ refreshToken }` to `POST /api/refresh`
+2. Server verifies refresh token → returns new `{ accessToken, id }`
+3. Client shows **Continue** button (skips login form)
+
+### Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `JWT_SECRET` | Secret for signing access tokens |
+| `JWT_REFRESH_SECRET` | Secret for signing refresh tokens |
 
 ## WebSocket Handlers
 

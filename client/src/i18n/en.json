@@ -3,6 +3,7 @@
     "loading": "LOADING..."
   },
   "menu": {
+    "continue": "Continue",
     "connect": "Connect",
     "username": "Username",
     "password": "Password",

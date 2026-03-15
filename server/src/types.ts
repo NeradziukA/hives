@@ -41,6 +41,7 @@ export type GameConfig = {
 export type SocketMessage = {
   type: MessageType;
   srcId: string;
+  token?: string;
   payload?: {
     coords?: Coordinates;
     users?: UserList;

@@ -10,10 +10,16 @@ sequenceDiagram
     participant O as Other Clients
 
     C->>S: POST /api/login { username, password }
-    S->>C: 200 { id }
+    S->>C: 200 { accessToken (15m), refreshToken (7d), id }
+    Note over C: Stores refreshToken in localStorage
+
+    alt Session exists (page reload)
+        C->>S: POST /api/refresh { refreshToken }
+        S->>C: 200 { accessToken, id }
+    end
 
     C->>WS: TCP connect
-    C->>WS: UNIT_AUTH { srcId: id }
+    C->>WS: UNIT_AUTH { srcId: id, token: accessToken }
     WS->>C: UNIT_AUTHENTICATED { id, config }
     Note over C: Starts LocationTracker (GPS)
 
@@ -37,7 +43,7 @@ sequenceDiagram
 
 | Type | Direction | Payload | Description |
 |------|-----------|---------|-------------|
-| `UNIT_AUTH` | C → S | `{ srcId: id }` | Client identifies itself after connect |
+| `UNIT_AUTH` | C → S | `{ srcId: id, token: accessToken }` | Client authenticates with JWT after connect |
 | `UNIT_AUTHENTICATED` | S → C | `{ id, config }` | Auth confirmed, game config sent |
 | `AUTH_ERROR` | S → C | `{ error }` | Auth failed; connection closed |
 | `UNIT_GET_ALL` | C → S | `{ coords }` | Request full state |

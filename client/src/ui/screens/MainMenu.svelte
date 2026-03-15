@@ -2,10 +2,14 @@
   import { _ } from "svelte-i18n";
 
   let {
+    hasSavedSession,
     onconnect,
+    oncontinue,
     onprofile,
   }: {
+    hasSavedSession: boolean;
     onconnect: (username: string, password: string) => Promise<void>;
+    oncontinue: () => Promise<void>;
     onprofile: () => void;
   } = $props();
 
@@ -13,6 +17,7 @@
   let password = $state("");
   let status = $state<"idle" | "loading" | "error">("idle");
   let errorMsg = $state("");
+  let showLoginForm = $state(!hasSavedSession);
 
   async function submit() {
     if (!username || !password) return;
@@ -25,17 +30,38 @@
       errorMsg = e.message ?? "Connection failed";
     }
   }
+
+  async function handleContinue() {
+    status = "loading";
+    errorMsg = "";
+    try {
+      await oncontinue();
+    } catch (e: any) {
+      status = "error";
+      errorMsg = e.message ?? "Session expired";
+      showLoginForm = true;
+    }
+  }
 </script>
 
 <div class="nav">
-  <input class="input" type="text" placeholder={$_("menu.username")} bind:value={username} disabled={status === "loading"} />
-  <input class="input" type="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
+  {#if !showLoginForm}
+    <button class="btn" onclick={handleContinue} disabled={status === "loading"}>
+      {status === "loading" ? "..." : $_("menu.continue")}
+    </button>
+    <button class="btn btn-secondary" onclick={() => (showLoginForm = true)} disabled={status === "loading"}>
+      {$_("menu.connect")}
+    </button>
+  {:else}
+    <input class="input" type="text" placeholder={$_("menu.username")} bind:value={username} disabled={status === "loading"} />
+    <input class="input" type="password" placeholder={$_("menu.password")} bind:value={password} disabled={status === "loading"} onkeydown={(e) => e.key === "Enter" && submit()} />
+    <button class="btn" onclick={submit} disabled={status === "loading"}>
+      {status === "loading" ? "..." : $_("menu.connect")}
+    </button>
+  {/if}
   {#if errorMsg}
     <p class="error">{errorMsg}</p>
   {/if}
-  <button class="btn" onclick={submit} disabled={status === "loading"}>
-    {status === "loading" ? "..." : $_("menu.connect")}
-  </button>
   <button class="btn btn-secondary" onclick={onprofile}>{$_("menu.profile")}</button>
 </div>
 
@@ -95,8 +121,9 @@
     transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
 
-  .btn:nth-of-type(1) { animation-delay: 1.0s; }
-  .btn:nth-of-type(2) { animation-delay: 1.2s; }
+  .btn:nth-of-type(1) { animation-delay: 0.6s; }
+  .btn:nth-of-type(2) { animation-delay: 0.8s; }
+  .btn:nth-of-type(3) { animation-delay: 1.0s; }
 
   .btn:hover:not(:disabled) {
     background: rgba(114, 181, 58, 0.12);

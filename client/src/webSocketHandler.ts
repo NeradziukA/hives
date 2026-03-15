@@ -12,6 +12,7 @@ const otherUnits: Map<string, UnitModel> = new Map();
 
 export function connectWebSocket(
   playerId: string,
+  accessToken: string,
   scene: THREE.Scene,
   messageHandler: Function,
   onOwnMove?: (coords: { lat: number; lon: number }) => void
@@ -24,7 +25,7 @@ export function connectWebSocket(
 
   socket.onopen = () => {
     console.log("Connected to server, authenticating...");
-    socket.send(JSON.stringify({ type: "UNIT_AUTH", srcId: playerId }));
+    socket.send(JSON.stringify({ type: "UNIT_AUTH", srcId: playerId, token: accessToken }));
   };
 
   socket.onerror = (error) => {
@@ -33,7 +34,7 @@ export function connectWebSocket(
 
   socket.onclose = (event) => {
     console.log("WebSocket closed:", event.reason);
-    setTimeout(() => connectWebSocket(playerId, scene, messageHandler, onOwnMove), 5000);
+    setTimeout(() => connectWebSocket(playerId, accessToken, scene, messageHandler, onOwnMove), 5000);
   };
 
   socket.onmessage = (event: MessageEvent) => {

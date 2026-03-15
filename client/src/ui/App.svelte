@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { initGame, connectToServer } from "../game";
+  import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId } from "../auth";
   import HivesTitle from "./components/HivesTitle.svelte";
   import Splash from "./screens/Splash.svelte";
   import MainMenu from "./screens/MainMenu.svelte";
@@ -11,9 +12,11 @@
 
   let screen = $state<Screen>("splash");
   let gameContainer: HTMLDivElement;
+  let hasSavedSession = $state(false);
 
   onMount(async () => {
     await initGame(gameContainer);
+    hasSavedSession = hasSession();
     screen = "mainmenu";
   });
 
@@ -27,8 +30,21 @@
       const { error } = await res.json();
       throw new Error(error ?? "Login failed");
     }
-    const { id } = await res.json();
-    connectToServer(id);
+    const { accessToken, refreshToken, id } = await res.json();
+    setTokens(accessToken, refreshToken, id);
+    connectToServer(id, accessToken);
+    screen = "game";
+  }
+
+  async function handleContinue(): Promise<void> {
+    const ok = await refreshAccessToken();
+    if (!ok) {
+      hasSavedSession = false;
+      throw new Error("Session expired, please log in again");
+    }
+    const id = getPlayerId()!;
+    const accessToken = getAccessToken()!;
+    connectToServer(id, accessToken);
     screen = "game";
   }
 
@@ -46,7 +62,9 @@
   <Splash />
 {:else if screen === "mainmenu"}
   <MainMenu
+    hasSavedSession={hasSavedSession}
     onconnect={handleConnect}
+    oncontinue={handleContinue}
     onprofile={() => (screen = "profile")}
   />
 {:else if screen === "game"}

@@ -11,6 +11,14 @@ VDS: `145.223.80.56` · Node.js 24 · PostgreSQL 15
 ```
 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/hives
 PORT=3000
+JWT_SECRET=<random-string>
+JWT_REFRESH_SECRET=<another-random-string>
+```
+
+Сгенерировать случайные секреты:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 Если пароль содержит спецсимволы (`%`, `&`, `^`) — закодировать:
