@@ -11,6 +11,7 @@
 
   let authenticated = $state(false);
   let activeSection = $state('users');
+  let sidebarOpen = $state(true);
 
   onMount(async () => {
     const token = auth.token;
@@ -67,13 +68,18 @@
   <LoginDialog onsuccess={onLoginSuccess} />
 {:else}
   <div class="app-shell">
-    <Sidebar
-      activeSection={activeSection}
-      onsectionChange={onSectionChange}
-      onlogout={onLogout}
-      onlangChange={onLangChange}
-    />
+    {#if sidebarOpen}
+      <Sidebar
+        activeSection={activeSection}
+        onsectionChange={onSectionChange}
+        onlogout={onLogout}
+        onlangChange={onLangChange}
+      />
+    {/if}
     <main class="main">
+      <button class="sidebar-toggle" onclick={() => sidebarOpen = !sidebarOpen} title={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}>
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
       {#if activeSection === 'users'}
         <PlayersPage />
       {/if}
@@ -93,5 +99,29 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+  }
+  .sidebar-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .sidebar-toggle:hover {
+    color: var(--text);
+    background: var(--bg2);
   }
 </style>

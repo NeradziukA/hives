@@ -291,7 +291,7 @@
     flex: 1; display: flex; flex-direction: column; overflow: hidden;
   }
   .page-header {
-    padding: 20px 28px 16px;
+    padding: 20px 28px 16px 56px;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 16px;
   }
