@@ -7,6 +7,7 @@ import { logger } from "./logger";
 import docsRouter from "./docs-router";
 import statusRouter from "./status-router";
 import authRouter from "./auth-router";
+import adminRouter from "./admin-router";
 
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/docs", docsRouter);
 app.use("/status", statusRouter);
 app.use("/api", authRouter);
+app.use("/admin", adminRouter);
 app.use(express.static(path.join(__dirname, "..", "static")));
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

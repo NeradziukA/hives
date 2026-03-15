@@ -10,6 +10,13 @@
     "profile": "Player Profile",
     "main_menu": "Main Menu"
   },
+  "admin": {
+    "title": "Admin Panel",
+    "nav": {
+      "players": "Players",
+      "buildings": "Buildings"
+    }
+  },
   "profile": {
     "title": "Player Profile",
     "attributes": {

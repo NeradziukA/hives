@@ -10,6 +10,13 @@
     "profile": "Профиль игрока",
     "main_menu": "Главное меню"
   },
+  "admin": {
+    "title": "Панель управления",
+    "nav": {
+      "players": "Игроки",
+      "buildings": "Постройки"
+    }
+  },
   "profile": {
     "title": "Профиль игрока",
     "attributes": {
