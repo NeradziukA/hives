@@ -5,7 +5,7 @@ import ru from "./ru.json";
 addMessages("en", en);
 addMessages("ru", ru);
 
-const STORAGE_KEY = "clientLang";
+const STORAGE_KEY = "locale";
 const saved = localStorage.getItem(STORAGE_KEY);
 const initialLocale = saved === "ru" ? "ru" : "en";
 

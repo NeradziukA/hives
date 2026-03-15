@@ -398,13 +398,15 @@ const LANGS: Record<Lang, Translations> = {
   },
 };
 
-let _lang = $state<Lang>((localStorage.getItem('adminLang') as Lang) || 'en');
+const STORAGE_KEY = 'locale';
+
+let _lang = $state<Lang>((localStorage.getItem(STORAGE_KEY) as Lang) || 'en');
 
 export const i18n = {
   get lang() { return _lang; },
   get t() { return LANGS[_lang]; },
   set(l: Lang) {
     _lang = l;
-    localStorage.setItem('adminLang', l);
+    localStorage.setItem(STORAGE_KEY, l);
   },
 };
