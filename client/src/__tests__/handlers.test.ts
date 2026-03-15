@@ -175,4 +175,31 @@ describe('handleInitUnits', () => {
     await handleInitUnits({ payload: {} }, scene, new Map(), 'my-id')
     expect(UnitModel.create).not.toHaveBeenCalled()
   })
+
+  // Regression: ghost players after account switch / WS reconnect
+  // Bug: INIT_UNITS did not clear existing otherUnits, causing stale 3D objects to accumulate
+  it('removes existing units from scene and map before adding new ones', async () => {
+    const scene = makeScene()
+    const staleUnit = { renderObj: { userData: {} } }
+    const units = new Map([['stale-unit', staleUnit as never]])
+
+    await handleInitUnits(
+      {
+        payload: {
+          users: {
+            'new-unit': { coords: { lat: 55.0, lon: 37.0 } },
+          },
+        },
+      },
+      scene,
+      units,
+      'my-id',
+    )
+
+    // Stale unit must be removed from scene and map
+    expect(scene.remove).toHaveBeenCalledWith(staleUnit.renderObj)
+    expect(units.has('stale-unit')).toBe(false)
+    // New unit must be present
+    expect(units.has('new-unit')).toBe(true)
+  })
 })

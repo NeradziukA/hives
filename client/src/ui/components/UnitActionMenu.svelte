@@ -32,8 +32,8 @@
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.88);
-    border: 1px solid rgba(114, 181, 58, 0.5);
-    color: #72b53a;
+    border: 1px solid rgba(var(--accent-rgb), 0.5);
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -57,8 +57,8 @@
 
   button {
     background: transparent;
-    border: 1px solid rgba(114, 181, 58, 0.4);
-    color: #72b53a;
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.08em;
@@ -69,7 +69,7 @@
   }
 
   button:hover:not(:disabled) {
-    background: rgba(114, 181, 58, 0.15);
+    background: rgba(var(--accent-rgb), 0.15);
   }
 
   button:disabled {

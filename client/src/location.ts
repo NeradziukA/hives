@@ -1,8 +1,3 @@
-import {
-  metersToLatitudeDegrees,
-  metersToLongitudeDegrees,
-} from "../../lib/geo/constants";
-
 export interface Coordinates {
   lat: number;
   lon: number;
@@ -23,16 +18,15 @@ export default class LocationTracker {
 
   private startTracking(): void {
     const onSuccess = (position: GeolocationPosition) => {
-      const coords: Coordinates = {
+      this.onLocationChange({
         lat: position.coords.latitude,
         lon: position.coords.longitude,
-      };
-      this.onLocationChange(addRandomOffset(coords));
+      });
     };
 
     const onError = (error: GeolocationPositionError) => {
       console.warn("Geolocation error, using fallback:", error.message);
-      this.onLocationChange(addRandomOffset(FALLBACK_COORDS));
+      this.onLocationChange(FALLBACK_COORDS);
     };
 
     if ("geolocation" in navigator) {
@@ -42,7 +36,7 @@ export default class LocationTracker {
     } else {
       console.warn("Geolocation not supported, using fallback");
       this._timer = setInterval(() => {
-        this.onLocationChange(addRandomOffset(FALLBACK_COORDS));
+        this.onLocationChange(FALLBACK_COORDS);
       }, this.UPDATE_INTERVAL);
     }
   }
@@ -53,16 +47,4 @@ export default class LocationTracker {
       this._timer = null;
     }
   }
-}
-
-function addRandomOffset(coords: Coordinates): Coordinates {
-  const latOffset = metersToLatitudeDegrees((Math.random() - 0.5) * 100);
-  const lonOffset = metersToLongitudeDegrees(
-    (Math.random() - 0.5) * 100,
-    coords.lon
-  );
-  return {
-    lat: coords.lat + latOffset,
-    lon: coords.lon + lonOffset,
-  };
 }

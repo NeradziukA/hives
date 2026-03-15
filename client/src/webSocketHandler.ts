@@ -6,9 +6,17 @@ import { handleUnitDisconnected } from "./handlers/unitDisconnectedHandler";
 import { handleUnitMoved } from "./handlers/unitMovedHandler";
 import { handleInitUnits } from "./handlers/initUnitsHandler";
 
-let socket: WebSocket;
+let socket: WebSocket | null = null;
 let myId: string;
 const otherUnits: Map<string, UnitModel> = new Map();
+
+export function disconnectWebSocket(): void {
+  if (socket) {
+    socket.onclose = null; // prevent auto-reconnect
+    socket.close();
+    socket = null;
+  }
+}
 
 export function connectWebSocket(
   playerId: string,
@@ -17,6 +25,7 @@ export function connectWebSocket(
   messageHandler: (event: MessageEvent, scene: THREE.Scene, socket: WebSocket, otherUnits: Map<string, UnitModel>, setMyId: (id: string) => void, onOwnMove?: (coords: { lat: number; lon: number }) => void) => Promise<void> | void,
   onOwnMove?: (coords: { lat: number; lon: number }) => void
 ): void {
+  disconnectWebSocket();
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const wsPort = window.location.port === "5173" ? ":3000"
     : window.location.port ? `:${window.location.port}` : "";

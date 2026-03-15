@@ -93,7 +93,7 @@
     font-size: 14px;
     letter-spacing: 0.05em;
     background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(114, 181, 58, 0.4);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
     color: #ccc;
     outline: none;
     box-sizing: border-box;
@@ -102,7 +102,7 @@
   }
 
   .input:focus {
-    border-color: #72b53a;
+    border-color: var(--accent);
     color: #fff;
   }
 
@@ -121,8 +121,8 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(114, 181, 58, 0.4);
-    color: #72b53a;
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    color: var(--accent);
     cursor: pointer;
     opacity: 0;
     animation: btn-in 0.4s ease forwards;
@@ -134,8 +134,8 @@
   .btn:nth-of-type(3) { animation-delay: 1.0s; }
 
   .btn:hover:not(:disabled) {
-    background: rgba(114, 181, 58, 0.12);
-    border-color: #72b53a;
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: var(--accent);
     color: #fff;
   }
 
@@ -154,7 +154,7 @@
     font-size: 16px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #72b53a;
+    color: var(--accent);
     margin: 0;
     text-align: center;
     animation: btn-in 0.4s ease forwards;

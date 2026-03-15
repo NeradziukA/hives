@@ -48,7 +48,7 @@
     z-index: 100;
     width: 240px;
     background: rgba(0, 0, 0, 0.92);
-    border-right: 1px solid rgba(114, 181, 58, 0.25);
+    border-right: 1px solid rgba(var(--accent-rgb), 0.25);
     display: flex;
     flex-direction: column;
     padding: 16px 0;
@@ -66,7 +66,7 @@
     margin-bottom: 16px;
     background: transparent;
     border: none;
-    color: rgba(114, 181, 58, 0.5);
+    color: rgba(var(--accent-rgb), 0.5);
     font-size: 16px;
     cursor: pointer;
     padding: 4px 8px;
@@ -74,7 +74,7 @@
   }
 
   .close-btn:hover {
-    color: #72b53a;
+    color: var(--accent);
   }
 
   .nav {
@@ -92,8 +92,8 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(114, 181, 58, 0.4);
-    color: #72b53a;
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    color: var(--accent);
     cursor: pointer;
     transition:
       background 0.15s,
@@ -102,14 +102,14 @@
   }
 
   .btn:hover:not(:disabled) {
-    background: rgba(114, 181, 58, 0.12);
-    border-color: #72b53a;
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: var(--accent);
     color: #fff;
   }
 
   .btn:disabled {
     opacity: 0.3;
     cursor: default;
-    border-color: rgba(114, 181, 58, 0.2);
+    border-color: rgba(var(--accent-rgb), 0.2);
   }
 </style>

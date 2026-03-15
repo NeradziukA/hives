@@ -132,7 +132,7 @@
     bottom: 0;
     padding: 24px 32px;
     overflow-y: auto;
-    color: #72b53a;
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
   }
 
@@ -141,7 +141,7 @@
     align-items: baseline;
     justify-content: space-between;
     margin-bottom: 24px;
-    border-bottom: 1px solid rgba(114, 181, 58, 0.3);
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.3);
     padding-bottom: 8px;
   }
 
@@ -159,7 +159,7 @@
     margin: 4px 0 0;
     font-size: 20px;
     letter-spacing: 0.2em;
-    color: #72b53a;
+    color: var(--accent);
   }
 
   .lang-switcher {
@@ -173,16 +173,16 @@
     letter-spacing: 0.1em;
     padding: 3px 8px;
     background: transparent;
-    border: 1px solid rgba(114, 181, 58, 0.3);
-    color: rgba(114, 181, 58, 0.5);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    color: rgba(var(--accent-rgb), 0.5);
     cursor: pointer;
     transition: color 0.15s, border-color 0.15s;
   }
 
   .lang-btn:hover,
   .lang-btn.active {
-    color: #72b53a;
-    border-color: #72b53a;
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .section {
@@ -193,7 +193,7 @@
     font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(114, 181, 58, 0.85);
+    color: rgba(var(--accent-rgb), 0.85);
     margin: 0 0 10px;
   }
 
@@ -206,7 +206,7 @@
   .stat {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(114, 181, 58, 0.1);
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.1);
     padding: 4px 0;
     font-size: 13px;
   }
@@ -216,6 +216,6 @@
   }
 
   .val {
-    color: #72b53a;
+    color: var(--accent);
   }
 </style>

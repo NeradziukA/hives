@@ -6,7 +6,7 @@ import { handleClose } from "./close";
 import { findPlayerById } from "../../db/queries";
 import { verifyAccess } from "../../auth/jwt";
 import { logger } from "../../logger";
-import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL } from "../../config";
+import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL, IDLE_TIMEOUT_MS } from "../../config";
 
 const AUTH_TIMEOUT_MS = 10_000;
 
@@ -68,6 +68,14 @@ export function handleConnection(ws: WebSocket) {
       return;
     }
 
+    // If a socket for this player is already registered, close it silently.
+    // handleClose will detect it's the old socket and skip the UNIT_DISCONNECTED broadcast.
+    const existingSocket = clientsSockets[id];
+    if (existingSocket && existingSocket !== ws) {
+      logger.info(`Player ${id} reconnected — closing previous socket`);
+      existingSocket.close();
+    }
+
     users[id] = { id, type: player.unitType as ObjectType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
     clientsSockets[id] = ws;
     logger.info("Authenticated: " + id);
@@ -79,6 +87,12 @@ export function handleConnection(ws: WebSocket) {
     }));
 
     broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id }, id);
+
+    // Idle timeout — close zombie connections that stop sending UNIT_MOVED
+    let idleTimer = setTimeout(() => {
+      logger.warn(`Idle timeout for ${id} — closing connection`);
+      ws.close();
+    }, IDLE_TIMEOUT_MS);
 
     ws.on("message", function (wsMessage: string) {
       logger.debug("Incoming message: " + wsMessage);
@@ -95,13 +109,19 @@ export function handleConnection(ws: WebSocket) {
           handleUnitGetAll(msg, clientsSockets[msg.srcId], users);
           break;
         case MessageType.UNIT_MOVED:
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => {
+            logger.warn(`Idle timeout for ${id} — closing connection`);
+            ws.close();
+          }, IDLE_TIMEOUT_MS);
           handleUnitMoved(msg, users);
           break;
       }
     });
 
     ws.on("close", function () {
-      handleClose(id, clientsSockets, users);
+      clearTimeout(idleTimer);
+      handleClose(id, ws, clientsSockets, users);
     });
   });
 }

@@ -144,10 +144,10 @@ Located in [server/src/websocket/handlers/](../server/src/websocket/handlers/)
 
 | Handler | Trigger | Action |
 |---------|---------|--------|
-| `connect.ts` | New WS connection | Waits for `UNIT_AUTH`, verifies player in DB, registers in memory |
+| `connect.ts` | New WS connection | Waits for `UNIT_AUTH` (10 s timeout), verifies player in DB, closes any previous socket for same player, registers in memory; starts 5-minute idle timer reset on each `UNIT_MOVED` |
 | `unit-get-all.ts` | `UNIT_GET_ALL` message | Sends `INIT_UNITS` with all users + static objects |
 | `unit-move.ts` | `UNIT_MOVED` message | Updates user coords in map; broadcasts to all other clients; persists to DB |
-| `close.ts` | Connection closed | Removes user from maps; broadcasts `UNIT_DISCONNECTED`; clears position buffer |
+| `close.ts` | Connection closed | Checks socket identity (ignores stale socket if replaced by a newer connection); removes user from maps; broadcasts `UNIT_DISCONNECTED`; clears position buffer |
 
 ## Port
 

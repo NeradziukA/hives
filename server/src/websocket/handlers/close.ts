@@ -6,9 +6,17 @@ import { clearPositionBuffer } from "../../db/queries";
 
 export function handleClose(
   srcId: string,
+  ws: WebSocket,
   clientsSockets: { [key: string]: WebSocket },
   users: { [key: string]: User }
 ) {
+  // If another connection replaced this socket, do nothing —
+  // the new connection is still live and the player stays on the map.
+  if (clientsSockets[srcId] !== ws) {
+    logger.info(`Stale socket closed for ${srcId} (replaced by newer connection) — ignoring`);
+    return;
+  }
+
   const message: SocketMessage = {
     type: MessageType.UNIT_DISCONNECTED,
     srcId,

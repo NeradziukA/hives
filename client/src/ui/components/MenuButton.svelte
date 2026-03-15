@@ -13,8 +13,8 @@
     width: 44px;
     height: 44px;
     background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(114, 181, 58, 0.5);
-    color: #72b53a;
+    border: 1px solid rgba(var(--accent-rgb), 0.5);
+    color: var(--accent);
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -23,7 +23,7 @@
     transition: background 0.15s, border-color 0.15s;
   }
   .menu-btn:hover {
-    background: rgba(114, 181, 58, 0.15);
-    border-color: #72b53a;
+    background: rgba(var(--accent-rgb), 0.15);
+    border-color: var(--accent);
   }
 </style>

@@ -15,6 +15,12 @@ export async function handleInitUnits(
   otherUnits: Map<string, UnitModel>,
   myId: string
 ): Promise<void> {
+  // Clear stale units from previous session before repopulating
+  for (const unit of otherUnits.values()) {
+    if (unit.renderObj) scene.remove(unit.renderObj);
+  }
+  otherUnits.clear();
+
   if (message.payload.users) {
     for (const [id, unitData] of Object.entries(message.payload.users)) {
       if (id !== myId.toString()) {

@@ -60,7 +60,7 @@
     gap: 8px;
     z-index: 5;
     pointer-events: auto;
-    color: #72b53a;
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
@@ -84,7 +84,7 @@
     width: 6px;
     height: 160px;
     cursor: pointer;
-    accent-color: #72b53a;
+    accent-color: var(--accent);
     background: transparent;
   }
 
