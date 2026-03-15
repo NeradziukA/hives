@@ -1,6 +1,6 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte.ts';
-  import { apiFetch } from '../lib/api.ts';
+  import { apiFetch, safeJson } from '../lib/api.ts';
   import { toast } from '../lib/toast.svelte.ts';
   import Badge from '../components/ui/Badge.svelte';
   import Spinner from '../components/ui/Spinner.svelte';
@@ -51,7 +51,7 @@
     try {
       const res = await apiFetch('/admin/api/users?' + params);
       if (res.status === 401) return;
-      const data = await res.json();
+      const data = await safeJson<{ users: typeof players; total: number }>(res);
       players = data.users;
       totalUsers = data.total;
     } catch {

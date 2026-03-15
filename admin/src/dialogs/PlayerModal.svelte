@@ -1,6 +1,6 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte.ts';
-  import { apiFetch } from '../lib/api.ts';
+  import { apiFetch, safeJson } from '../lib/api.ts';
   import { toast } from '../lib/toast.svelte.ts';
   import Spinner from '../components/ui/Spinner.svelte';
   import type { Player } from '../lib/types.ts';
@@ -118,7 +118,7 @@
         toast.show(i18n.t.errGeneric, true);
         return;
       }
-      const data = await res.json();
+      const data = await safeJson<Parameters<typeof populateForm>[0]>(res);
       populateForm(data);
     } catch {
       onclose();

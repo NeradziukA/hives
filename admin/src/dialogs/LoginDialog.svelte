@@ -1,6 +1,7 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte.ts';
   import { auth } from '../lib/auth.svelte.ts';
+  import { safeJson } from '../lib/api.ts';
 
   interface Props {
     onsuccess: () => void;
@@ -27,7 +28,7 @@
         error = i18n.t.loginErr;
         return;
       }
-      const data = await res.json();
+      const data = await safeJson<{ accessToken: string; refreshToken: string }>(res);
       auth.save(data.accessToken, data.refreshToken);
       onsuccess();
     } catch {

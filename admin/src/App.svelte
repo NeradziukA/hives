@@ -3,6 +3,7 @@
   import { auth } from './lib/auth.svelte.ts';
   import { i18n } from './lib/i18n.svelte.ts';
   import type { Lang } from './lib/types.ts';
+  import { safeJson } from './lib/api.ts';
   import LoginDialog from './dialogs/LoginDialog.svelte';
   import Sidebar from './components/Sidebar.svelte';
   import Toast from './components/Toast.svelte';
@@ -30,7 +31,7 @@
             body: JSON.stringify({ refreshToken: auth.refreshToken }),
           });
           if (refreshRes.ok) {
-            const data = await refreshRes.json();
+            const data = await safeJson<{ accessToken: string }>(refreshRes);
             auth.save(data.accessToken);
             authenticated = true;
             return;

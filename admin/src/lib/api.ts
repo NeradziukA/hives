@@ -1,5 +1,13 @@
 import { auth } from './auth.svelte.ts';
 
+export async function safeJson<T>(res: Response): Promise<T> {
+  const ct = res.headers.get('content-type') ?? '';
+  if (!ct.includes('application/json')) {
+    throw new Error(`Server returned ${res.status} (non-JSON response)`);
+  }
+  return res.json();
+}
+
 async function tryRefresh(): Promise<boolean> {
   const rt = auth.refreshToken;
   if (!rt) return false;
@@ -10,7 +18,7 @@ async function tryRefresh(): Promise<boolean> {
       body: JSON.stringify({ refreshToken: rt }),
     });
     if (!res.ok) return false;
-    const data = await res.json();
+    const data = await safeJson<{ accessToken: string }>(res);
     auth.save(data.accessToken);
     return true;
   } catch {
