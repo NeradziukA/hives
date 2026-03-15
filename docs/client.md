@@ -54,54 +54,54 @@ graph TD
 
 ## Files
 
-| File | Responsibility |
-|------|---------------|
-| [main.ts](../client/src/main.ts) | App entry; animation loop; raycaster for click interactions |
-| [game.ts](../client/src/game.ts) | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring |
-| [hexgrid.ts](../client/src/hexgrid.ts) | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25 |
-| [renderer.ts](../client/src/renderer.ts) | WebGL renderer (antialiasing, transparent background) |
-| [sceneSetup.ts](../client/src/sceneSetup.ts) | Three.js scene, lights, camera; updates `gameState.zoom` on scroll |
-| [models.ts](../client/src/models.ts) | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()` |
-| [webSocketHandler.ts](../client/src/webSocketHandler.ts) | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
-| [location.ts](../client/src/location.ts) | `LocationTracker` — Geolocation API polling; interval configured by server on auth |
-| [lighting.ts](../client/src/lighting.ts) | Lighting helper (currently unused) |
-| [ui/gameState.svelte.ts](../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId |
+| File                                                           | Responsibility                                                                                            |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [main.ts](../client/src/main.ts)                               | App entry; animation loop; raycaster for click interactions                                               |
+| [game.ts](../client/src/game.ts)                               | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring                          |
+| [hexgrid.ts](../client/src/hexgrid.ts)                         | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25              |
+| [renderer.ts](../client/src/renderer.ts)                       | WebGL renderer (antialiasing, transparent background)                                                     |
+| [sceneSetup.ts](../client/src/sceneSetup.ts)                   | Three.js scene, lights, camera; updates `gameState.zoom` on scroll                                        |
+| [models.ts](../client/src/models.ts)                           | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()`                                       |
+| [webSocketHandler.ts](../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
+| [location.ts](../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
+| [lighting.ts](../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
+| [ui/gameState.svelte.ts](../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId                                                     |
 
 ## Handlers
 
 Located in [client/src/handlers/](../client/src/handlers/)
 
-| Handler | Triggered by | Action |
-|---------|-------------|--------|
-| `unitAuthenticatedHandler` | `UNIT_AUTHENTICATED` | Saves own ID, starts LocationTracker, begins sending position |
-| `initUnitsHandler` | `INIT_UNITS` | Clears stale units, then creates 3D models for all existing users and buildings |
-| `unitConnectedHandler` | `UNIT_CONNECTED` | Creates 3D model for newly joined user |
-| `unitMovedHandler` | `UNIT_MOVED` | Updates position of a user's model |
-| `unitDisconnectedHandler` | `UNIT_DISCONNECTED` | Removes model from scene |
+| Handler                    | Triggered by         | Action                                                                          |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------- |
+| `unitAuthenticatedHandler` | `UNIT_AUTHENTICATED` | Saves own ID, starts LocationTracker, begins sending position                   |
+| `initUnitsHandler`         | `INIT_UNITS`         | Clears stale units, then creates 3D models for all existing users and buildings |
+| `unitConnectedHandler`     | `UNIT_CONNECTED`     | Creates 3D model for newly joined user                                          |
+| `unitMovedHandler`         | `UNIT_MOVED`         | Updates position of a user's model                                              |
+| `unitDisconnectedHandler`  | `UNIT_DISCONNECTED`  | Removes model from scene                                                        |
 
 ## 3D Models
 
-| Asset | File | Used for |
-|-------|------|---------|
-| Unit model | `public/assets/models-3d/funko_test_model.glb` (5.1 MB) | All player units |
-| Building | `public/assets/models-3d/Large Building.glb` (140 KB) | Static BUILDING_A objects |
-| Background | `public/assets/images/main-background.jpg` | Main menu / splash background |
+| Asset      | File                                                    | Used for                      |
+| ---------- | ------------------------------------------------------- | ----------------------------- |
+| Unit model | `public/assets/models-3d/funko_test_model.glb` (5.1 MB) | All player units              |
+| Building   | `public/assets/models-3d/Large Building.glb` (140 KB)   | Static BUILDING_A objects     |
+| Background | `public/assets/images/main-background.png`              | Main menu / splash background |
 
 ## Color Palettes
 
-| Entity | Colors |
-|--------|--------|
-| Own unit | Red, Orange, Gold |
+| Entity      | Colors            |
+| ----------- | ----------------- |
+| Own unit    | Red, Orange, Gold |
 | Other users | Blue, Cyan, Green |
 
 ## Theming
 
 The accent color adapts to the player's faction using CSS custom properties.
 
-| Faction | Class | `--accent` |
-|---------|-------|-----------|
-| zombies (default) | _(none)_ | `#72b53a` (green) |
-| humans | `.theme-humans` on `<body>` | `#3a8ab5` (blue) |
+| Faction           | Class                       | `--accent`        |
+| ----------------- | --------------------------- | ----------------- |
+| zombies (default) | _(none)_                    | `#72b53a` (green) |
+| humans            | `.theme-humans` on `<body>` | `#3a8ab5` (blue)  |
 
 `App.svelte` applies the class via a `$effect` keyed to `gameState.faction`. All UI components reference `var(--accent)` and `rgba(var(--accent-rgb), …)` — never hardcoded hex values. The faction is fetched from `GET /api/profile` after login and after token refresh.
 
@@ -109,11 +109,11 @@ The accent color adapts to the player's faction using CSS custom properties.
 
 A fixed bottom-center overlay visible on the Game screen.
 
-| Component | File | Displays |
-|-----------|------|---------|
-| `GameHud` | `components/hud/GameHud.svelte` | Container; shows `MessageLog` only |
+| Component     | File                                | Displays                                             |
+| ------------- | ----------------------------------- | ---------------------------------------------------- |
+| `GameHud`     | `components/hud/GameHud.svelte`     | Container; shows `MessageLog` only                   |
 | `ZoomDisplay` | `components/hud/ZoomDisplay.svelte` | Current camera zoom value (used inside `ZoomSlider`) |
-| `MessageLog` | `components/hud/MessageLog.svelte` | Last incoming event message (auto-clears after 4s) |
+| `MessageLog`  | `components/hud/MessageLog.svelte`  | Last incoming event message (auto-clears after 4s)   |
 
 ## Zoom Slider
 
@@ -133,6 +133,7 @@ A fixed bottom-center overlay visible on the Game screen.
 ## Unit Selection
 
 Clicking a non-own unit:
+
 - Highlights it with a green outline (`OutlinePass`) in 3D model mode
 - Shows a green selection ring sprite in dot LOD mode
 - Opens `UnitActionMenu` above the HUD with unit ID and action buttons
@@ -149,12 +150,12 @@ cd client && npm test              # run all tests
 cd client && npm run test:coverage # run with HTML coverage report
 ```
 
-| Test file | Covers |
-|-----------|--------|
-| [`__tests__/auth.test.ts`](../client/src/__tests__/auth.test.ts) | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken` |
-| [`__tests__/handlers.test.ts`](../client/src/__tests__/handlers.test.ts) | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits`; ghost-player regression |
-| [`__tests__/unitAuthenticatedHandler.test.ts`](../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour |
-| [`__tests__/webSocketHandler.test.ts`](../client/src/__tests__/webSocketHandler.test.ts) | `disconnectWebSocket`: no auto-reconnect after disconnect, cleans up socket; `connectWebSocket`: closes previous socket on account switch |
+| Test file                                                                                                | Covers                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [`__tests__/auth.test.ts`](../client/src/__tests__/auth.test.ts)                                         | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken`                                          |
+| [`__tests__/handlers.test.ts`](../client/src/__tests__/handlers.test.ts)                                 | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits`; ghost-player regression                            |
+| [`__tests__/unitAuthenticatedHandler.test.ts`](../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour                                                  |
+| [`__tests__/webSocketHandler.test.ts`](../client/src/__tests__/webSocketHandler.test.ts)                 | `disconnectWebSocket`: no auto-reconnect after disconnect, cleans up socket; `connectWebSocket`: closes previous socket on account switch |
 
 Coverage reports are written to `client/coverage/` (git-ignored).
 
