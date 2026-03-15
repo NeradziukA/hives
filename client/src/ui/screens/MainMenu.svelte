@@ -56,7 +56,7 @@
       {status === "loading" ? "..." : $_("menu.continue")}
     </button>
     <button class="btn btn-secondary" onclick={() => (showLoginForm = true)} disabled={status === "loading"}>
-      {$_("menu.connect")}
+      {$_("menu.switch_user")}
     </button>
   {:else}
     <input class="input" type="text" placeholder={$_("menu.username")} bind:value={loginUsername} disabled={status === "loading"} />

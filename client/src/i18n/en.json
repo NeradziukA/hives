@@ -5,6 +5,7 @@
   "menu": {
     "continue": "Continue",
     "connect": "Connect",
+    "switch_user": "Switch User",
     "username": "Username",
     "password": "Password",
     "profile": "Player Profile",
