@@ -214,7 +214,7 @@ DATABASE_URL=postgresql://user:password@host:5432/hives
 
 ## Deployment
 
-The server runs on the VDS at `145.223.80.56`.
+The server runs on the VDS at `145.223.80.56`, accessible at `https://incuby.duckdns.org` via Nginx reverse proxy with Let's Encrypt TLS.
 
 ```bash
 # Build and start with pm2
@@ -226,5 +226,7 @@ npx pm2 start dist/index.js --name hives
 Static files layout (all git-ignored, populated by build scripts):
 - `server/static/client/` — game SPA, served at `/`
 - `server/static/admin/` — admin SPA, served at `/admin/`
+
+Nginx (`/etc/nginx/sites-available/hives`, template at `nginx.conf`) terminates TLS on port 443 and proxies all traffic (HTTP and WebSocket) to `localhost:3000`. Certificates managed by Certbot / Let's Encrypt with automatic renewal.
 
 See [VDS_RUN.md](../VDS_RUN.md) for the full setup guide.

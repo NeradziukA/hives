@@ -102,21 +102,42 @@ npx pm2 save
 
 ---
 
-## 7. Внешний доступ
+## 7. HTTPS через Nginx (требует root)
 
-Порт 3000 должен быть открыт в файрволе (требует sudo):
+Node.js остаётся на порту 3000. Nginx принимает 80/443 и проксирует на 3000.
+
+Запустить один раз от root:
 
 ```bash
-sudo ufw allow 3000/tcp
+bash /home/hives/projects/hives/setup-https.sh
 ```
 
-Адрес сервера: `http://145.223.80.56:3000`
+Или вручную:
+
+```bash
+apt install -y nginx certbot python3-certbot-nginx
+cp /home/hives/projects/hives/nginx.conf /etc/nginx/sites-available/hives
+ln -s /etc/nginx/sites-available/hives /etc/nginx/sites-enabled/hives
+nginx -t && systemctl reload nginx
+ufw allow 80/tcp && ufw allow 443/tcp
+ufw delete allow 3000/tcp     # порт 3000 закрыть снаружи
+certbot --nginx -d incuby.duckdns.org
+```
+
+Сертификат обновляется автоматически через systemd. Проверить:
+
+```bash
+certbot renew --dry-run
+```
+
+Адрес сервера: `https://incuby.duckdns.org`
 
 | URL | Что |
 |-----|-----|
-| `http://145.223.80.56:3000` | Игровой клиент |
-| `http://145.223.80.56:3000/status/ui` | Дашборд |
-| `http://145.223.80.56:3000/docs` | Документация |
+| `https://incuby.duckdns.org` | Игровой клиент |
+| `https://incuby.duckdns.org/status/ui` | Дашборд |
+| `https://incuby.duckdns.org/docs` | Документация |
+| `https://incuby.duckdns.org/admin` | Админ-панель |
 
 ---
 
