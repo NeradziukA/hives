@@ -1,28 +1,25 @@
 # Запуск на VDS
 
-## Требования
-
-- Node.js ≥ 24
-- PostgreSQL 15 (уже запущен на `localhost:5432`)
+VDS: `145.223.80.56` · Node.js 24 · PostgreSQL 15
 
 ---
 
 ## 1. Переменные окружения
 
-Файл `server/.env` должен содержать:
+Файл `server/.env`:
 
 ```
 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/hives
+PORT=3000
 ```
 
-Если пароль содержит спецсимволы (`%`, `&`, `^` и др.) — закодировать их:
+Если пароль содержит спецсимволы (`%`, `&`, `^`) — закодировать:
 
 | символ | код   |
 |--------|-------|
 | `%`    | `%25` |
 | `&`    | `%26` |
 | `^`    | `%5E` |
-| `@`    | `%40` |
 
 ---
 
@@ -35,7 +32,7 @@ npm run install:all
 
 ---
 
-## 3. Применить миграции БД
+## 3. Миграции БД
 
 ```bash
 cd /home/hives/projects/hives/server
@@ -52,82 +49,70 @@ cd /home/hives/projects/hives/server
 npm run user:create <username> <password>
 ```
 
-Пример:
+---
+
+## 5. Сборка
+
 ```bash
-npm run user:create admin secret123
+# Установить зависимости клиента (если первый раз)
+cd /home/hives/projects/hives/client && npm install
+
+# Собрать клиент и скопировать в server/static/
+cd /home/hives/projects/hives/client && npm run build
+cp -r /home/hives/projects/hives/client/dist/* /home/hives/projects/hives/server/static/
+
+# Скомпилировать сервер
+cd /home/hives/projects/hives/server && npm run build
 ```
 
 ---
 
-## 5. Собрать и запустить
+## 6. Запуск через pm2
 
 ```bash
-cd /home/hives/projects/hives
-npm run build        # сборка клиента → server/static/
-cd server
-npm run build        # компиляция TypeScript → dist/
-npm start            # запуск сервера
+cd /home/hives/projects/hives/server
+npx pm2 start dist/index.js --name hives
+npx pm2 save           # сохранить список процессов
 ```
 
-Или одной командой из корня:
+Управление:
 
 ```bash
-cd /home/hives/projects/hives && npm run build && cd server && npm start
+npx pm2 status         # статус
+npx pm2 logs hives     # логи в реальном времени
+npx pm2 restart hives  # перезапуск
+npx pm2 stop hives     # остановить
+npx pm2 delete hives   # удалить из pm2
 ```
 
-Сервер слушает на **порту 3000**.
+Автостарт после перезагрузки сервера (требует sudo):
+
+```bash
+npx pm2 startup        # выполнить команду которую выдаст pm2
+npx pm2 save
+```
 
 ---
 
-## 6. Внешний доступ
+## 7. Внешний доступ
 
-Внешний IP VDS: **`145.223.80.56`**
+Порт 3000 должен быть открыт в файрволе (требует sudo):
+
+```bash
+sudo ufw allow 3000/tcp
+```
+
+Адрес сервера: `http://145.223.80.56:3000`
 
 | URL | Что |
 |-----|-----|
 | `http://145.223.80.56:3000` | Игровой клиент |
-| `http://145.223.80.56:3000/status/ui` | Дашборд игроков |
-| `http://145.223.80.56:3000/status` | JSON со статусом |
+| `http://145.223.80.56:3000/status/ui` | Дашборд |
 | `http://145.223.80.56:3000/docs` | Документация |
-
-### Открыть порт 3000 в файрволе
-
-Если порт недоступен снаружи — нужно открыть его через `ufw` (требует sudo):
-
-```bash
-sudo ufw allow 3000/tcp
-sudo ufw status
-```
-
-Или через `iptables`:
-
-```bash
-sudo iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
-```
-
-### Проверка доступности порта
-
-```bash
-# С самого VDS:
-curl -s http://145.223.80.56:3000
-
-# Локально — убедиться что сервер запущен:
-curl -s http://localhost:3000
-```
-
-### Тест авторизации
-
-```bash
-curl -s -X POST http://145.223.80.56:3000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"secret123"}' | cat
-```
-
-Ожидаемый ответ: `{"id":"<uuid>"}`
 
 ---
 
-## 7. Тесты
+## 8. Тесты
 
 ```bash
 cd /home/hives/projects/hives/server
@@ -136,42 +121,26 @@ npm test
 
 ---
 
-## 8. Пересборка после изменений
+## 9. Пересборка после изменений
 
-После изменений в клиенте:
 ```bash
 cd /home/hives/projects/hives
-npm run build        # клиент + копирует в server/static/
-cd server && npm run build
+npm run build && cd server && npm run build
+npx pm2 restart hives
 ```
-
-После изменений только в сервере:
-```bash
-cd /home/hives/projects/hives/server
-npm run build
-```
-
-Перезапуск сервера: `Ctrl+C`, затем `npm start`.
 
 ---
 
 ## Типичные проблемы
 
-**`URIError: URI malformed`** — спецсимволы в пароле в `DATABASE_URL`, см. п. 1.
+**`URIError: URI malformed`** — спецсимволы в пароле, см. п. 1.
 
-**`connection refused` к PostgreSQL** — проверить статус:
+**PostgreSQL недоступен:**
 ```bash
 pg_isready -h localhost -p 5432
-sudo systemctl status postgresql
 ```
 
-**Порт 3000 занят** — задать другой через переменную:
+**Порт занят:**
 ```bash
-PORT=4000 npm start
-```
-
-**Порт 3000 не открыт снаружи** — открыть через sudo (см. п. 6) или запустить сервер фоново с nohup и использовать другой открытый порт:
-```bash
-PORT=8080 nohup npm start > /tmp/hives.log 2>&1 &
-tail -f /tmp/hives.log
+PORT=4000 npx pm2 start dist/index.js --name hives
 ```

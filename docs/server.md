@@ -127,11 +127,15 @@ DATABASE_URL=postgresql://user:password@host:5432/hives
 
 ## Deployment
 
-Both client and server deploy to **Heroku** from a single dyno.
+The server runs on the VDS at `145.223.80.56`.
 
-`Procfile`:
-```
-web: cd server && npm install --include=dev && npm start
+```bash
+# Build and start with pm2
+npm run build
+cd server && npm run build
+npx pm2 start dist/index.js --name hives
 ```
 
-The built client ends up in `server/static/` and is served by Express at the root URL.
+The built client is served by Express from `server/static/` at the root URL.
+
+See [VDS_RUN.md](../VDS_RUN.md) for the full setup guide.
