@@ -1,6 +1,6 @@
 # Admin Panel
 
-Svelte 5 admin UI for managing players and buildings. Source: [admin/src/](../admin/src/)
+Svelte 5 admin UI for managing players and buildings. Source: [admin/src/](../../admin/src/)
 
 ## Build
 
@@ -60,10 +60,10 @@ graph TD
 | `pages/BuildingsTable.svelte` | Renders building rows with edit/delete actions |
 | `dialogs/PlayerModal.svelte` | Create/edit player modal; delegates form fields to sub-components |
 | `dialogs/playerFormState.svelte.ts` | `PlayerFormState` interface, `FORM_DEFAULTS`, `populateForm(form, player)` |
-| `dialogs/PlayerFormBase.svelte` | Base fields: username, password, unit type, faction, role, alive, HP |
+| `dialogs/PlayerFormBase.svelte` | Base fields: username, password, unit type (`<select>`), faction (`<select>`), role (`<select>`), alive, HP |
 | `dialogs/PlayerFormAttributes.svelte` | 10 attribute fields rendered via `{#each}` |
 | `dialogs/PlayerFormSkills.svelte` | 5 skill fields rendered via `{#each}` |
-| `dialogs/BuildingModal.svelte` | Create/edit building modal (type, name, lat, lng, revealRadius, faction, active) |
+| `dialogs/BuildingModal.svelte` | Create/edit building modal (type `<select>`, name, lat, lng, revealRadius, faction `<select>`, active) |
 | `dialogs/ConfirmDialog.svelte` | Generic yes/no confirmation modal |
 | `dialogs/LoginDialog.svelte` | Admin login form |
 | `lib/api.ts` | `apiFetch` (JWT header injection + auto-refresh), `safeJson` |
@@ -73,6 +73,34 @@ graph TD
 | `lib/types.ts` | `Player`, `Building` types |
 | `components/ui/Spinner.svelte` | Loading spinner |
 | `components/ui/Badge.svelte` | Status badge (faction / alive / online) |
+
+## Enum-based Selects
+
+All enum-valued fields use `<select>` elements populated from `lib/enums.ts` (imported via Vite's TypeScript handling). The displayed labels come from the i18n dictionaries in `lib/i18n.svelte.ts`.
+
+| Field | Enum | Form component |
+|---|---|---|
+| Unit type | `UnitType` (`HUMAN_A`, `HUMAN_B`, `ZOMBIE_A`, `ZOMBIE_B`) | `PlayerFormBase.svelte` |
+| Faction | `Faction` (`HUMANS`, `ZOMBIES`, `NEUTRAL`) | `PlayerFormBase.svelte` |
+| Role | `PlayerRole` (`QUEST_MASTER`, `NPC`, `BOSS`) | `PlayerFormBase.svelte` |
+| Rank | `PlayerRank` (`NOVICE`, `SURVIVOR`, `VETERAN`, `ELITE`, `GENERAL`) | `PlayerFormBase.svelte` |
+| Building type | `BuildingType` (10 types) | `BuildingModal.svelte` |
+
+`PlayerFormBase` iterates with `Object.values(UnitType)`, `Object.values(Faction)`, etc. Labels are looked up from the relevant i18n record (e.g. `unitTypes[value]`, `factions[value]`).
+
+## i18n Enum Dictionaries
+
+Each language file in `lib/i18n.svelte.ts` includes records mapping enum values to display strings:
+
+| Record | Keys |
+|---|---|
+| `buildingTypes` | All 10 `BuildingType` values |
+| `unitTypes` | All 4 `UnitType` values |
+| `factions` | All 3 `Faction` values |
+| `ranks` | All 5 `PlayerRank` values |
+| `roles` | All 3 `PlayerRole` values |
+
+Supported locales: **EN**, **RU**.
 
 ## API
 

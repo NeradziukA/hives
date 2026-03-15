@@ -18,6 +18,22 @@
       "buildings": "Постройки"
     }
   },
+  "types": {
+    "HUMAN_A":         "Человек A",
+    "HUMAN_B":         "Человек B",
+    "ZOMBIE_A":        "Зомби A",
+    "ZOMBIE_B":        "Зомби B",
+    "incubator":       "Инкубатор",
+    "hive":            "Улей",
+    "shelter-zombie":  "Убежище зомби",
+    "mutator":         "Мутатор",
+    "extractor":       "Экстрактор",
+    "military-base":   "Военная база",
+    "resistance-base": "База сопротивления",
+    "shelter-human":   "Убежище людей",
+    "laboratory":      "Лаборатория",
+    "training-base":   "Учебная база"
+  },
   "profile": {
     "title": "Профиль игрока",
     "attributes": {

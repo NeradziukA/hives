@@ -1,10 +1,12 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte.ts';
+  import { PlayerRank, PlayerRole, Faction, UnitType } from '../lib/types.ts';
   import type { PlayerFormState } from './playerFormState.svelte.ts';
 
-  const UNIT_TYPES = ['HUMAN_A', 'HUMAN_B', 'ZOMBIE_A', 'ZOMBIE_B'];
-  const FACTIONS   = ['humans', 'zombies'];
-  const ROLES      = ['', 'transformation', 'boss', 'general', 'scientist', 'soldier', 'quest_master'];
+  const UNIT_TYPES = Object.values(UnitType);
+  const FACTIONS   = Object.values(Faction);
+  const RANKS      = Object.values(PlayerRank);
+  const ROLES      = Object.values(PlayerRole);
 
   let { form, isEdit }: { form: PlayerFormState; isEdit: boolean } = $props();
 </script>
@@ -26,21 +28,29 @@
 <div class="form-group">
   <label class="form-label" for="f-unit-type">{i18n.t.fieldUnitType}</label>
   <select id="f-unit-type" name="unit-type" bind:value={form.unitType}>
-    {#each UNIT_TYPES as ut}<option value={ut}>{ut}</option>{/each}
+    {#each UNIT_TYPES as ut}<option value={ut}>{i18n.t.unitTypes[ut]}</option>{/each}
   </select>
 </div>
 
 <div class="form-group">
   <label class="form-label" for="f-faction">{i18n.t.fieldFaction}</label>
   <select id="f-faction" name="faction" bind:value={form.faction}>
-    {#each FACTIONS as f}<option value={f}>{f}</option>{/each}
+    {#each FACTIONS as f}<option value={f}>{i18n.t.factions[f]}</option>{/each}
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label" for="f-rank">{i18n.t.fieldRank}</label>
+  <select id="f-rank" name="rank" bind:value={form.rank}>
+    {#each RANKS as r}<option value={r}>{i18n.t.ranks[r]}</option>{/each}
   </select>
 </div>
 
 <div class="form-group">
   <label class="form-label" for="f-role">{i18n.t.fieldRole}</label>
   <select id="f-role" name="role" bind:value={form.role}>
-    {#each ROLES as r}<option value={r}>{r || '—'}</option>{/each}
+    <option value="">—</option>
+    {#each ROLES as r}<option value={r}>{i18n.t.roles[r]}</option>{/each}
   </select>
 </div>
 

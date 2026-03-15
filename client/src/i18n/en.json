@@ -18,6 +18,22 @@
       "buildings": "Buildings"
     }
   },
+  "types": {
+    "HUMAN_A":         "Human A",
+    "HUMAN_B":         "Human B",
+    "ZOMBIE_A":        "Zombie A",
+    "ZOMBIE_B":        "Zombie B",
+    "incubator":       "Incubator",
+    "hive":            "Hive",
+    "shelter-zombie":  "Zombie Shelter",
+    "mutator":         "Mutator",
+    "extractor":       "Extractor",
+    "military-base":   "Military Base",
+    "resistance-base": "Resistance Base",
+    "shelter-human":   "Human Shelter",
+    "laboratory":      "Laboratory",
+    "training-base":   "Training Base"
+  },
   "profile": {
     "title": "Player Profile",
     "attributes": {

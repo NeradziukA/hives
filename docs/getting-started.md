@@ -4,6 +4,7 @@
 
 - Node.js ≥ 24 (required by Vite 8)
 - npm
+- PostgreSQL database (required for server)
 
 ## Install Dependencies
 
@@ -51,27 +52,34 @@ npm run build-client
 npm run build-client-win
 ```
 
-This builds the client and copies the output into `server/static/`, so the server can serve it directly.
+This builds the client and copies the output into `server/static/client/`, so the server can serve it directly.
 
-Then start the server:
+Build the admin panel:
 ```bash
+npm run build --prefix ./admin   # outputs to server/static/admin/
+```
+
+Then build and start the server:
+```bash
+cd server && npm run build
 npm run server
 ```
 
 Open http://localhost:3000
 
-## Deployment (Heroku)
+## Deployment (VDS + pm2)
 
-Both client and server run on a single Heroku dyno.
+The project runs on a VDS accessible at `https://incuby.duckdns.org`. Nginx terminates TLS on port 443 and proxies all traffic (HTTP and WebSocket) to `localhost:3000`. The Node.js process is managed by pm2 under the name `hives`.
 
-Heroku build sequence:
-1. `npm install` — installs root dependencies
-2. `heroku-postbuild` — installs client deps (including devDeps for Vite), builds client, copies to `server/static/`, installs server deps (including devDeps for TypeScript)
-3. `Procfile` — compiles TypeScript, starts Express
-
-Push to Heroku:
+Build and restart:
 ```bash
-git push heroku main
+npm run build          # builds client → server/static/client/
+cd server && npm run build   # compiles server TypeScript
+npx pm2 restart hives  # restart the running pm2 process
 ```
 
-The app is then accessible at the Heroku app URL (client served at `/`, WebSocket at the same host).
+Static files layout (all git-ignored, populated by build scripts):
+- `server/static/client/` — game SPA, served at `/`
+- `server/static/admin/` — admin SPA, served at `/admin/`
+
+See [VDS_RUN.md](../VDS_RUN.md) for the full server setup guide.

@@ -5,7 +5,7 @@
     faction?: string;
     alive?: boolean;
     online?: boolean;
-    mode: 'faction' | 'status' | 'online';
+    mode: 'faction' | 'status' | 'active' | 'online';
   }
 
   const { faction, alive, online, mode }: Props = $props();
@@ -16,6 +16,10 @@
 {:else if mode === 'online'}
   <span class="badge" class:online={online} class:offline={!online}>
     {online ? i18n.t.statusOnline : i18n.t.statusOffline}
+  </span>
+{:else if mode === 'active'}
+  <span class="badge" class:alive={alive} class:dead={!alive}>
+    {alive ? i18n.t.statusActive : i18n.t.statusInactive}
   </span>
 {:else}
   <span class="badge" class:alive={alive} class:dead={!alive}>

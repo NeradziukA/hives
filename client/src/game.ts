@@ -33,10 +33,19 @@ function findUnitId(object: THREE.Object3D): string | null {
   return null;
 }
 
+function findObjectType(object: THREE.Object3D): 'unit' | 'building' | null {
+  let node: THREE.Object3D | null = object;
+  while (node) {
+    if (node.userData.objectType) return node.userData.objectType as 'unit' | 'building';
+    node = node.parent;
+  }
+  return null;
+}
+
 let _scene: THREE.Scene;
 let _mainUnit: UnitModel;
 let _updateTarget: (lat: number, lon: number) => void;
-let _hexGrid: THREE.Object3D;
+let _hexGrid: THREE.LineSegments;
 
 export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
@@ -88,8 +97,10 @@ export async function initGame(container: HTMLElement): Promise<void> {
     if (intersects.length > 0) {
       const unitId = findUnitId(intersects[0].object);
       gameState.selectedUnitId = unitId;
+      gameState.selectedObjectType = findObjectType(intersects[0].object);
     } else {
       gameState.selectedUnitId = null;
+      gameState.selectedObjectType = null;
     }
   });
 

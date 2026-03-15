@@ -1,12 +1,19 @@
 <script lang="ts">
+  import { _ } from "svelte-i18n";
   import { gameState } from "../../gameState.svelte.ts";
   import MessageLog from "./MessageLog.svelte";
 
-  let lastMsg = $derived(gameState.messages.at(-1)?.text ?? "");
+  const MAIN_UNIT_ID = "__self__";
+
+  let displayMsg = $derived(
+    gameState.selectedUnitId && gameState.selectedUnitId !== MAIN_UNIT_ID
+      ? `${$_('types.' + gameState.selectedObjectType, { default: gameState.selectedObjectType ?? '' })} · ${gameState.selectedUnitId.slice(0, 8)}`
+      : gameState.messages.at(-1)?.text ?? ""
+  );
 </script>
 
 <div class="hud">
-  <MessageLog message={lastMsg} />
+  <MessageLog message={displayMsg} />
 </div>
 
 <style>

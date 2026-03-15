@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 
 import { handleUnitGetAll, handleUnitMoved } from ".";
-import { MessageType, ObjectType, SocketMessage, User } from "../../types";
+import { MessageType, UnitType, SocketMessage, User } from "../../types";
 import { handleClose } from "./close";
 import { findPlayerById } from "../../db/queries";
 import { verifyAccess } from "../../auth/jwt";
@@ -84,7 +84,7 @@ export function handleConnection(ws: WebSocket) {
       existingSocket.close();
     }
 
-    users[id] = { id, type: player.unitType as ObjectType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
+    users[id] = { id, type: player.unitType as UnitType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
     clientsSockets[id] = ws;
     logger.info("Authenticated: " + id);
 
@@ -94,7 +94,7 @@ export function handleConnection(ws: WebSocket) {
       payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
     }));
 
-    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id }, id);
+    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id, payload: { unitType: player.unitType } }, id);
 
     // Idle timeout — close zombie connections that stop sending UNIT_MOVED
     let idleTimer = setTimeout(() => {

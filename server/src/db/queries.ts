@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { db } from './index'
 import { players, staticObjects, playerTracks, hexVisited, combatEvents } from './schema'
 import type { Player, CombatEvent } from './schema'
-import { ObjectType, StaticObject } from '../types'
+import { BuildingType, StaticObject } from '../types'
 
 // --- Player ---
 
@@ -85,7 +85,7 @@ export async function getAllStaticObjects(): Promise<StaticObject[]> {
     .where(eq(staticObjects.active, true))
   return rows.map(row => ({
     id: row.id,
-    type: row.type as ObjectType,
+    type: row.type as BuildingType,
     coords: {
       lat: row.lat,
       lon: row.lng,

@@ -9,6 +9,7 @@ export const players = pgTable('players', {
   passwordHash: text('password_hash'),
   unitType: text('unit_type').notNull().default('HUMAN_A'),
   faction:  text('faction').notNull().default('humans'),
+  rank:     text('rank').notNull().default('novice'),
   role:     text('role'),
 
   strength:     integer('strength').default(10),

@@ -49,7 +49,7 @@ sequenceDiagram
 | `UNIT_GET_ALL` | C → S | `{ coords }` | Request full state |
 | `INIT_UNITS` | S → C | `{ users[], staticObjects[] }` | Full snapshot |
 | `UNIT_MOVED` | C → S, S → C | `{ id, coords }` | Position update |
-| `UNIT_CONNECTED` | S → C | `{ user }` | New user joined |
+| `UNIT_CONNECTED` | S → C | `{ user, unitType }` | New user joined; unitType is a `UnitType` enum value |
 | `UNIT_DISCONNECTED` | S → C | `{ id }` | User left |
 
 ## Server Data Structures
@@ -61,7 +61,7 @@ users: { [id: string]: User }
 
 interface User {
   id: string          // UUID (from players table)
-  type: string        // e.g. "HUMAN_A"
+  type: UnitType      // enum: HUMAN_A | HUMAN_B | ZOMBIE_A | ZOMBIE_B
   coords: { lat: number, lon: number }
 }
 ```

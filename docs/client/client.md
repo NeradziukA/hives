@@ -1,10 +1,10 @@
 # Client
 
-Frontend Three.js application. Source: [client/src/](../client/src/)
+Frontend Three.js application. Source: [client/src/](../../client/src/)
 
 ## Entry Point
 
-[main.ts](../client/src/main.ts) — initializes the scene, creates the local unit, starts the WebSocket connection, and runs the animation loop.
+[main.ts](../../client/src/main.ts) — initializes the scene, creates the local unit, starts the WebSocket connection, and runs the animation loop.
 
 ```mermaid
 graph TD
@@ -56,20 +56,20 @@ graph TD
 
 | File                                                           | Responsibility                                                                                            |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [main.ts](../client/src/main.ts)                               | App entry; animation loop; raycaster for click interactions                                               |
-| [game.ts](../client/src/game.ts)                               | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring                          |
-| [hexgrid.ts](../client/src/hexgrid.ts)                         | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25              |
-| [renderer.ts](../client/src/renderer.ts)                       | WebGL renderer (antialiasing, transparent background)                                                     |
-| [sceneSetup.ts](../client/src/sceneSetup.ts)                   | Three.js scene, lights, camera; updates `gameState.zoom` on scroll                                        |
-| [models.ts](../client/src/models.ts)                           | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()`; dot size formula uses `renderer.domElement.clientHeight` (not `window.innerHeight`) to stay constant on iOS Safari |
-| [webSocketHandler.ts](../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
-| [location.ts](../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
-| [lighting.ts](../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
-| [ui/gameState.svelte.ts](../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId                                                     |
+| [main.ts](../../client/src/main.ts)                               | App entry; animation loop; raycaster for click interactions                                               |
+| [game.ts](../../client/src/game.ts)                               | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring                          |
+| [hexgrid.ts](../../client/src/hexgrid.ts)                         | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25              |
+| [renderer.ts](../../client/src/renderer.ts)                       | WebGL renderer (antialiasing, transparent background)                                                     |
+| [sceneSetup.ts](../../client/src/sceneSetup.ts)                   | Three.js scene, lights, camera; updates `gameState.zoom` on scroll                                        |
+| [models.ts](../../client/src/models.ts)                           | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()`; dot size formula uses `renderer.domElement.clientHeight` (not `window.innerHeight`) to stay constant on iOS Safari |
+| [webSocketHandler.ts](../../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
+| [location.ts](../../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
+| [lighting.ts](../../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
+| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId                                                     |
 
 ## Handlers
 
-Located in [client/src/handlers/](../client/src/handlers/)
+Located in [client/src/handlers/](../../client/src/handlers/)
 
 | Handler                    | Triggered by         | Action                                                                          |
 | -------------------------- | -------------------- | ------------------------------------------------------------------------------- |
@@ -152,11 +152,11 @@ cd client && npm run test:coverage # run with HTML coverage report
 
 | Test file                                                                                                | Covers                                                                                                                                    |
 | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [`__tests__/auth.test.ts`](../client/src/__tests__/auth.test.ts)                                         | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken`                                          |
-| [`__tests__/handlers.test.ts`](../client/src/__tests__/handlers.test.ts)                                 | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits`; ghost-player regression                            |
-| [`__tests__/unitAuthenticatedHandler.test.ts`](../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour                                                  |
-| [`__tests__/webSocketHandler.test.ts`](../client/src/__tests__/webSocketHandler.test.ts)                 | `disconnectWebSocket`: no auto-reconnect after disconnect, cleans up socket; `connectWebSocket`: closes previous socket on account switch |
-| [`__tests__/lodDotSize.test.ts`](../client/src/__tests__/lodDotSize.test.ts)                             | LOD dot size formula: constant at any zoom/position; regression for `window.innerHeight` vs renderer height divergence on iOS |
+| [`__tests__/auth.test.ts`](../../client/src/__tests__/auth.test.ts)                                         | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken`                                          |
+| [`__tests__/handlers.test.ts`](../../client/src/__tests__/handlers.test.ts)                                 | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits`; ghost-player regression                            |
+| [`__tests__/unitAuthenticatedHandler.test.ts`](../../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour                                                  |
+| [`__tests__/webSocketHandler.test.ts`](../../client/src/__tests__/webSocketHandler.test.ts)                 | `disconnectWebSocket`: no auto-reconnect after disconnect, cleans up socket; `connectWebSocket`: closes previous socket on account switch |
+| [`__tests__/lodDotSize.test.ts`](../../client/src/__tests__/lodDotSize.test.ts)                             | LOD dot size formula: constant at any zoom/position; regression for `window.innerHeight` vs renderer height divergence on iOS |
 
 Coverage reports are written to `client/coverage/` (git-ignored).
 
@@ -178,6 +178,4 @@ npm run build-client       # Linux/Mac
 npm run build-client-win   # Windows
 ```
 
-Builds to `client/dist/` then copies to `server/static/` so Express can serve it.
-
-On Heroku this step runs automatically via `heroku-postbuild` in the root `package.json`.
+Builds to `client/dist/` then copies to `server/static/client/` so Express can serve it.

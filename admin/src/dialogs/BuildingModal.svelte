@@ -2,6 +2,7 @@
   import { i18n } from '../lib/i18n.svelte.ts';
   import { apiFetch, safeJson } from '../lib/api.ts';
   import { toast } from '../lib/toast.svelte.ts';
+  import { Faction, BuildingType } from '../lib/types.ts';
   import type { Building } from '../lib/types.ts';
 
   interface Props {
@@ -13,7 +14,7 @@
 
   const { open, buildingId, onsaved, onclose }: Props = $props();
 
-  const DEFAULTS = { type: '', name: '', lat: '', lng: '', revealRadius: '10', faction: '', active: true };
+  const DEFAULTS = { type: BuildingType.INCUBATOR, name: '', lat: '', lng: '', revealRadius: '10', faction: '', active: true };
 
   let saving = $state(false);
   let form   = $state({ ...DEFAULTS });
@@ -48,13 +49,13 @@
   }
 
   async function save() {
-    if (!form.type.trim() || !form.lat || !form.lng || !form.revealRadius) {
+    if (!form.type || !form.lat || !form.lng || !form.revealRadius) {
       err = i18n.t.errRequired; return;
     }
     saving = true; err = '';
     try {
       const body = {
-        type: form.type.trim(),
+        type: form.type,
         name: form.name.trim() || null,
         lat: parseFloat(form.lat),
         lng: parseFloat(form.lng),
@@ -93,7 +94,9 @@
       <div class="modal-body">
         <div class="field">
           <label for="b-type">{i18n.t.fieldType}</label>
-          <input id="b-type" type="text" bind:value={form.type} />
+          <select id="b-type" bind:value={form.type}>
+            {#each Object.values(BuildingType) as t}<option value={t}>{i18n.t.buildingTypes[t]}</option>{/each}
+          </select>
         </div>
         <div class="field">
           <label for="b-name">{i18n.t.colName}</label>
@@ -116,7 +119,10 @@
           </div>
           <div class="field">
             <label for="b-faction">{i18n.t.fieldFaction}</label>
-            <input id="b-faction" type="text" bind:value={form.faction} />
+            <select id="b-faction" bind:value={form.faction}>
+              <option value="">—</option>
+              {#each Object.values(Faction) as f}<option value={f}>{i18n.t.factions[f]}</option>{/each}
+            </select>
           </div>
         </div>
         <div class="field">

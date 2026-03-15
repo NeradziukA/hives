@@ -1,10 +1,12 @@
 import type { Player } from '../lib/types.ts';
+import { PlayerRank, Faction, UnitType } from '../lib/types.ts';
 
 export interface PlayerFormState {
   username: string;
   password: string;
-  unitType: string;
-  faction: string;
+  unitType: UnitType;
+  faction: Faction;
+  rank: PlayerRank;
   role: string;
   isAlive: string;
   hp: number;
@@ -27,8 +29,8 @@ export interface PlayerFormState {
 }
 
 export const FORM_DEFAULTS: PlayerFormState = {
-  username: '', password: '', unitType: 'HUMAN_A', faction: 'humans',
-  role: '', isAlive: 'true', hp: 100, maxHp: 100, strength: 10,
+  username: '', password: '', unitType: UnitType.HUMAN_A, faction: Faction.HUMANS,
+  rank: PlayerRank.NOVICE, role: '', isAlive: 'true', hp: 100, maxHp: 100, strength: 10,
   defense: 10, agility: 10, speed: 10, intelligence: 10, leadership: 0,
   vision: 10, vaccineLevel: 0, bagSize: 5, mutation: 0,
   heavyWeapon: 0, twoHanded: 0, camouflage: 0, regeneration: 0, stench: 0,
@@ -37,8 +39,9 @@ export const FORM_DEFAULTS: PlayerFormState = {
 export function populateForm(form: PlayerFormState, p: Player): void {
   form.username    = p.username    ?? '';
   form.password    = '';
-  form.unitType    = p.unitType    ?? 'HUMAN_A';
-  form.faction     = p.faction     ?? 'humans';
+  form.unitType    = p.unitType    ?? UnitType.HUMAN_A;
+  form.faction     = p.faction     ?? Faction.HUMANS;
+  form.rank        = p.rank        ?? PlayerRank.NOVICE;
   form.role        = p.role        ?? '';
   form.isAlive     = p.isAlive !== false ? 'true' : 'false';
   form.hp          = p.hp          ?? 100;

@@ -46,7 +46,7 @@
             <td class="mono">{fmtCoords(b.lat, b.lng)}</td>
             <td class="mono">{b.revealRadius}</td>
             <td class="mono">{b.capturedBy ?? '—'}</td>
-            <td><Badge mode="status" alive={b.active} /></td>
+            <td><Badge mode="active" alive={b.active} /></td>
             <td>
               <div class="row-actions">
                 <button class="btn small secondary" onclick={() => onEdit(b.id)}>

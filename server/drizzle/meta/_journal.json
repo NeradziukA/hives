@@ -15,6 +15,13 @@
       "when": 1773558586328,
       "tag": "0001_fixed_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773602687409,
+      "tag": "0002_eminent_mulholland_black",
+      "breakpoints": true
     }
   ]
 }

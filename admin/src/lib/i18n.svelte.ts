@@ -1,4 +1,5 @@
 import type { Lang } from './types.ts';
+import { BuildingType, UnitType, Faction, PlayerRank, PlayerRole } from './types.ts';
 
 type PageInfoFn = (from: number, to: number, total: number) => string;
 type ConfirmDeleteBodyFn = (name: string) => string;
@@ -50,6 +51,7 @@ interface Translations {
   fieldNewPassword: string;
   fieldUnitType: string;
   fieldFaction: string;
+  fieldRank: string;
   fieldRole: string;
   fieldHp: string;
   fieldMaxHp: string;
@@ -80,6 +82,8 @@ interface Translations {
   errGeneric: string;
   statusAlive: string;
   statusDead: string;
+  statusActive: string;
+  statusInactive: string;
   optionAlive: string;
   optionDead: string;
   buildingsTitle: string;
@@ -104,6 +108,11 @@ interface Translations {
   confirmDeleteBuildingBody: (name: string) => string;
   optionYes: string;
   optionNo: string;
+  buildingTypes: Record<BuildingType, string>;
+  unitTypes: Record<UnitType, string>;
+  factions: Record<Faction, string>;
+  ranks: Record<PlayerRank, string>;
+  roles: Record<PlayerRole, string>;
 }
 
 const LANGS: Record<Lang, Translations> = {
@@ -154,6 +163,7 @@ const LANGS: Record<Lang, Translations> = {
     fieldNewPassword: 'New Password (leave blank to keep)',
     fieldUnitType: 'Unit Type',
     fieldFaction: 'Faction',
+    fieldRank: 'Rank',
     fieldRole: 'Role',
     fieldHp: 'HP',
     fieldMaxHp: 'Max HP',
@@ -184,6 +194,8 @@ const LANGS: Record<Lang, Translations> = {
     errGeneric: 'Server error',
     statusAlive: 'Alive',
     statusDead: 'Dead',
+    statusActive: 'Active',
+    statusInactive: 'Inactive',
     optionAlive: 'Alive',
     optionDead: 'Dead',
     buildingsTitle: 'Buildings',
@@ -208,6 +220,41 @@ const LANGS: Record<Lang, Translations> = {
     confirmDeleteBuildingBody: (name) => `Delete building "${name}"? This action cannot be undone.`,
     optionYes: 'Yes',
     optionNo: 'No',
+    buildingTypes: {
+      [BuildingType.INCUBATOR]:       'Incubator',
+      [BuildingType.HIVE]:            'Hive',
+      [BuildingType.SHELTER_ZOMBIE]:  'Zombie Shelter',
+      [BuildingType.MUTATOR]:         'Mutator',
+      [BuildingType.EXTRACTOR]:       'Extractor',
+      [BuildingType.MILITARY_BASE]:   'Military Base',
+      [BuildingType.RESISTANCE_BASE]: 'Resistance Base',
+      [BuildingType.SHELTER_HUMAN]:   'Human Shelter',
+      [BuildingType.LABORATORY]:      'Laboratory',
+      [BuildingType.TRAINING_BASE]:   'Training Base',
+    },
+    unitTypes: {
+      [UnitType.HUMAN_A]:  'Human A',
+      [UnitType.HUMAN_B]:  'Human B',
+      [UnitType.ZOMBIE_A]: 'Zombie A',
+      [UnitType.ZOMBIE_B]: 'Zombie B',
+    },
+    factions: {
+      [Faction.HUMANS]:  'Humans',
+      [Faction.ZOMBIES]: 'Zombies',
+      [Faction.NEUTRAL]: 'Neutral',
+    },
+    ranks: {
+      [PlayerRank.NOVICE]:   'Novice',
+      [PlayerRank.SURVIVOR]: 'Survivor',
+      [PlayerRank.VETERAN]:  'Veteran',
+      [PlayerRank.ELITE]:    'Elite',
+      [PlayerRank.GENERAL]:  'General',
+    },
+    roles: {
+      [PlayerRole.QUEST_MASTER]: 'Quest Master',
+      [PlayerRole.NPC]:          'NPC',
+      [PlayerRole.BOSS]:         'Boss',
+    },
   },
   ru: {
     adminLabel: 'ПАНЕЛЬ УПРАВЛЕНИЯ',
@@ -256,6 +303,7 @@ const LANGS: Record<Lang, Translations> = {
     fieldNewPassword: 'Новый пароль (оставьте пустым для сохранения)',
     fieldUnitType: 'Тип юнита',
     fieldFaction: 'Фракция',
+    fieldRank: 'Ранг',
     fieldRole: 'Роль',
     fieldHp: 'HP',
     fieldMaxHp: 'Макс HP',
@@ -286,6 +334,8 @@ const LANGS: Record<Lang, Translations> = {
     errGeneric: 'Ошибка сервера',
     statusAlive: 'Жив',
     statusDead: 'Мёртв',
+    statusActive: 'Активна',
+    statusInactive: 'Неактивна',
     optionAlive: 'Жив',
     optionDead: 'Мёртв',
     buildingsTitle: 'Постройки',
@@ -310,6 +360,41 @@ const LANGS: Record<Lang, Translations> = {
     confirmDeleteBuildingBody: (name) => `Удалить постройку "${name}"? Это действие нельзя отменить.`,
     optionYes: 'Да',
     optionNo: 'Нет',
+    buildingTypes: {
+      [BuildingType.INCUBATOR]:       'Инкубатор',
+      [BuildingType.HIVE]:            'Улей',
+      [BuildingType.SHELTER_ZOMBIE]:  'Убежище зомби',
+      [BuildingType.MUTATOR]:         'Мутатор',
+      [BuildingType.EXTRACTOR]:       'Экстрактор',
+      [BuildingType.MILITARY_BASE]:   'Военная база',
+      [BuildingType.RESISTANCE_BASE]: 'База сопротивления',
+      [BuildingType.SHELTER_HUMAN]:   'Убежище людей',
+      [BuildingType.LABORATORY]:      'Лаборатория',
+      [BuildingType.TRAINING_BASE]:   'Учебная база',
+    },
+    unitTypes: {
+      [UnitType.HUMAN_A]:  'Человек A',
+      [UnitType.HUMAN_B]:  'Человек B',
+      [UnitType.ZOMBIE_A]: 'Зомби A',
+      [UnitType.ZOMBIE_B]: 'Зомби B',
+    },
+    factions: {
+      [Faction.HUMANS]:  'Люди',
+      [Faction.ZOMBIES]: 'Зомби',
+      [Faction.NEUTRAL]: 'Нейтральные',
+    },
+    ranks: {
+      [PlayerRank.NOVICE]:   'Новичок',
+      [PlayerRank.SURVIVOR]: 'Выживший',
+      [PlayerRank.VETERAN]:  'Ветеран',
+      [PlayerRank.ELITE]:    'Элита',
+      [PlayerRank.GENERAL]:  'Генерал',
+    },
+    roles: {
+      [PlayerRole.QUEST_MASTER]: 'Квест мастер',
+      [PlayerRole.NPC]:          'NPC',
+      [PlayerRole.BOSS]:         'Босс',
+    },
   },
 };
 

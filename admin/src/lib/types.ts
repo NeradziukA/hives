@@ -1,11 +1,15 @@
 export type Lang = 'en' | 'ru';
 
+import { BuildingType, PlayerRank, PlayerRole, Faction, UnitType } from '../../../lib/enums.ts';
+export { BuildingType, PlayerRank, PlayerRole, Faction, UnitType };
+
 export interface Player {
   id: string;
   username: string;
-  unitType: string;
-  faction: string;
-  role: string | null;
+  unitType: UnitType;
+  faction: Faction;
+  rank: PlayerRank;
+  role: PlayerRole | null;
   isAlive: boolean;
   isOnline: boolean;
   hp: number; maxHp: number;
@@ -27,12 +31,12 @@ export interface PlayerListResponse {
 
 export interface Building {
   id: string;
-  type: string;
+  type: BuildingType;
   name: string | null;
   lat: number;
   lng: number;
   revealRadius: number;
-  faction: string | null;
+  faction: Faction | null;
   capturedBy: string | null;
   capturedAt: string | null;
   active: boolean;

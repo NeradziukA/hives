@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "rank" text DEFAULT 'novice' NOT NULL;

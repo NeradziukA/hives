@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
 import { players, staticObjects } from "../db/schema";
+import { BuildingType } from "../types";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
 
@@ -82,6 +83,7 @@ api.get("/users", async (req: Request, res: Response) => {
         username:  players.username,
         unitType:  players.unitType,
         faction:   players.faction,
+        rank:      players.rank,
         role:      players.role,
         isAlive:   players.isAlive,
         lastLat:   players.lastLat,
@@ -137,6 +139,7 @@ api.post("/users", async (req: Request, res: Response) => {
         passwordHash,
         unitType:     rest.unitType     ?? "HUMAN_A",
         faction:      rest.faction      ?? "humans",
+        rank:         rest.rank         ?? "novice",
         role:         rest.role         ?? null,
         strength:     rest.strength     ?? 10,
         defense:      rest.defense      ?? 10,
@@ -239,8 +242,13 @@ api.get("/buildings", async (req: Request, res: Response) => {
 // POST /admin/api/buildings
 api.post("/buildings", async (req: Request, res: Response) => {
   const { type, name, lat, lng, revealRadius, faction, active } = req.body ?? {};
+  const validTypes = Object.values(BuildingType);
   if (!type || lat == null || lng == null || revealRadius == null) {
     res.status(400).json({ error: "type, lat, lng and revealRadius are required" });
+    return;
+  }
+  if (!validTypes.includes(type)) {
+    res.status(400).json({ error: `Invalid type. Valid values: ${validTypes.join(", ")}` });
     return;
   }
   const id = uuidv4();
