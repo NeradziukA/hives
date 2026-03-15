@@ -4,7 +4,7 @@ import { eq, ilike, or, and, gte, lte, count, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
-import { players } from "../db/schema";
+import { players, staticObjects } from "../db/schema";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
 
@@ -212,6 +212,68 @@ api.delete("/users/:id", async (req: Request, res: Response) => {
     return;
   }
 
+  res.json({ success: true });
+});
+
+// GET /admin/api/buildings?q=&active=&page=1&limit=20
+api.get("/buildings", async (req: Request, res: Response) => {
+  const page   = Math.max(1, parseInt(req.query.page  as string) || 1);
+  const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+  const offset = (page - 1) * limit;
+  const q      = (req.query.q as string | undefined)?.trim();
+  const active = req.query.active;
+
+  const filters = [];
+  if (q) filters.push(or(ilike(staticObjects.name, `%${q}%`), ilike(staticObjects.type, `%${q}%`), eq(staticObjects.id, q)));
+  if (active === "true")  filters.push(eq(staticObjects.active, true));
+  if (active === "false") filters.push(eq(staticObjects.active, false));
+
+  const where = filters.length > 0 ? and(...filters) : undefined;
+  const [rows, totals] = await Promise.all([
+    db.select().from(staticObjects).where(where).orderBy(staticObjects.type).limit(limit).offset(offset),
+    db.select({ total: count() }).from(staticObjects).where(where),
+  ]);
+  res.json({ buildings: rows, total: totals[0]?.total ?? 0, page, limit });
+});
+
+// POST /admin/api/buildings
+api.post("/buildings", async (req: Request, res: Response) => {
+  const { type, name, lat, lng, revealRadius, faction, active } = req.body ?? {};
+  if (!type || lat == null || lng == null || revealRadius == null) {
+    res.status(400).json({ error: "type, lat, lng and revealRadius are required" });
+    return;
+  }
+  const id = uuidv4();
+  const [created] = await db.insert(staticObjects).values({
+    id, type, name: name || null,
+    lat: parseFloat(lat), lng: parseFloat(lng),
+    revealRadius: parseInt(revealRadius),
+    faction: faction || null,
+    active: active ?? true,
+  }).returning();
+  res.status(201).json(created);
+});
+
+// PUT /admin/api/buildings/:id
+api.put("/buildings/:id", async (req: Request, res: Response) => {
+  const { id: _id, capturedBy: _cb, capturedAt: _ca, ...rest } = req.body ?? {};
+  if (Object.keys(rest).length === 0) {
+    res.status(400).json({ error: "No fields to update" });
+    return;
+  }
+  const rows = await db.update(staticObjects).set(rest)
+    .where(eq(staticObjects.id, req.params.id as string)).returning();
+  if (rows.length === 0) { res.status(404).json({ error: "Building not found" }); return; }
+  res.json(rows[0]);
+});
+
+// DELETE /admin/api/buildings/:id
+api.delete("/buildings/:id", async (req: Request, res: Response) => {
+  const rows = await db
+    .delete(staticObjects)
+    .where(eq(staticObjects.id, req.params.id as string))
+    .returning({ id: staticObjects.id });
+  if (rows.length === 0) { res.status(404).json({ error: "Building not found" }); return; }
   res.json({ success: true });
 });
 

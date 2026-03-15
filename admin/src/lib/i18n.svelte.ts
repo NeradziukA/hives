@@ -82,6 +82,28 @@ interface Translations {
   statusDead: string;
   optionAlive: string;
   optionDead: string;
+  buildingsTitle: string;
+  createBuilding: string;
+  colType: string;
+  colName: string;
+  colCapturedBy: string;
+  colActive: string;
+  colRevealRadius: string;
+  noBuildings: string;
+  deletedBuildingOk: string;
+  createdBuildingOk: string;
+  modalCreateBuildingTitle: string;
+  modalEditBuildingTitle: string;
+  fieldType: string;
+  fieldLat: string;
+  fieldLng: string;
+  fieldRevealRadius: string;
+  fieldActive: string;
+  filterActiveOnly: string;
+  confirmDeleteBuildingTitle: string;
+  confirmDeleteBuildingBody: (name: string) => string;
+  optionYes: string;
+  optionNo: string;
 }
 
 const LANGS: Record<Lang, Translations> = {
@@ -164,6 +186,28 @@ const LANGS: Record<Lang, Translations> = {
     statusDead: 'Dead',
     optionAlive: 'Alive',
     optionDead: 'Dead',
+    buildingsTitle: 'Buildings',
+    createBuilding: '+ New Building',
+    colType: 'Type',
+    colName: 'Name',
+    colCapturedBy: 'Captured By',
+    colActive: 'Active',
+    colRevealRadius: 'Reveal R.',
+    noBuildings: 'No buildings found',
+    deletedBuildingOk: 'Building deleted',
+    createdBuildingOk: 'Building created',
+    modalCreateBuildingTitle: 'New Building',
+    modalEditBuildingTitle: 'Edit Building',
+    fieldType: 'Type *',
+    fieldLat: 'Latitude *',
+    fieldLng: 'Longitude *',
+    fieldRevealRadius: 'Reveal Radius *',
+    fieldActive: 'Active',
+    filterActiveOnly: 'Active only',
+    confirmDeleteBuildingTitle: 'Delete Building',
+    confirmDeleteBuildingBody: (name) => `Delete building "${name}"? This action cannot be undone.`,
+    optionYes: 'Yes',
+    optionNo: 'No',
   },
   ru: {
     adminLabel: 'ПАНЕЛЬ УПРАВЛЕНИЯ',
@@ -244,6 +288,28 @@ const LANGS: Record<Lang, Translations> = {
     statusDead: 'Мёртв',
     optionAlive: 'Жив',
     optionDead: 'Мёртв',
+    buildingsTitle: 'Постройки',
+    createBuilding: '+ Новая постройка',
+    colType: 'Тип',
+    colName: 'Название',
+    colCapturedBy: 'Захвачена',
+    colActive: 'Активна',
+    colRevealRadius: 'Радиус',
+    noBuildings: 'Постройки не найдены',
+    deletedBuildingOk: 'Постройка удалена',
+    createdBuildingOk: 'Постройка создана',
+    modalCreateBuildingTitle: 'Новая постройка',
+    modalEditBuildingTitle: 'Редактировать постройку',
+    fieldType: 'Тип *',
+    fieldLat: 'Широта *',
+    fieldLng: 'Долгота *',
+    fieldRevealRadius: 'Радиус обзора *',
+    fieldActive: 'Активна',
+    filterActiveOnly: 'Только активные',
+    confirmDeleteBuildingTitle: 'Удалить постройку',
+    confirmDeleteBuildingBody: (name) => `Удалить постройку "${name}"? Это действие нельзя отменить.`,
+    optionYes: 'Да',
+    optionNo: 'Нет',
   },
 };
 

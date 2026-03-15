@@ -14,43 +14,52 @@
 </script>
 
 <nav class="sidebar">
-  <div class="sidebar-logo">
+  <header class="sidebar-logo">
     HIVES
     <span>{i18n.t.adminLabel}</span>
-    <button class="sidebar-close" onclick={oncloseSidebar} title="Скрыть меню">✕</button>
-  </div>
-  <div class="sidebar-nav">
-    <div
-      class="nav-item"
-      class:active={activeSection === 'users'}
-      onclick={() => onsectionChange('users')}
-      role="button"
-      tabindex="0"
-      onkeydown={(e) => e.key === 'Enter' && onsectionChange('users')}
-    >
-      <span class="nav-icon">◈</span>
-      <span>{i18n.t.navUsers}</span>
-    </div>
-    <div class="nav-item disabled">
-      <span class="nav-icon">⬡</span>
-      <span>{i18n.t.navBuildings}</span>
-    </div>
-  </div>
-  <div class="sidebar-footer">
+    <button class="sidebar-close" onclick={oncloseSidebar} title="Скрыть меню" aria-label="Скрыть меню">✕</button>
+  </header>
+  <ul class="sidebar-nav" role="list">
+    <li>
+      <button
+        class="nav-item"
+        class:active={activeSection === 'users'}
+        aria-current={activeSection === 'users' ? 'page' : undefined}
+        onclick={() => onsectionChange('users')}
+      >
+        <span class="nav-icon" aria-hidden="true">◈</span>
+        <span>{i18n.t.navUsers}</span>
+      </button>
+    </li>
+    <li>
+      <button
+        class="nav-item"
+        class:active={activeSection === 'buildings'}
+        aria-current={activeSection === 'buildings' ? 'page' : undefined}
+        onclick={() => onsectionChange('buildings')}
+      >
+        <span class="nav-icon" aria-hidden="true">⬡</span>
+        <span>{i18n.t.navBuildings}</span>
+      </button>
+    </li>
+  </ul>
+  <footer class="sidebar-footer">
     <button
       class="btn lang-btn"
       class:active={i18n.lang === 'en'}
+      aria-pressed={i18n.lang === 'en'}
       onclick={() => onlangChange('en')}
     >EN</button>
     <button
       class="btn lang-btn"
       class:active={i18n.lang === 'ru'}
+      aria-pressed={i18n.lang === 'ru'}
       onclick={() => onlangChange('ru')}
     >RU</button>
     <button class="btn secondary small logout-btn" onclick={onlogout}>
       {i18n.t.logout}
     </button>
-  </div>
+  </footer>
 </nav>
 
 <style>
@@ -89,20 +98,19 @@
     transition: color 0.15s, background 0.15s;
   }
   .sidebar-close:hover { color: var(--text); background: var(--bg2); }
-  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .sidebar-nav { flex: 1; padding: 12px 0; margin: 0; list-style: none; }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 20px;
+    width: 100%; text-align: left;
+    background: none; border: none; border-left: 2px solid transparent;
     cursor: pointer; text-transform: uppercase;
     letter-spacing: 0.1em; font-size: 12px;
     color: var(--text-dim);
-    border-left: 2px solid transparent;
     transition: color 0.15s, background 0.15s;
-    user-select: none;
   }
   .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
   .nav-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-bg); }
-  .nav-item.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
   .nav-icon { font-size: 15px; width: 20px; text-align: center; }
   .sidebar-footer {
     padding: 16px 20px;

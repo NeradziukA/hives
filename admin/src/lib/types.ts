@@ -25,6 +25,19 @@ export interface PlayerListResponse {
   limit: number;
 }
 
+export interface Building {
+  id: string;
+  type: string;
+  name: string | null;
+  lat: number;
+  lng: number;
+  revealRadius: number;
+  faction: string | null;
+  capturedBy: string | null;
+  capturedAt: string | null;
+  active: boolean;
+}
+
 export interface SearchParams {
   q: string;
   lat: string;

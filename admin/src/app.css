@@ -68,6 +68,21 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .btn.icon-btn { padding: 6px 10px; font-size: 16px; line-height: 1; border-color: var(--border); color: var(--text-dim); }
 .btn.icon-btn:hover:not(:disabled) { border-color: var(--green-dim); color: var(--green); background: var(--green-bg); }
 
+/* ── Form grid ── */
+.section-title {
+  grid-column: 1 / -1;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-dim);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-top: 8px;
+}
+.section-title:first-child { margin-top: 0; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+
 /* ── Error text ── */
 .error-msg { color: var(--red); font-size: 12px; margin: 0; }
 
