@@ -7,15 +7,17 @@
     onsectionChange: (section: string) => void;
     onlogout: () => void;
     onlangChange: (lang: Lang) => void;
+    oncloseSidebar: () => void;
   }
 
-  const { activeSection, onsectionChange, onlogout, onlangChange }: Props = $props();
+  const { activeSection, onsectionChange, onlogout, onlangChange, oncloseSidebar }: Props = $props();
 </script>
 
 <nav class="sidebar">
   <div class="sidebar-logo">
     HIVES
     <span>{i18n.t.adminLabel}</span>
+    <button class="sidebar-close" onclick={oncloseSidebar} title="Скрыть меню">✕</button>
   </div>
   <div class="sidebar-nav">
     <div
@@ -65,11 +67,28 @@
     letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--green);
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .sidebar-logo span {
     color: var(--text-dim); font-size: 11px; display: block;
     margin-top: 2px; letter-spacing: 0.1em;
   }
+  .sidebar-close {
+    position: absolute;
+    top: 50%; right: 12px;
+    transform: translateY(-50%);
+    width: 28px; height: 28px;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .sidebar-close:hover { color: var(--text); background: var(--bg2); }
   .sidebar-nav { flex: 1; padding: 12px 0; }
   .nav-item {
     display: flex; align-items: center; gap: 10px;

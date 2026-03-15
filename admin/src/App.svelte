@@ -11,7 +11,7 @@
 
   let authenticated = $state(false);
   let activeSection = $state('users');
-  let sidebarOpen = $state(true);
+  let sidebarOpen = $state(typeof window !== 'undefined' ? window.innerWidth > 768 : true);
 
   onMount(async () => {
     const token = auth.token;
@@ -74,12 +74,13 @@
         onsectionChange={onSectionChange}
         onlogout={onLogout}
         onlangChange={onLangChange}
+        oncloseSidebar={() => sidebarOpen = false}
       />
     {/if}
     <main class="main">
-      <button class="sidebar-toggle" onclick={() => sidebarOpen = !sidebarOpen} title={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}>
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
+      {#if !sidebarOpen}
+        <button class="sidebar-toggle" onclick={() => sidebarOpen = true} title="Показать меню">☰</button>
+      {/if}
       {#if activeSection === 'users'}
         <PlayersPage />
       {/if}

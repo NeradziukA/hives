@@ -342,6 +342,12 @@
     background: var(--green);
   }
   .search-actions { display: flex; gap: 8px; align-self: flex-end; }
+  @media (max-width: 640px) {
+    .search-bar { padding: 8px 12px; gap: 6px; }
+    .search-group input { width: 120px; }
+    .search-group.narrow input { width: 72px; }
+    .toggle-group { margin-left: 0; }
+  }
   .table-wrap { flex: 1; overflow-y: auto; padding: 0 28px; }
   table { width: 100%; border-collapse: collapse; margin-top: 4px; }
   thead tr { border-bottom: 1px solid var(--border); }
