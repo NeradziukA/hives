@@ -103,7 +103,7 @@
   }
   .sidebar-toggle {
     position: absolute;
-    top: 10px;
+    top: 19px;
     left: 10px;
     z-index: 10;
     width: 32px;
