@@ -200,7 +200,6 @@
       </button>
     </div>
     <div class="search-actions">
-      <button class="btn small" onclick={() => fetchUsers()}>{i18n.t.search}</button>
       <button class="btn small secondary" onclick={resetSearch}>{i18n.t.reset}</button>
     </div>
   </div>
