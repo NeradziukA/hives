@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _, locale } from "svelte-i18n";
+  import { onMount } from "svelte";
   import Layout from "../components/Layout.svelte";
+  import { getAccessToken } from "../../auth";
 
   const langs = ["en", "ru"] as const;
 
@@ -10,6 +12,49 @@
     { label: $_("menu.continue"), onclick: oncontinue },
     { label: $_("menu.profile"),  onclick: () => {}, disabled: true },
   ]);
+
+  interface PlayerProfile {
+    strength: number | null;
+    defense: number | null;
+    agility: number | null;
+    speed: number | null;
+    intelligence: number | null;
+    hp: number | null;
+    maxHp: number | null;
+    leadership: number | null;
+    vision: number | null;
+    vaccineLevel: number | null;
+    bagSize: number | null;
+    heavyWeapon: number | null;
+    twoHanded: number | null;
+    camouflage: number | null;
+    regeneration: number | null;
+    stench: number | null;
+    mutation: number | null;
+    role: string | null;
+    faction: string | null;
+    unitType: string | null;
+    isAlive: boolean | null;
+  }
+
+  let profile = $state<PlayerProfile | null>(null);
+
+  function fmt(val: number | null | undefined): string {
+    return val !== null && val !== undefined ? String(val) : "—";
+  }
+
+  onMount(async () => {
+    const token = getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch("/api/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) profile = await res.json();
+    } catch {
+      // ignore
+    }
+  });
 </script>
 
 <Layout {actions}>
@@ -35,39 +80,39 @@
     <section class="section">
       <h3 class="section-title">{$_("profile.attributes.title")}</h3>
       <div class="stat-grid">
-        <div class="stat"><span class="key">{$_("profile.attributes.strength")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.defense")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.agility")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.speed")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.intelligence")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.health")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.leadership")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.vision")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.mutation")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.attributes.backpack")}</span><span class="val">—</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.strength")}</span><span class="val">{fmt(profile?.strength)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.defense")}</span><span class="val">{fmt(profile?.defense)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.agility")}</span><span class="val">{fmt(profile?.agility)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.speed")}</span><span class="val">{fmt(profile?.speed)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.intelligence")}</span><span class="val">{fmt(profile?.intelligence)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.health")}</span><span class="val">{profile ? `${fmt(profile.hp)}/${fmt(profile.maxHp)}` : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.leadership")}</span><span class="val">{fmt(profile?.leadership)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.vision")}</span><span class="val">{fmt(profile?.vision)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.mutation")}</span><span class="val">{fmt(profile?.mutation)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.attributes.backpack")}</span><span class="val">{fmt(profile?.bagSize)}</span></div>
       </div>
     </section>
 
     <section class="section">
       <h3 class="section-title">{$_("profile.skills.title")}</h3>
       <div class="stat-grid">
-        <div class="stat"><span class="key">{$_("profile.skills.heavy_weapon")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.skills.dual_wield")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.skills.stealth")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.skills.regeneration")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.skills.stench")}</span><span class="val">—</span></div>
+        <div class="stat"><span class="key">{$_("profile.skills.heavy_weapon")}</span><span class="val">{fmt(profile?.heavyWeapon)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.skills.dual_wield")}</span><span class="val">{fmt(profile?.twoHanded)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.skills.stealth")}</span><span class="val">{fmt(profile?.camouflage)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.skills.regeneration")}</span><span class="val">{fmt(profile?.regeneration)}</span></div>
+        <div class="stat"><span class="key">{$_("profile.skills.stench")}</span><span class="val">{fmt(profile?.stench)}</span></div>
       </div>
     </section>
 
     <section class="section">
       <h3 class="section-title">{$_("profile.role.title")}</h3>
       <div class="stat-grid">
-        <div class="stat"><span class="key">{$_("profile.role.transformation")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.role.boss")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.role.general")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.role.scientist")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.role.soldier")}</span><span class="val">—</span></div>
-        <div class="stat"><span class="key">{$_("profile.role.quest_master")}</span><span class="val">—</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.transformation")}</span><span class="val">{profile ? (profile.role === "transformation" ? "+" : "—") : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.boss")}</span><span class="val">{profile ? (profile.role === "boss" ? "+" : "—") : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.general")}</span><span class="val">{profile ? (profile.role === "general" ? "+" : "—") : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.scientist")}</span><span class="val">{profile ? (profile.role === "scientist" ? "+" : "—") : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.soldier")}</span><span class="val">{profile ? (profile.role === "soldier" ? "+" : "—") : "—"}</span></div>
+        <div class="stat"><span class="key">{$_("profile.role.quest_master")}</span><span class="val">{profile ? (profile.role === "quest_master" ? "+" : "—") : "—"}</span></div>
       </div>
     </section>
   </div>
