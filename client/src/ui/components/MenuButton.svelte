@@ -2,7 +2,7 @@
   let { onclick }: { onclick: () => void } = $props();
 </script>
 
-<button class="menu-btn" {onclick}>☰</button>
+<button class="menu-btn" {onclick} aria-label="Open menu">☰</button>
 
 <style>
   .menu-btn {

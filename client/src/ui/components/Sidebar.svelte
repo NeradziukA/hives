@@ -17,7 +17,7 @@
 {/if}
 
 <div class="sidebar" class:open>
-  <button class="close-btn" onclick={onclose}>✕</button>
+  <button class="close-btn" onclick={onclose} aria-label="Close sidebar">✕</button>
   <nav class="nav">
     {#each actions as action (action.label)}
       <button

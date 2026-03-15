@@ -96,7 +96,7 @@
 {:else if screen === "game"}
   <Game onprofile={() => (screen = "profile")} />
 {:else if screen === "profile"}
-  <Profile username={username} oncontinue={() => (screen = "game")} onprofile={() => (screen = "profile")} />
+  <Profile username={username} oncontinue={() => (screen = "game")} />
 {/if}
 
 <style>

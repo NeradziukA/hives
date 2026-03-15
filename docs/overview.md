@@ -44,6 +44,7 @@ graph TB
 ```
 hives/
 ├── client/       # Frontend — Three.js 3D app (TypeScript + Vite)
+├── admin/        # Admin UI — Svelte 5 player management panel
 ├── server/       # Backend  — Express + WebSocket server (TypeScript)
 ├── lib/          # Shared   — Geo math, Unit class, interfaces
 ├── messaging/    # Firebase config (stub, not integrated)

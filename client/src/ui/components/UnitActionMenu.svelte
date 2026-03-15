@@ -20,7 +20,7 @@
     <div class="actions">
       <button disabled>Follow</button>
       <button disabled>Message</button>
-      <button onclick={dismiss}>✕</button>
+      <button onclick={dismiss} aria-label="Dismiss">✕</button>
     </div>
   </div>
 {/if}

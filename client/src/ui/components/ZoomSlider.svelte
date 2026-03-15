@@ -36,6 +36,7 @@
   <input
     type="range"
     name="zoom"
+    aria-label="Zoom"
     min="0"
     max="1"
     step="0.001"
