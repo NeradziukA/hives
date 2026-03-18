@@ -51,6 +51,13 @@ Each tick:
 - The new position is written to `players.lastLat / lastLng` in the database.
 - `UNIT_MOVED` is broadcast to all connected clients **only if `alwaysOnline = true`**.
 
+### Runtime `isActive` toggle (admin panel)
+
+Changing `isActive` via the admin panel takes effect immediately without a server restart:
+
+- **`true → false`**: patrol is removed from `patrolStates`; the NPC stops moving. If `alwaysOnline = true`, broadcasts `UNIT_DISCONNECTED` and deregisters from the shared users map.
+- **`false → true`**: patrol is loaded from DB and added to `patrolStates`; NPC resumes moving from its last known position. If `alwaysOnline = true`, broadcasts `UNIT_MOVED` so clients add it to the map.
+
 ```
 patrolStates: Map<npcId, PatrolState>
 PatrolState {

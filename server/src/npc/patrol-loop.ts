@@ -30,8 +30,8 @@
  */
 
 import { MessageType, UnitType } from '../types'
-import { getActivePatrols, updatePlayerPosition } from '../db/queries'
-import { registerNpc, setNpcPosition, broadcast } from '../websocket/handlers/connect'
+import { getActivePatrols, getPatrolById, updatePlayerPosition } from '../db/queries'
+import { registerNpc, setNpcPosition, deregisterNpc, broadcast } from '../websocket/handlers/connect'
 import { NPC_TICK_INTERVAL_MS } from '../config'
 import { logger } from '../logger'
 
@@ -290,6 +290,79 @@ export function applyNpcAlwaysOnline(npcId: string, alwaysOnline: boolean): void
     state.alwaysOnline = alwaysOnline
     logger.info(`NPC alwaysOnline updated in-memory: ${npcId} → ${alwaysOnline}`)
   }
+}
+
+/**
+ * Activate or deactivate a patrol at runtime (called from the admin router when
+ * `isActive` is toggled via PUT /admin/api/patrols/:id).
+ *
+ * - Deactivate: removes patrol from the tick loop; deregisters the NPC from the
+ *   shared users map and broadcasts UNIT_DISCONNECTED if it was alwaysOnline.
+ * - Activate: loads the patrol row from the DB, adds it to the tick loop, and
+ *   registers the NPC in the shared users map.
+ */
+export async function applyPatrolActive(patrolId: string, isActive: boolean): Promise<void> {
+  if (!isActive) {
+    // Find the state by patrolId and remove it
+    for (const [npcId, state] of patrolStates) {
+      if (state.patrolId === patrolId) {
+        patrolStates.delete(npcId)
+        if (state.alwaysOnline) {
+          deregisterNpc(npcId)
+          broadcast({ type: MessageType.UNIT_DISCONNECTED, srcId: npcId, payload: {} })
+        }
+        logger.info(`NPC patrol deactivated: ${npcId}`)
+        return
+      }
+    }
+    return
+  }
+
+  // Activate: load from DB and register
+  const row = await getPatrolById(patrolId)
+  if (!row) {
+    logger.error(`applyPatrolActive: patrol ${patrolId} not found in DB`)
+    return
+  }
+
+  const sorted = [...row.waypoints].sort((a, b) => a.order - b.order)
+  let startIndex = 0
+  if (row.lastLat !== null && row.lastLng !== null && sorted.length > 0) {
+    let minDist = Infinity
+    sorted.forEach((wp, i) => {
+      const d = haversineDistance(row.lastLat!, row.lastLng!, wp.lat, wp.lng)
+      if (d < minDist) { minDist = d; startIndex = i }
+    })
+  }
+
+  const state: PatrolState = {
+    patrolId:             row.patrolId,
+    npcId:                row.npcId,
+    unitType:             row.unitType,
+    speed:                row.speed,
+    alwaysOnline:         row.alwaysOnline,
+    waypoints:            sorted,
+    currentWaypointIndex: startIndex,
+    currentLat:           row.lastLat ?? (sorted[0]?.lat ?? 0),
+    currentLng:           row.lastLng ?? (sorted[0]?.lng ?? 0),
+  }
+
+  patrolStates.set(row.npcId, state)
+  registerNpc(row.npcId, {
+    id:     row.npcId,
+    type:   row.unitType,
+    coords: { lat: state.currentLat, lon: state.currentLng },
+  })
+
+  if (row.alwaysOnline) {
+    broadcast({
+      type:    MessageType.UNIT_MOVED,
+      srcId:   row.npcId,
+      payload: { coords: { lat: state.currentLat, lon: state.currentLng } },
+    })
+  }
+
+  logger.info(`NPC patrol activated: ${row.npcId} (${row.unitType}), waypoints: ${sorted.length}`)
 }
 
 export async function startNpcLoop(): Promise<void> {

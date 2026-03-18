@@ -106,6 +106,29 @@ export interface ActivePatrolRow {
   lastLng: number | null
 }
 
+/** Returns a single patrol by its patrol id, regardless of isActive state. */
+export async function getPatrolById(patrolId: string): Promise<ActivePatrolRow | null> {
+  const rows = await db
+    .select({
+      patrolId:     npcPatrols.id,
+      npcId:        npcPatrols.npcId,
+      speed:        npcPatrols.speed,
+      waypoints:    npcPatrols.waypoints,
+      unitType:     players.unitType,
+      alwaysOnline: players.alwaysOnline,
+      lastLat:      players.lastLat,
+      lastLng:      players.lastLng,
+    })
+    .from(npcPatrols)
+    .innerJoin(players, eq(npcPatrols.npcId, players.id))
+    .where(eq(npcPatrols.id, patrolId))
+    .limit(1)
+
+  const r = rows[0]
+  if (!r || !r.npcId) return null
+  return { ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false }
+}
+
 /** Returns all NPC patrols that are currently active, joined with player data. */
 export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
   const rows = await db

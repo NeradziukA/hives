@@ -8,7 +8,7 @@ import { players, staticObjects, npcPatrols } from "../db/schema";
 import { BuildingType, MessageType } from "../types";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline, broadcast } from "../websocket/handlers/connect";
-import { applyPatrolSpeed, applyNpcAlwaysOnline } from "../npc/patrol-loop";
+import { applyPatrolSpeed, applyNpcAlwaysOnline, applyPatrolActive } from "../npc/patrol-loop";
 
 const router = Router();
 
@@ -415,6 +415,9 @@ api.put("/patrols/:id", async (req: Request, res: Response) => {
   }
   if (typeof rest.speed === "number") {
     applyPatrolSpeed(req.params.id as string, rest.speed);
+  }
+  if (typeof rest.isActive === "boolean") {
+    await applyPatrolActive(req.params.id as string, rest.isActive);
   }
   res.json(rows[0]);
 });
