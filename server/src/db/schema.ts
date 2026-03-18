@@ -96,6 +96,15 @@ export const zombiePatrols = pgTable('zombie_patrols', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 })
 
+export const npcPatrols = pgTable('npc_patrols', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  npcId:     text('npc_id').references(() => players.id, { onDelete: 'cascade' }),
+  speed:     doublePrecision('speed').notNull().default(1.4),
+  waypoints: jsonb('waypoints').notNull().$type<Array<{ lat: number; lng: number; order: number }>>(),
+  isActive:  boolean('is_active').default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+})
+
 export const combatEvents = pgTable('combat_events', {
   id:            uuid('id').primaryKey().defaultRandom(),
   attackerId:    text('attacker_id').references(() => players.id, { onDelete: 'set null' }),
@@ -117,3 +126,4 @@ export type InventoryItem = typeof inventory.$inferSelect
 export type PlayerTrack   = typeof playerTracks.$inferSelect
 export type CombatEvent   = typeof combatEvents.$inferSelect
 export type ZombiePatrol  = typeof zombiePatrols.$inferSelect
+export type NpcPatrol     = typeof npcPatrols.$inferSelect

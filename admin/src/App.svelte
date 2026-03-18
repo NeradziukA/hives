@@ -9,6 +9,7 @@
   import Toast from './components/Toast.svelte';
   import PlayersPage from './pages/PlayersPage.svelte';
   import BuildingsPage from './pages/BuildingsPage.svelte';
+  import PatrolsPage from './pages/PatrolsPage.svelte';
 
   let authenticated = $state(false);
   let activeSection = $state('users');
@@ -87,6 +88,8 @@
         <PlayersPage />
       {:else if activeSection === 'buildings'}
         <BuildingsPage />
+      {:else if activeSection === 'patrols'}
+        <PatrolsPage />
       {/if}
     </main>
   </div>

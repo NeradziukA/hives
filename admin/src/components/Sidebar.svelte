@@ -42,6 +42,17 @@
         <span>{i18n.t.navBuildings}</span>
       </button>
     </li>
+    <li>
+      <button
+        class="nav-item"
+        class:active={activeSection === 'patrols'}
+        aria-current={activeSection === 'patrols' ? 'page' : undefined}
+        onclick={() => onsectionChange('patrols')}
+      >
+        <span class="nav-icon" aria-hidden="true">⟳</span>
+        <span>{i18n.t.navPatrols}</span>
+      </button>
+    </li>
   </ul>
   <footer class="sidebar-footer">
     <button

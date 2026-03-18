@@ -4,7 +4,7 @@ import { eq, ilike, or, and, gte, lte, count, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
-import { players, staticObjects } from "../db/schema";
+import { players, staticObjects, npcPatrols } from "../db/schema";
 import { BuildingType } from "../types";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
@@ -282,6 +282,124 @@ api.delete("/buildings/:id", async (req: Request, res: Response) => {
     .where(eq(staticObjects.id, req.params.id as string))
     .returning({ id: staticObjects.id });
   if (rows.length === 0) { res.status(404).json({ error: "Building not found" }); return; }
+  res.json({ success: true });
+});
+
+// ── Patrols ──────────────────────────────────────────────────────────────────
+
+// GET /admin/api/patrols?page=1&limit=20&npcId=&active=
+api.get("/patrols", async (req: Request, res: Response) => {
+  const page   = Math.max(1, parseInt(req.query.page  as string) || 1);
+  const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+  const offset = (page - 1) * limit;
+  const npcId  = (req.query.npcId as string | undefined)?.trim();
+  const active = req.query.active;
+
+  const filters = [];
+  if (npcId) filters.push(eq(npcPatrols.npcId, npcId));
+  if (active === "true")  filters.push(eq(npcPatrols.isActive, true));
+  if (active === "false") filters.push(eq(npcPatrols.isActive, false));
+
+  const where = filters.length > 0 ? and(...filters) : undefined;
+  const [rows, totals] = await Promise.all([
+    db
+      .select({
+        id:        npcPatrols.id,
+        npcId:     npcPatrols.npcId,
+        speed:     npcPatrols.speed,
+        waypoints: npcPatrols.waypoints,
+        isActive:  npcPatrols.isActive,
+        createdAt: npcPatrols.createdAt,
+        npcUsername: players.username,
+      })
+      .from(npcPatrols)
+      .leftJoin(players, eq(npcPatrols.npcId, players.id))
+      .where(where)
+      .orderBy(npcPatrols.createdAt)
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(npcPatrols).where(where),
+  ]);
+  res.json({ patrols: rows, total: totals[0]?.total ?? 0, page, limit });
+});
+
+// GET /admin/api/patrols/:id
+api.get("/patrols/:id", async (req: Request, res: Response) => {
+  const rows = await db
+    .select({
+      id:        npcPatrols.id,
+      npcId:     npcPatrols.npcId,
+      speed:     npcPatrols.speed,
+      waypoints: npcPatrols.waypoints,
+      isActive:  npcPatrols.isActive,
+      createdAt: npcPatrols.createdAt,
+      npcUsername: players.username,
+    })
+    .from(npcPatrols)
+    .leftJoin(players, eq(npcPatrols.npcId, players.id))
+    .where(eq(npcPatrols.id, req.params.id as string))
+    .limit(1);
+
+  if (!rows[0]) {
+    res.status(404).json({ error: "Patrol not found" });
+    return;
+  }
+  res.json(rows[0]);
+});
+
+// POST /admin/api/patrols
+api.post("/patrols", async (req: Request, res: Response) => {
+  const { npcId, speed, waypoints, isActive } = req.body ?? {};
+  if (!npcId || !waypoints || !Array.isArray(waypoints)) {
+    res.status(400).json({ error: "npcId and waypoints are required" });
+    return;
+  }
+
+  const npc = await db.select({ id: players.id }).from(players).where(eq(players.id, npcId)).limit(1);
+  if (!npc[0]) {
+    res.status(400).json({ error: "NPC player not found" });
+    return;
+  }
+
+  const [created] = await db.insert(npcPatrols).values({
+    npcId,
+    speed:     speed != null ? parseFloat(speed) : 1.4,
+    waypoints,
+    isActive:  isActive ?? true,
+  }).returning();
+
+  res.status(201).json(created);
+});
+
+// PUT /admin/api/patrols/:id
+api.put("/patrols/:id", async (req: Request, res: Response) => {
+  const { id: _id, createdAt: _ca, npcUsername: _nu, ...rest } = req.body ?? {};
+  if (Object.keys(rest).length === 0) {
+    res.status(400).json({ error: "No fields to update" });
+    return;
+  }
+  const rows = await db
+    .update(npcPatrols)
+    .set(rest)
+    .where(eq(npcPatrols.id, req.params.id as string))
+    .returning();
+  if (rows.length === 0) {
+    res.status(404).json({ error: "Patrol not found" });
+    return;
+  }
+  res.json(rows[0]);
+});
+
+// DELETE /admin/api/patrols/:id
+api.delete("/patrols/:id", async (req: Request, res: Response) => {
+  const rows = await db
+    .delete(npcPatrols)
+    .where(eq(npcPatrols.id, req.params.id as string))
+    .returning({ id: npcPatrols.id });
+  if (rows.length === 0) {
+    res.status(404).json({ error: "Patrol not found" });
+    return;
+  }
   res.json({ success: true });
 });
 

@@ -48,3 +48,26 @@ export interface SearchParams {
   lng: string;
   radius: string;
 }
+
+export interface Waypoint {
+  lat: number;
+  lng: number;
+  order: number;
+}
+
+export interface NpcPatrol {
+  id: string;
+  npcId: string | null;
+  npcUsername: string | null;
+  speed: number;
+  waypoints: Waypoint[];
+  isActive: boolean;
+  createdAt: string | null;
+}
+
+export interface PatrolListResponse {
+  patrols: NpcPatrol[];
+  total: number;
+  page: number;
+  limit: number;
+}

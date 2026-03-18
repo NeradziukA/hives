@@ -113,6 +113,29 @@ interface Translations {
   factions: Record<Faction, string>;
   ranks: Record<PlayerRank, string>;
   roles: Record<PlayerRole, string>;
+  navPatrols: string;
+  patrolsTitle: string;
+  createPatrol: string;
+  noPatrols: string;
+  colNpc: string;
+  colSpeed: string;
+  colWaypoints: string;
+  colPatrolActive: string;
+  modalCreatePatrolTitle: string;
+  modalEditPatrolTitle: string;
+  fieldNpcId: string;
+  fieldSpeed: string;
+  fieldWaypoints: string;
+  fieldPatrolActive: string;
+  addWaypoint: string;
+  removeWaypoint: string;
+  colOrder: string;
+  createdPatrolOk: string;
+  deletedPatrolOk: string;
+  confirmDeletePatrolTitle: string;
+  confirmDeletePatrolBody: (name: string) => string;
+  errPatrolRequired: string;
+  errNoWaypoints: string;
 }
 
 const LANGS: Record<Lang, Translations> = {
@@ -255,6 +278,29 @@ const LANGS: Record<Lang, Translations> = {
       [PlayerRole.NPC]:          'NPC',
       [PlayerRole.BOSS]:         'Boss',
     },
+    navPatrols: 'Patrols',
+    patrolsTitle: 'Patrols',
+    createPatrol: '+ New Patrol',
+    noPatrols: 'No patrols found',
+    colNpc: 'NPC',
+    colSpeed: 'Speed (m/s)',
+    colWaypoints: 'Waypoints',
+    colPatrolActive: 'Active',
+    modalCreatePatrolTitle: 'New Patrol',
+    modalEditPatrolTitle: 'Edit Patrol',
+    fieldNpcId: 'NPC *',
+    fieldSpeed: 'Speed (m/s) *',
+    fieldWaypoints: 'Waypoints',
+    fieldPatrolActive: 'Active',
+    addWaypoint: '+ Add Waypoint',
+    removeWaypoint: '✕',
+    colOrder: 'Order',
+    createdPatrolOk: 'Patrol created',
+    deletedPatrolOk: 'Patrol deleted',
+    confirmDeletePatrolTitle: 'Delete Patrol',
+    confirmDeletePatrolBody: (name) => `Delete patrol for "${name}"? This action cannot be undone.`,
+    errPatrolRequired: 'NPC and speed are required',
+    errNoWaypoints: 'At least one waypoint is required',
   },
   ru: {
     adminLabel: 'ПАНЕЛЬ УПРАВЛЕНИЯ',
@@ -395,6 +441,29 @@ const LANGS: Record<Lang, Translations> = {
       [PlayerRole.NPC]:          'NPC',
       [PlayerRole.BOSS]:         'Босс',
     },
+    navPatrols: 'Патрули',
+    patrolsTitle: 'Патрули',
+    createPatrol: '+ Новый патруль',
+    noPatrols: 'Патрули не найдены',
+    colNpc: 'NPC',
+    colSpeed: 'Скорость (м/с)',
+    colWaypoints: 'Точки',
+    colPatrolActive: 'Активен',
+    modalCreatePatrolTitle: 'Новый патруль',
+    modalEditPatrolTitle: 'Редактировать патруль',
+    fieldNpcId: 'NPC *',
+    fieldSpeed: 'Скорость (м/с) *',
+    fieldWaypoints: 'Точки маршрута',
+    fieldPatrolActive: 'Активен',
+    addWaypoint: '+ Добавить точку',
+    removeWaypoint: '✕',
+    colOrder: 'Порядок',
+    createdPatrolOk: 'Патруль создан',
+    deletedPatrolOk: 'Патруль удалён',
+    confirmDeletePatrolTitle: 'Удалить патруль',
+    confirmDeletePatrolBody: (name) => `Удалить патруль для "${name}"? Это действие нельзя отменить.`,
+    errPatrolRequired: 'Требуется NPC и скорость',
+    errNoWaypoints: 'Требуется хотя бы одна точка маршрута',
   },
 };
 
