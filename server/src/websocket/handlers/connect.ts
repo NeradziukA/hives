@@ -8,7 +8,7 @@ import { verifyAccess } from "../../auth/jwt";
 import { logger } from "../../logger";
 import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL, IDLE_TIMEOUT_MS } from "../../config";
 
-const AUTH_TIMEOUT_MS = 10_000;
+const AUTH_TIMEOUT_MS = 10000;
 
 const clientsSockets: { [key: string]: WebSocket } = {};
 const users: { [key: string]: User } = {};
@@ -29,11 +29,7 @@ export function broadcast(message: SocketMessage, senderId?: string) {
   }
 }
 
-/**
- * Register an NPC as "always online" in the shared users map.
- * Called by the NPC patrol loop at startup; the NPC will appear
- * in INIT_UNITS responses sent to newly connecting clients.
- */
+/** Register a patrol NPC in the shared users map so its position can be updated in real-time. */
 export function registerNpc(id: string, user: User): void {
   users[id] = user;
 }
@@ -134,9 +130,16 @@ export function handleConnection(ws: WebSocket) {
       }
 
       switch (msg.type) {
-        case MessageType.UNIT_GET_ALL:
-          handleUnitGetAll(msg, clientsSockets[msg.srcId], users);
+        case MessageType.UNIT_GET_ALL: {
+          // Pass only human players (those with an active WebSocket connection).
+          // alwaysOnline NPCs are added in handleUnitGetAll from the database.
+          const humanUsers: { [key: string]: User } = {};
+          for (const pid of Object.keys(clientsSockets)) {
+            if (users[pid]) humanUsers[pid] = users[pid];
+          }
+          handleUnitGetAll(msg, clientsSockets[msg.srcId], humanUsers);
           break;
+        }
         case MessageType.UNIT_MOVED:
           clearTimeout(idleTimer);
           idleTimer = setTimeout(() => {

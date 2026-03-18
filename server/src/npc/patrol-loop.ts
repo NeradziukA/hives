@@ -6,9 +6,8 @@
  *
  * ## Startup
  * `startNpcLoop()` must be called once after the WebSocket server is ready.
- * It loads all active patrols and always-online NPCs from the database, registers
- * them in the shared `users` map so they appear in `INIT_UNITS` responses, then
- * starts the recurring tick.
+ * It loads all active patrols from the database, registers them in the shared
+ * `users` map so they appear in `INIT_UNITS` responses, then starts the recurring tick.
  *
  * ## Tick cycle (every NPC_TICK_INTERVAL_MS)
  * Each tick iterates over every active patrol state and:
@@ -26,13 +25,12 @@
  * this map and the existing tick loop will drive them automatically.
  *
  * ## Always-online stationary NPCs
- * NPCs with `alwaysOnline = true` but without an active patrol are registered in the
- * `users` map at startup and never removed.  Their position is read from the database
- * and does not change during the tick (they have no waypoints to follow).
+ * NPCs with `alwaysOnline = true` but without an active patrol are served directly
+ * from the database on each `UNIT_GET_ALL` request (see `unit-get-all.ts`).
  */
 
 import { MessageType, UnitType } from '../types'
-import { getActivePatrols, getAlwaysOnlineNpcs, updatePlayerPosition } from '../db/queries'
+import { getActivePatrols, updatePlayerPosition } from '../db/queries'
 import { registerNpc, setNpcPosition, broadcast } from '../websocket/handlers/connect'
 import { NPC_TICK_INTERVAL_MS } from '../config'
 import { logger } from '../logger'
@@ -49,6 +47,8 @@ interface PatrolState {
   unitType: UnitType
   /** Movement speed in metres per second */
   speed: number
+  /** Whether to broadcast this NPC's position to connected clients */
+  alwaysOnline: boolean
   /** Waypoints sorted ascending by `order` */
   waypoints: Array<{ lat: number; lng: number; order: number }>
   /** Index into `waypoints` of the current target */
@@ -178,14 +178,9 @@ function advancePatrol(state: PatrolState, stepM: number): { lat: number; lng: n
 // Startup: load from database
 // ---------------------------------------------------------------------------
 
-/**
- * Load all active NPC patrols from the database and populate `patrolStates`.
- * Returns the list of npcIds that were registered so always-online stationary
- * NPCs can be excluded from a duplicate load.
- */
-async function loadPatrols(): Promise<string[]> {
+/** Load all active NPC patrols from the database and populate `patrolStates`. */
+async function loadPatrols(): Promise<void> {
   const rows = await getActivePatrols()
-  const registeredIds: string[] = []
 
   for (const row of rows) {
     const sorted = [...row.waypoints].sort((a, b) => a.order - b.order)
@@ -205,6 +200,7 @@ async function loadPatrols(): Promise<string[]> {
       npcId:                row.npcId,
       unitType:             row.unitType,
       speed:                row.speed,
+      alwaysOnline:         row.alwaysOnline,
       waypoints:            sorted,
       currentWaypointIndex: startIndex,
       currentLat:           row.lastLat ?? (sorted[0]?.lat ?? 0),
@@ -219,27 +215,7 @@ async function loadPatrols(): Promise<string[]> {
       coords: { lat: state.currentLat, lon: state.currentLng },
     })
 
-    registeredIds.push(row.npcId)
     logger.info(`NPC patrol registered: ${row.npcId} (${row.unitType}), waypoints: ${sorted.length}`)
-  }
-
-  return registeredIds
-}
-
-/**
- * Load stationary always-online NPCs (those without an active patrol).
- * They appear in `INIT_UNITS` but are never moved by the tick loop.
- */
-async function loadStaticNpcs(excludeIds: string[]): Promise<void> {
-  const rows = await getAlwaysOnlineNpcs(excludeIds)
-
-  for (const row of rows) {
-    registerNpc(row.id, {
-      id:     row.id,
-      type:   row.unitType,
-      coords: { lat: row.lastLat ?? 0, lon: row.lastLng ?? 0 },
-    })
-    logger.info(`NPC always-online registered: ${row.id} (${row.unitType})`)
   }
 }
 
@@ -263,11 +239,13 @@ async function tick(elapsedMs: number): Promise<void> {
 
     setNpcPosition(npcId, { lat, lon: lng })
 
-    broadcast({
-      type:    MessageType.UNIT_MOVED,
-      srcId:   npcId,
-      payload: { coords: { lat, lon: lng } },
-    })
+    if (state.alwaysOnline) {
+      broadcast({
+        type:    MessageType.UNIT_MOVED,
+        srcId:   npcId,
+        payload: { coords: { lat, lon: lng } },
+      })
+    }
 
     // Persist position to DB (allows resuming from last known position on restart)
     updates.push(
@@ -306,11 +284,18 @@ export function applyPatrolSpeed(patrolId: string, speed: number): void {
   }
 }
 
+export function applyNpcAlwaysOnline(npcId: string, alwaysOnline: boolean): void {
+  const state = patrolStates.get(npcId)
+  if (state) {
+    state.alwaysOnline = alwaysOnline
+    logger.info(`NPC alwaysOnline updated in-memory: ${npcId} → ${alwaysOnline}`)
+  }
+}
+
 export async function startNpcLoop(): Promise<void> {
   logger.info('NPC loop: initialising…')
 
-  const patrolIds = await loadPatrols()
-  await loadStaticNpcs(patrolIds)
+  await loadPatrols()
 
   logger.info(
     `NPC loop: ${patrolStates.size} patrol(s), tick every ${NPC_TICK_INTERVAL_MS} ms`,

@@ -35,14 +35,21 @@ Exact values are set by administrators. See [units.md § Unit Data Model](../uni
 
 Every NPC has an `alwaysOnline` boolean column in the `players` table (default `false`).
 
-When `alwaysOnline = true` the server registers the NPC in the shared `users` map at startup, so it always appears in `INIT_UNITS` responses sent to connecting clients — even if no player is near and even if the NPC has no patrol.
-
 | `alwaysOnline` | Behaviour |
 |----------------|-----------|
-| `false`        | NPC is invisible to clients unless explicitly placed in the users map by game logic |
-| `true`         | NPC appears in every `INIT_UNITS` response from the moment the server starts |
+| `false`        | NPC is invisible to clients; `UNIT_MOVED` is never broadcast for this NPC |
+| `true`         | NPC is included in every `INIT_UNITS` response and its position is broadcast via `UNIT_MOVED` |
 
-Patrol NPCs (`npc_patrols` with `isActive = true`) are always registered regardless of this flag; `alwaysOnline` is primarily useful for stationary NPCs such as quest masters and bosses.
+**Stationary NPCs** (no active patrol) — fetched directly from the database on each `UNIT_GET_ALL` request when `alwaysOnline = true`.
+
+**Patrol NPCs** (`npc_patrols` with `isActive = true`) — position is tracked in-memory every tick, but `UNIT_MOVED` is only broadcast and the NPC only appears in `INIT_UNITS` when `alwaysOnline = true`.
+
+### Runtime toggle (admin panel)
+
+Changing `alwaysOnline` via the admin panel takes effect immediately without a server restart:
+
+- **`true → false`**: server broadcasts `UNIT_DISCONNECTED`; clients remove the NPC from the map. The patrol tick stops broadcasting for that NPC.
+- **`false → true`**: server broadcasts `UNIT_MOVED` with the NPC's current position; clients add it to the map.
 
 ---
 

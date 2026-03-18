@@ -53,8 +53,7 @@ graph TD
 
     subgraph PatrolLoop["npc/patrol-loop.ts"]
         loadPatrols["loadPatrols()\nload active patrols from DB"]
-        loadStaticNpcs["loadStaticNpcs()\nalwaysOnline stationary NPCs"]
-        npcTick["tick every 100 ms\nadvance position · broadcast UNIT_MOVED"]
+        npcTick["tick every 100 ms\nadvance position · broadcast UNIT_MOVED if alwaysOnline"]
     end
 
     index --> authRouter & adminRouter & statusRouter & wsIndex
@@ -65,13 +64,13 @@ graph TD
     connect --> unitGetAll & unitMove & close
     connect --> db
     authRouter --> db
-    unitGetAll --> State
+    unitGetAll --> State & db
     unitMove --> State & db
     close --> State
     connect --> State
     Handlers --> logger & types
-    loadPatrols & loadStaticNpcs --> db
-    loadPatrols & loadStaticNpcs --> State
+    loadPatrols --> db
+    loadPatrols --> State
     npcTick --> State & db
 ```
 

@@ -101,6 +101,7 @@ export interface ActivePatrolRow {
   speed: number
   waypoints: Array<{ lat: number; lng: number; order: number }>
   unitType: UnitType
+  alwaysOnline: boolean
   lastLat: number | null
   lastLng: number | null
 }
@@ -109,13 +110,14 @@ export interface ActivePatrolRow {
 export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
   const rows = await db
     .select({
-      patrolId:  npcPatrols.id,
-      npcId:     npcPatrols.npcId,
-      speed:     npcPatrols.speed,
-      waypoints: npcPatrols.waypoints,
-      unitType:  players.unitType,
-      lastLat:   players.lastLat,
-      lastLng:   players.lastLng,
+      patrolId:     npcPatrols.id,
+      npcId:        npcPatrols.npcId,
+      speed:        npcPatrols.speed,
+      waypoints:    npcPatrols.waypoints,
+      unitType:     players.unitType,
+      alwaysOnline: players.alwaysOnline,
+      lastLat:      players.lastLat,
+      lastLng:      players.lastLng,
     })
     .from(npcPatrols)
     .innerJoin(players, eq(npcPatrols.npcId, players.id))
@@ -123,7 +125,7 @@ export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
 
   return rows
     .filter(r => r.npcId !== null)
-    .map(r => ({ ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType }))
+    .map(r => ({ ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false }))
 }
 
 export interface AlwaysOnlineNpcRow {
@@ -133,19 +135,14 @@ export interface AlwaysOnlineNpcRow {
   lastLng: number | null
 }
 
-/**
- * Returns NPCs with alwaysOnline=true that do NOT have an active patrol
- * (patrol NPCs are handled separately by the patrol loop).
- */
-export async function getAlwaysOnlineNpcs(excludeIds: string[]): Promise<AlwaysOnlineNpcRow[]> {
+/** Returns all NPCs with alwaysOnline=true. */
+export async function getAlwaysOnlineNpcs(): Promise<AlwaysOnlineNpcRow[]> {
   const rows = await db
     .select({ id: players.id, unitType: players.unitType, lastLat: players.lastLat, lastLng: players.lastLng })
     .from(players)
     .where(and(eq(players.alwaysOnline, true), isNotNull(players.role)))
 
-  return rows
-    .filter(r => !excludeIds.includes(r.id))
-    .map(r => ({ ...r, unitType: r.unitType as UnitType }))
+  return rows.map(r => ({ ...r, unitType: r.unitType as UnitType }))
 }
 
 // --- Combat ---

@@ -46,7 +46,7 @@ export function populateForm(form: PlayerFormState, p: Player): void {
   form.role        = p.role        ?? '';
   form.isAlive      = p.isAlive !== false ? 'true' : 'false';
   form.alwaysOnline = p.alwaysOnline ?? false;
-  form.hp           = p.hp          ?? 100;
+  form.hp           = p.hp ?? 100;
   form.maxHp       = p.maxHp       ?? 100;
   form.strength    = p.strength    ?? 10;
   form.defense     = p.defense     ?? 10;

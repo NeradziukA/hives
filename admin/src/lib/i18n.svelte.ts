@@ -356,6 +356,7 @@ const LANGS: Record<Lang, Translations> = {
     fieldHp: 'HP',
     fieldMaxHp: 'Макс HP',
     fieldIsAlive: 'Статус',
+    fieldAlwaysOnline: 'Всегда онлайн',
     sectionBase: 'Основное',
     sectionAttributes: 'Атрибуты',
     sectionSkills: 'Навыки',

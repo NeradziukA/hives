@@ -1,14 +1,14 @@
 import path from "path";
 import { Router, Request, Response, NextFunction } from "express";
-import { eq, ilike, or, and, gte, lte, count, inArray } from "drizzle-orm";
+import { eq, ilike, or, and, gte, lte, count, inArray, isNotNull } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
 import { players, staticObjects, npcPatrols } from "../db/schema";
-import { BuildingType } from "../types";
+import { BuildingType, MessageType } from "../types";
 import { verifyAccess } from "../auth/jwt";
-import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
-import { applyPatrolSpeed } from "../npc/patrol-loop";
+import { getOnlineIds, isOnline, broadcast } from "../websocket/handlers/connect";
+import { applyPatrolSpeed, applyNpcAlwaysOnline } from "../npc/patrol-loop";
 
 const router = Router();
 
@@ -61,7 +61,7 @@ api.get("/users", async (req: Request, res: Response) => {
     const onlineIds = getOnlineIds();
     filters.push(
       or(
-        eq(players.role, 'npc'),
+        and(isNotNull(players.role), eq(players.alwaysOnline, true)),
         onlineIds.length > 0 ? inArray(players.id, onlineIds) : eq(players.id, ""),
       )!,
     );
@@ -85,17 +85,18 @@ api.get("/users", async (req: Request, res: Response) => {
   const [rows, totals] = await Promise.all([
     db
       .select({
-        id:        players.id,
-        username:  players.username,
-        unitType:  players.unitType,
-        faction:   players.faction,
-        rank:      players.rank,
-        role:      players.role,
-        isAlive:   players.isAlive,
-        lastLat:   players.lastLat,
-        lastLng:   players.lastLng,
-        lastSeen:  players.lastSeen,
-        createdAt: players.createdAt,
+        id:           players.id,
+        username:     players.username,
+        unitType:     players.unitType,
+        faction:      players.faction,
+        rank:         players.rank,
+        role:         players.role,
+        isAlive:      players.isAlive,
+        alwaysOnline: players.alwaysOnline,
+        lastLat:      players.lastLat,
+        lastLng:      players.lastLng,
+        lastSeen:     players.lastSeen,
+        createdAt:    players.createdAt,
       })
       .from(players)
       .where(whereClause)
@@ -105,7 +106,10 @@ api.get("/users", async (req: Request, res: Response) => {
     db.select({ total: count() }).from(players).where(whereClause),
   ]);
 
-  const enriched = rows.map(r => ({ ...r, isOnline: r.role === 'npc' || isOnline(r.id) }));
+  const enriched = rows.map(r => ({
+    ...r,
+    isOnline: r.role ? r.alwaysOnline : isOnline(r.id),
+  }));
   res.json({ users: enriched, total: totals[0]?.total ?? 0, page, limit });
 });
 
@@ -122,7 +126,7 @@ api.get("/users/:id", async (req: Request, res: Response) => {
     return;
   }
   const { passwordHash: _, ...safe } = rows[0];
-  res.json({ ...safe, isOnline: safe.role === 'npc' || isOnline(safe.id) });
+  res.json({ ...safe, isOnline: isOnline(safe.id) });
 });
 
 // POST /admin/api/users
@@ -206,6 +210,22 @@ api.put("/users/:id", async (req: Request, res: Response) => {
   }
 
   const { passwordHash: _, ...safe } = rows[0];
+
+  if (safe.role && 'alwaysOnline' in rest) {
+    applyNpcAlwaysOnline(safe.id, safe.alwaysOnline ?? false);
+    if (safe.alwaysOnline === false) {
+      // NPC went offline — remove it from all clients' maps.
+      broadcast({ type: MessageType.UNIT_DISCONNECTED, srcId: safe.id, payload: {} });
+    } else if (safe.alwaysOnline === true) {
+      // NPC came online — push its position to all clients.
+      broadcast({
+        type:    MessageType.UNIT_MOVED,
+        srcId:   safe.id,
+        payload: { coords: { lat: safe.lastLat ?? 0, lon: safe.lastLng ?? 0 } },
+      });
+    }
+  }
+
   res.json(safe);
 });
 

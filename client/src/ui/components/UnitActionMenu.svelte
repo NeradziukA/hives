@@ -2,7 +2,7 @@
   import { gameState } from "../gameState.svelte.ts";
 
   const MAIN_UNIT_ID = "__self__";
-
+console.log(gameState)
   let label = $derived(
     gameState.selectedUnitId === MAIN_UNIT_ID
       ? "You"
