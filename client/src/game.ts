@@ -149,10 +149,10 @@ export async function initGame(container: HTMLElement): Promise<void> {
   renderer.setAnimationLoop(animate);
 }
 
-export function connectToServer(playerId: string, accessToken: string): void {
+export function connectToServer(playerId: string, accessToken: string, onAuthError?: () => void): void {
   connectWebSocket(playerId, accessToken, _scene, handleWebSocketMessages, (coords) => {
     if (_mainUnit?.renderObj) _mainUnit.moveTo(new Coords(coords.lat, coords.lon));
     _updateTarget(coords.lat, coords.lon);
     updateHexGrid(_hexGrid, coords.lat, coords.lon);
-  });
+  }, onAuthError);
 }

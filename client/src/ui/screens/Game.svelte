@@ -5,12 +5,13 @@
   import UnitActionMenu from "../components/UnitActionMenu.svelte";
   import ZoomSlider from "../components/ZoomSlider.svelte";
 
-  let { onprofile }: { onprofile: () => void } = $props();
+  let { onprofile, onlogout }: { onprofile: () => void; onlogout: () => void } = $props();
 </script>
 
 <Layout actions={[
   { label: $_("menu.continue"), onclick: () => {}, disabled: true },
   { label: $_("menu.profile"),  onclick: onprofile },
+  { label: $_("menu.logout"),   onclick: onlogout },
 ]}>
   <!-- Three.js canvas is rendered in the background layer of App.svelte -->
   <ZoomSlider />

@@ -9,7 +9,8 @@
     "username": "Username",
     "password": "Password",
     "profile": "Player Profile",
-    "main_menu": "Main Menu"
+    "main_menu": "Main Menu",
+    "logout": "Logout"
   },
   "admin": {
     "title": "Admin Panel",

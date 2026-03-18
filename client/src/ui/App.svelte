@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { initGame, connectToServer } from "../game";
-  import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId, getUsername } from "../auth";
+  import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId, getUsername, clearSession } from "../auth";
+  import { disconnectWebSocket } from "../webSocketHandler";
   import { gameState } from "./gameState.svelte";
   import HivesTitle from "./components/HivesTitle.svelte";
   import Splash from "./screens/Splash.svelte";
@@ -41,6 +42,14 @@
     screen = "mainmenu";
   });
 
+  function handleLogout(): void {
+    clearSession();
+    disconnectWebSocket();
+    hasSavedSession = false;
+    username = "";
+    screen = "mainmenu";
+  }
+
   async function handleConnect(loginUser: string, password: string): Promise<void> {
     const res = await fetch("/api/login", {
       method: "POST",
@@ -55,7 +64,7 @@
     setTokens(accessToken, refreshToken, id);
     username = getUsername() ?? "";
     await fetchFaction(accessToken);
-    connectToServer(id, accessToken);
+    connectToServer(id, accessToken, handleLogout);
     screen = "game";
   }
 
@@ -69,7 +78,7 @@
     const accessToken = getAccessToken()!;
     username = getUsername() ?? "";
     await fetchFaction(accessToken);
-    connectToServer(id, accessToken);
+    connectToServer(id, accessToken, handleLogout);
     screen = "game";
   }
 
@@ -94,7 +103,7 @@
     onprofile={() => (screen = "profile")}
   />
 {:else if screen === "game"}
-  <Game onprofile={() => (screen = "profile")} />
+  <Game onprofile={() => (screen = "profile")} onlogout={handleLogout} />
 {:else if screen === "profile"}
   <Profile username={username} oncontinue={() => (screen = "game")} />
 {/if}

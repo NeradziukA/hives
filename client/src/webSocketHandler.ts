@@ -9,6 +9,7 @@ import { handleInitUnits } from "./handlers/initUnitsHandler";
 let socket: WebSocket | null = null;
 let myId: string;
 const otherUnits: Map<string, UnitModel> = new Map();
+let _onAuthError: (() => void) | null = null;
 
 export function disconnectWebSocket(): void {
   if (socket) {
@@ -23,8 +24,10 @@ export function connectWebSocket(
   accessToken: string,
   scene: THREE.Scene,
   messageHandler: (event: MessageEvent, scene: THREE.Scene, socket: WebSocket, otherUnits: Map<string, UnitModel>, setMyId: (id: string) => void, onOwnMove?: (coords: { lat: number; lon: number }) => void) => Promise<void> | void,
-  onOwnMove?: (coords: { lat: number; lon: number }) => void
+  onOwnMove?: (coords: { lat: number; lon: number }) => void,
+  onAuthError?: () => void
 ): void {
+  _onAuthError = onAuthError ?? null;
   disconnectWebSocket();
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const wsPort = window.location.port === "5173" ? ":3000"
@@ -106,6 +109,7 @@ export async function handleWebSocketMessages(
 
       case "AUTH_ERROR":
         console.error("Auth error:", message.payload?.error);
+        _onAuthError?.();
         break;
     }
   } catch (error) {
