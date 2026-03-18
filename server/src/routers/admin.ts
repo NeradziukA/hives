@@ -99,7 +99,7 @@ api.get("/users", async (req: Request, res: Response) => {
     db.select({ total: count() }).from(players).where(whereClause),
   ]);
 
-  const enriched = rows.map(r => ({ ...r, isOnline: isOnline(r.id) }));
+  const enriched = rows.map(r => ({ ...r, isOnline: r.role === 'npc' || isOnline(r.id) }));
   res.json({ users: enriched, total: totals[0]?.total ?? 0, page, limit });
 });
 
@@ -116,7 +116,7 @@ api.get("/users/:id", async (req: Request, res: Response) => {
     return;
   }
   const { passwordHash: _, ...safe } = rows[0];
-  res.json({ ...safe, isOnline: isOnline(safe.id) });
+  res.json({ ...safe, isOnline: safe.role === 'npc' || isOnline(safe.id) });
 });
 
 // POST /admin/api/users
