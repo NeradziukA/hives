@@ -36,6 +36,31 @@ Waypoints are traversed in ascending `order`. The patrol loops when the last way
 
 ---
 
+## Server-Side Loop
+
+Patrol movement is driven by `server/src/npc/patrol-loop.ts`, which runs a tick every **100 ms** (`NPC_TICK_INTERVAL_MS`).
+
+On server startup:
+1. `loadPatrols()` — queries all `npc_patrols` rows where `isActive = true`, reads the NPC's last known position from the `players` table, and populates the in-memory `patrolStates` map.
+2. `loadStaticNpcs()` — loads `alwaysOnline` NPCs that have no patrol route and registers them in the `users` map so they are always included in `INIT_UNITS` responses.
+
+Each tick:
+- Advances every patrol's position toward the next waypoint using haversine distance and bearing calculations.
+- When a waypoint is reached the patrol moves to the next one; after the last waypoint it loops back to the first.
+- The new position is written to `players.lastLat / lastLng` in the database and broadcast to all connected clients as `UNIT_MOVED`.
+
+```
+patrolStates: Map<npcId, PatrolState>
+PatrolState {
+  waypoints: Array<{ lat, lng, order }>
+  speed: number          // m/s
+  currentLat / currentLng
+  currentWaypointIndex
+}
+```
+
+---
+
 ## UI Interaction
 
 Bots can be selected in the game UI similarly to player units. The set of available actions shown upon selection depends on the bot's type and faction. Examples:

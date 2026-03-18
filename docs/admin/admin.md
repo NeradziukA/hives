@@ -37,12 +37,19 @@ graph TD
         BuildingModal["dialogs/BuildingModal.svelte"]
     end
 
+    subgraph Patrols["Patrols section"]
+        PatrolsPage["pages/PatrolsPage.svelte\norchestrator"]
+        PatrolsTable["pages/PatrolsTable.svelte\nNPC · speed · waypoints · active"]
+        PatrolModal["dialogs/PatrolModal.svelte\nNPC selector · speed · waypoints editor"]
+    end
+
     ConfirmDialog["dialogs/ConfirmDialog.svelte\ndelete confirmation"]
 
-    App --> Sidebar & PlayersPage & BuildingsPage
+    App --> Sidebar & PlayersPage & BuildingsPage & PatrolsPage
     PlayersPage --> SearchBar & PlayersTable & Pagination & PlayerModal & ConfirmDialog
     PlayerModal --> FormState & PlayerFormBase & PlayerFormAttributes & PlayerFormSkills
     BuildingsPage --> BuildingsSearchBar & BuildingsTable & Pagination & BuildingModal & ConfirmDialog
+    PatrolsPage --> PatrolsTable & PatrolModal & ConfirmDialog
 ```
 
 ## NPC Creation
@@ -83,11 +90,14 @@ NPCs appear in the Players table alongside regular players. The search bar can f
 | `dialogs/BuildingModal.svelte` | Create/edit building modal (type `<select>`, name, lat, lng, revealRadius, faction `<select>`, active) |
 | `dialogs/ConfirmDialog.svelte` | Generic yes/no confirmation modal |
 | `dialogs/LoginDialog.svelte` | Admin login form |
+| `pages/PatrolsPage.svelte` | State owner: patrols list, pagination, active filter, modal/confirm state |
+| `pages/PatrolsTable.svelte` | Renders patrol rows (NPC name, speed, waypoint count, active status, created date); edit/delete actions |
+| `dialogs/PatrolModal.svelte` | Create/edit patrol modal; NPC selector, speed input, waypoints list editor (add/remove) |
 | `lib/api.ts` | `apiFetch` (JWT header injection + auto-refresh), `safeJson` |
 | `lib/auth.svelte.ts` | Token store, login/logout helpers |
 | `lib/i18n.svelte.ts` | Admin UI strings (EN/RU) |
 | `lib/toast.svelte.ts` | Toast notification state |
-| `lib/types.ts` | `Player`, `Building` types |
+| `lib/types.ts` | `Player`, `Building`, `NpcPatrol` types |
 | `components/ui/Spinner.svelte` | Loading spinner |
 | `components/ui/Badge.svelte` | Status badge (faction / alive / online) |
 
@@ -143,6 +153,18 @@ Query params for `GET /admin/api/users`: `page`, `limit`, `q`, `lat`, `lng`, `ra
 | `DELETE` | `/admin/api/buildings/:id` | Delete building |
 
 Query params for `GET /admin/api/buildings`: `page`, `limit`, `q`, `active`
+
+### Patrols
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/admin/api/patrols` | List with pagination and filters |
+| `GET` | `/admin/api/patrols/:id` | Single patrol |
+| `POST` | `/admin/api/patrols` | Create patrol |
+| `PUT` | `/admin/api/patrols/:id` | Update patrol |
+| `DELETE` | `/admin/api/patrols/:id` | Delete patrol |
+
+Query params for `GET /admin/api/patrols`: `page`, `limit`, `active`
 
 ## Semantic markup
 

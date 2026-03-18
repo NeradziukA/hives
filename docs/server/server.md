@@ -14,13 +14,14 @@ Express + WebSocket backend. Source: [server/src/](../../server/src/)
 | [websocket/index.ts](../../server/src/websocket/index.ts) | WebSocket server setup; delegates to connection handler |
 | [db/schema.ts](../../server/src/db/schema.ts) | Drizzle ORM schema: `players`, `static_objects`, `inventory`, etc. |
 | [db/queries.ts](../../server/src/db/queries.ts) | DB helper functions |
+| [npc/patrol-loop.ts](../../server/src/npc/patrol-loop.ts) | NPC patrol tick loop — loads active patrols from DB at startup, advances each patrol every 100 ms using geodesic calculations, broadcasts `UNIT_MOVED` to all clients |
 
 ### Routers (`server/src/routers/`)
 
 | File | Responsibility |
 |------|---------------|
 | [routers/auth.ts](../../server/src/routers/auth.ts) | `POST /api/login`, `POST /api/refresh`, `GET /api/profile` |
-| [routers/admin.ts](../../server/src/routers/admin.ts) | Serves admin SPA at `GET /admin/`; CRUD API at `/admin/api/users` (JWT-protected) |
+| [routers/admin.ts](../../server/src/routers/admin.ts) | Serves admin SPA at `GET /admin/`; CRUD APIs at `/admin/api/users`, `/admin/api/buildings`, `/admin/api/patrols` (JWT-protected) |
 | [routers/status.ts](../../server/src/routers/status.ts) | `GET /status` (JSON), `GET /status/ui` (dashboard) |
 | [routers/docs.ts](../../server/src/routers/docs.ts) | `GET /docs` — renders Markdown docs as HTML |
 
@@ -47,10 +48,18 @@ graph TD
     subgraph State["In-Memory State"]
         sockets["clientsSockets\nMap&lt;id, WebSocket&gt;"]
         users["users\nMap&lt;id, User&gt;"]
+        patrolStates["patrolStates\nMap&lt;npcId, PatrolState&gt;"]
+    end
+
+    subgraph PatrolLoop["npc/patrol-loop.ts"]
+        loadPatrols["loadPatrols()\nload active patrols from DB"]
+        loadStaticNpcs["loadStaticNpcs()\nalwaysOnline stationary NPCs"]
+        npcTick["tick every 100 ms\nadvance position · broadcast UNIT_MOVED"]
     end
 
     index --> authRouter & adminRouter & statusRouter & wsIndex
     index --> staticClient & staticAdmin
+    index --> PatrolLoop
     adminRouter --> staticAdmin & db
     wsIndex --> connect
     connect --> unitGetAll & unitMove & close
@@ -61,6 +70,9 @@ graph TD
     close --> State
     connect --> State
     Handlers --> logger & types
+    loadPatrols & loadStaticNpcs --> db
+    loadPatrols & loadStaticNpcs --> State
+    npcTick --> State & db
 ```
 
 ## Authentication
