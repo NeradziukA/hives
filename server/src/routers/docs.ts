@@ -15,34 +15,50 @@ function rewriteLinks(md: string, baseDir: string): string {
   });
 }
 
-function buildDocNav(current: string): string {
-  const entries = fs.readdirSync(DOCS_DIR, { withFileTypes: true });
-  const rootFiles = entries
-    .filter(e => e.isFile() && e.name.endsWith(".md") && e.name !== "README.md")
-    .map(e => e.name.slice(0, -3));
-  const dirs = entries
-    .filter(e => e.isDirectory())
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(e => ({
-      name: e.name,
-      files: fs.readdirSync(path.join(DOCS_DIR, e.name))
-        .filter(f => f.endsWith(".md"))
-        .map(f => f.slice(0, -3)),
-    }));
+const label = (name: string) =>
+  name.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-  const label = (name: string) =>
-    name.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-  const link = (href: string, name: string) => {
-    const active = current === href ? ' class="active"' : "";
-    return `<li${active}><a href="/docs/${href}">${label(name)}</a></li>`;
-  };
-
-  let items = `<li${current === "" ? ' class="active"' : ""}><a href="/docs">Home</a></li>\n`;
-  for (const f of rootFiles) items += link(f, f) + "\n";
-  for (const dir of dirs) {
-    items += `<li class="nav-section">${label(dir.name)}</li>\n`;
-    for (const f of dir.files) items += link(`${dir.name}/${f}`, f) + "\n";
+function buildNavTree(dir: string, urlBase: string, current: string, depth: number): string {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return "";
   }
+
+  const files = entries
+    .filter(e => e.isFile() && e.name.endsWith(".md") && e.name !== "README.md")
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const subdirs = entries
+    .filter(e => e.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const pad = 20 + depth * 12;
+  let html = "";
+
+  for (const f of files) {
+    const slug = f.name.slice(0, -3);
+    const href = urlBase ? `${urlBase}/${slug}` : slug;
+    const active = current === href ? ' class="active"' : "";
+    html += `<li${active}><a href="/docs/${href}" style="padding-left:${pad}px">${label(slug)}</a></li>\n`;
+  }
+
+  for (const d of subdirs) {
+    const subBase = urlBase ? `${urlBase}/${d.name}` : d.name;
+    const isOpen = current === subBase || current.startsWith(subBase + "/");
+    const inner = buildNavTree(path.join(dir, d.name), subBase, current, depth + 1);
+    if (!inner) continue;
+    html += `<li class="nav-folder"><details${isOpen ? " open" : ""}><summary style="padding-left:${pad}px">${label(d.name)}</summary><ul>${inner}</ul></details></li>\n`;
+  }
+
+  return html;
+}
+
+function buildDocNav(current: string): string {
+  const homeActive = current === "" ? ' class="active"' : "";
+  let items = `<li${homeActive}><a href="/docs" style="padding-left:20px">Home</a></li>\n`;
+  items += buildNavTree(DOCS_DIR, "", current, 0);
   return `<nav class="docs-nav"><ul>${items}</ul></nav>`;
 }
 

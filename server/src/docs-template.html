@@ -48,6 +48,26 @@
     letter-spacing: 0.08em;
     color: #555;
   }
+  .docs-nav li.nav-folder > details > summary {
+    display: block;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    padding-right: 20px;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .docs-nav li.nav-folder > details > summary::-webkit-details-marker { display: none; }
+  .docs-nav li.nav-folder > details > summary::marker { display: none; }
+  .docs-nav li.nav-folder > details > summary:hover { color: #888; }
+  .docs-nav li.nav-folder > details > summary::after { content: " ▸"; }
+  .docs-nav li.nav-folder > details[open] > summary::after { content: " ▾"; }
+  .docs-nav li.nav-folder > details > ul { padding: 0; margin: 0; }
 
   main { flex: 1; padding: 40px 48px; max-width: 860px; }
 </style>
