@@ -8,6 +8,7 @@ import { players, staticObjects, npcPatrols } from "../db/schema";
 import { BuildingType } from "../types";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline } from "../websocket/handlers/connect";
+import { applyPatrolSpeed } from "../npc/patrol-loop";
 
 const router = Router();
 
@@ -391,6 +392,9 @@ api.put("/patrols/:id", async (req: Request, res: Response) => {
   if (rows.length === 0) {
     res.status(404).json({ error: "Patrol not found" });
     return;
+  }
+  if (typeof rest.speed === "number") {
+    applyPatrolSpeed(req.params.id as string, rest.speed);
   }
   res.json(rows[0]);
 });

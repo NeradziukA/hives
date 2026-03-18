@@ -291,6 +291,21 @@ async function tick(elapsedMs: number): Promise<void> {
  * The loop runs for the lifetime of the process; there is no stop mechanism
  * because NPCs should always be online.
  */
+/**
+ * Update the in-memory speed for a patrol identified by its `patrolId` (UUID
+ * of the `npc_patrols` row).  Call this immediately after persisting a speed
+ * change to the database so the running tick loop picks it up without a restart.
+ */
+export function applyPatrolSpeed(patrolId: string, speed: number): void {
+  for (const state of patrolStates.values()) {
+    if (state.patrolId === patrolId) {
+      state.speed = speed
+      logger.info(`NPC patrol speed updated in-memory: ${state.npcId} → ${speed} m/s`)
+      return
+    }
+  }
+}
+
 export async function startNpcLoop(): Promise<void> {
   logger.info('NPC loop: initialising…')
 
