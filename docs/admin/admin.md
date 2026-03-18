@@ -18,11 +18,19 @@ graph TD
     App["App.svelte\nrouter · auth gate"]
     Sidebar["components/Sidebar.svelte\npage navigation"]
 
+    subgraph Shared["Shared UI components"]
+        PageHeader["components/ui/PageHeader.svelte\ntitle + new button"]
+        Pagination["pages/Pagination.svelte\nprev/next · page X/Y · range"]
+        ToggleFilter["components/ui/ToggleFilter.svelte\ntoggle switch"]
+        Badge["components/ui/Badge.svelte\nfaction / alive / online"]
+        Spinner["components/ui/Spinner.svelte\nloading spinner"]
+        ConfirmDialog["dialogs/ConfirmDialog.svelte\ndelete confirmation"]
+    end
+
     subgraph Players["Players section"]
         PlayersPage["pages/PlayersPage.svelte\norchestrator"]
         SearchBar["PlayersSearchBar.svelte\nq · lat/lng/radius · online toggle"]
         PlayersTable["PlayersTable.svelte"]
-        Pagination["PlayersPagination.svelte"]
         PlayerModal["dialogs/PlayerModal.svelte"]
         FormState["playerFormState.svelte.ts"]
         PlayerFormBase["PlayerFormBase.svelte\nrole → NPC / QUEST_MASTER / BOSS"]
@@ -40,16 +48,21 @@ graph TD
     subgraph Patrols["Patrols section"]
         PatrolsPage["pages/PatrolsPage.svelte\norchestrator"]
         PatrolsTable["pages/PatrolsTable.svelte\nNPC · speed · waypoints · active"]
+        PatrolsSearchBar["PatrolsSearchBar.svelte\nactive toggle"]
         PatrolModal["dialogs/PatrolModal.svelte\nNPC selector · speed · waypoints editor"]
     end
 
-    ConfirmDialog["dialogs/ConfirmDialog.svelte\ndelete confirmation"]
-
     App --> Sidebar & PlayersPage & BuildingsPage & PatrolsPage
-    PlayersPage --> SearchBar & PlayersTable & Pagination & PlayerModal & ConfirmDialog
+    PlayersPage --> PageHeader & SearchBar & PlayersTable & Pagination & PlayerModal & ConfirmDialog
+    SearchBar --> ToggleFilter
     PlayerModal --> FormState & PlayerFormBase & PlayerFormAttributes & PlayerFormSkills
-    BuildingsPage --> BuildingsSearchBar & BuildingsTable & Pagination & BuildingModal & ConfirmDialog
-    PatrolsPage --> PatrolsTable & PatrolModal & ConfirmDialog
+    BuildingsPage --> PageHeader & BuildingsSearchBar & BuildingsTable & Pagination & BuildingModal & ConfirmDialog
+    BuildingsSearchBar --> ToggleFilter
+    PatrolsPage --> PageHeader & PatrolsSearchBar & PatrolsTable & Pagination & PatrolModal & ConfirmDialog
+    PatrolsSearchBar --> ToggleFilter
+    PlayersTable --> Badge & Spinner
+    BuildingsTable --> Spinner
+    PatrolsTable --> Spinner
 ```
 
 ## NPC Creation
@@ -75,31 +88,34 @@ NPCs appear in the Players table alongside regular players. The search bar can f
 |---|---|
 | `App.svelte` | Auth gate — shows `LoginDialog` until authenticated; routes to pages |
 | `components/Sidebar.svelte` | Left nav (`<nav>` + `<ul>/<li>` + `<button>`), page links with `aria-current` |
+| `components/ui/PageHeader.svelte` | Shared page title + "New" button; used by all three section pages |
+| `pages/Pagination.svelte` | Shared prev/next pagination with page X/Y display and result range label |
+| `components/ui/ToggleFilter.svelte` | Shared toggle switch; used in all three search bars |
+| `components/ui/Spinner.svelte` | Loading spinner |
+| `components/ui/Badge.svelte` | Status badge (faction / alive / online) |
 | `pages/PlayersPage.svelte` | State owner: players list, pagination, search filters, modal/confirm state |
-| `pages/PlayersSearchBar.svelte` | Search inputs (text, geo coords, radius) + online-only toggle + reset |
+| `pages/PlayersSearchBar.svelte` | Search inputs (text, geo coords, radius) + `ToggleFilter` (online-only) + reset |
 | `pages/PlayersTable.svelte` | Renders player rows; loading/empty states |
-| `pages/PlayersPagination.svelte` | Prev/next buttons, page X/Y display, result range label |
 | `pages/BuildingsPage.svelte` | State owner: buildings list, pagination, search filters, modal/confirm state |
-| `pages/BuildingsSearchBar.svelte` | Search input (text) + active-only toggle + reset |
+| `pages/BuildingsSearchBar.svelte` | Search input (text) + `ToggleFilter` (active-only) + reset |
 | `pages/BuildingsTable.svelte` | Renders building rows with edit/delete actions |
+| `pages/PatrolsPage.svelte` | State owner: patrols list, pagination, active filter, modal/confirm state |
+| `pages/PatrolsSearchBar.svelte` | `ToggleFilter` (active-only) + reset |
+| `pages/PatrolsTable.svelte` | Renders patrol rows (NPC name, speed, waypoint count, active status, created date); edit/delete actions |
 | `dialogs/PlayerModal.svelte` | Create/edit player modal; delegates form fields to sub-components |
 | `dialogs/playerFormState.svelte.ts` | `PlayerFormState` interface, `FORM_DEFAULTS`, `populateForm(form, player)` |
 | `dialogs/PlayerFormBase.svelte` | Base fields: username, password, unit type (`<select>`), faction (`<select>`), role (`<select>`), alive, HP |
 | `dialogs/PlayerFormAttributes.svelte` | 10 attribute fields rendered via `{#each}` |
 | `dialogs/PlayerFormSkills.svelte` | 5 skill fields rendered via `{#each}` |
 | `dialogs/BuildingModal.svelte` | Create/edit building modal (type `<select>`, name, lat, lng, revealRadius, faction `<select>`, active) |
-| `dialogs/ConfirmDialog.svelte` | Generic yes/no confirmation modal |
-| `dialogs/LoginDialog.svelte` | Admin login form |
-| `pages/PatrolsPage.svelte` | State owner: patrols list, pagination, active filter, modal/confirm state |
-| `pages/PatrolsTable.svelte` | Renders patrol rows (NPC name, speed, waypoint count, active status, created date); edit/delete actions |
 | `dialogs/PatrolModal.svelte` | Create/edit patrol modal; NPC selector, speed input, waypoints list editor (add/remove) |
+| `dialogs/ConfirmDialog.svelte` | Generic yes/no confirmation modal; used by all three section pages |
+| `dialogs/LoginDialog.svelte` | Admin login form |
 | `lib/api.ts` | `apiFetch` (JWT header injection + auto-refresh), `safeJson` |
 | `lib/auth.svelte.ts` | Token store, login/logout helpers |
 | `lib/i18n.svelte.ts` | Admin UI strings (EN/RU) |
 | `lib/toast.svelte.ts` | Toast notification state |
 | `lib/types.ts` | `Player`, `Building`, `NpcPatrol` types |
-| `components/ui/Spinner.svelte` | Loading spinner |
-| `components/ui/Badge.svelte` | Status badge (faction / alive / online) |
 
 ## Enum-based Selects
 

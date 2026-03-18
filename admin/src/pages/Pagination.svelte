@@ -1,21 +1,21 @@
 <script lang="ts">
+  import { i18n } from '../lib/i18n.svelte.ts';
+
   let {
-    currentPage, totalPages, totalUsers, pageFrom, pageTo, onPage,
+    currentPage, totalPages, total, pageFrom, pageTo, onPage,
   }: {
     currentPage: number;
     totalPages:  number;
-    totalUsers:  number;
+    total:       number;
     pageFrom:    number;
     pageTo:      number;
     onPage:      (dir: number) => void;
   } = $props();
-
-  import { i18n } from '../lib/i18n.svelte.ts';
 </script>
 
 <div class="pagination">
   <span class="page-info">
-    {totalUsers > 0 ? i18n.t.pageInfo(pageFrom, pageTo, totalUsers) : ''}
+    {total > 0 ? i18n.t.pageInfo(pageFrom, pageTo, total) : ''}
   </span>
   <div class="page-controls">
     <button class="btn small icon-btn" disabled={currentPage <= 1}

@@ -6,7 +6,8 @@
   import BuildingModal from '../dialogs/BuildingModal.svelte';
   import BuildingsSearchBar from './BuildingsSearchBar.svelte';
   import BuildingsTable from './BuildingsTable.svelte';
-  import PlayersPagination from './PlayersPagination.svelte';
+  import Pagination from './Pagination.svelte';
+  import PageHeader from '../components/ui/PageHeader.svelte';
   import type { Building } from '../lib/types.ts';
 
   const PAGE_LIMIT = 20;
@@ -94,12 +95,8 @@
 </script>
 
 <div class="page">
-  <div class="page-header">
-    <p class="page-title">{i18n.t.buildingsTitle}</p>
-    <button class="btn small" onclick={() => { editingId = null; modalOpen = true; }}>
-      {i18n.t.createBuilding}
-    </button>
-  </div>
+  <PageHeader title={i18n.t.buildingsTitle} newLabel={i18n.t.createBuilding}
+    onNew={() => { editingId = null; modalOpen = true; }} />
 
   <BuildingsSearchBar
     bind:searchQ bind:filterActiveOnly
@@ -114,8 +111,8 @@
     onDelete={openDelete}
   />
 
-  <PlayersPagination
-    {currentPage} {totalPages} totalUsers={totalItems} {pageFrom} {pageTo}
+  <Pagination
+    {currentPage} {totalPages} total={totalItems} {pageFrom} {pageTo}
     onPage={goPage}
   />
 </div>
@@ -137,14 +134,4 @@
 
 <style>
   .page { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .page-header {
-    padding: 20px 28px 16px 56px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 16px;
-  }
-  .page-title {
-    font-size: 14px; font-weight: 700;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--text-bright); margin: 0; flex: 1;
-  }
 </style>

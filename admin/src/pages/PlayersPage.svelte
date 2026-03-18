@@ -6,7 +6,8 @@
   import PlayerModal from '../dialogs/PlayerModal.svelte';
   import PlayersSearchBar from './PlayersSearchBar.svelte';
   import PlayersTable from './PlayersTable.svelte';
-  import PlayersPagination from './PlayersPagination.svelte';
+  import Pagination from './Pagination.svelte';
+  import PageHeader from '../components/ui/PageHeader.svelte';
   import type { Player } from '../lib/types.ts';
 
   const PAGE_LIMIT = 20;
@@ -101,12 +102,8 @@
 </script>
 
 <div class="page">
-  <div class="page-header">
-    <p class="page-title">{i18n.t.usersTitle}</p>
-    <button class="btn small" onclick={() => { editingPlayerId = null; modalOpen = true; }}>
-      {i18n.t.createUser}
-    </button>
-  </div>
+  <PageHeader title={i18n.t.usersTitle} newLabel={i18n.t.createUser}
+    onNew={() => { editingPlayerId = null; modalOpen = true; }} />
 
   <PlayersSearchBar
     bind:searchQ bind:searchLat bind:searchLng bind:searchRadius bind:filterOnlineOnly
@@ -121,8 +118,8 @@
     onDelete={openDelete}
   />
 
-  <PlayersPagination
-    {currentPage} {totalPages} {totalUsers} {pageFrom} {pageTo}
+  <Pagination
+    {currentPage} {totalPages} total={totalUsers} {pageFrom} {pageTo}
     onPage={goPage}
   />
 </div>
@@ -144,14 +141,4 @@
 
 <style>
   .page { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .page-header {
-    padding: 20px 28px 16px 56px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 16px;
-  }
-  .page-title {
-    font-size: 14px; font-weight: 700;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--text-bright); margin: 0; flex: 1;
-  }
 </style>

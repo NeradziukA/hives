@@ -1,5 +1,6 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte.ts';
+  import ToggleFilter from '../components/ui/ToggleFilter.svelte';
 
   interface Props {
     searchQ:          string;
@@ -43,14 +44,8 @@
     <input type="number" name="search-radius" step="any" min="0" bind:value={searchRadius}
       onkeydown={(e) => e.key === 'Enter' && onSearch()} />
   </div>
-  <div class="toggle-group">
-    <button class="toggle" class:active={filterOnlineOnly}
-      onclick={() => { filterOnlineOnly = !filterOnlineOnly; onSearch(); }}
-      aria-pressed={filterOnlineOnly} aria-label={i18n.t.filterOnlineOnly}>
-      <span class="toggle-thumb"></span>
-    </button>
-    <span class="toggle-label">{i18n.t.filterOnlineOnly}</span>
-  </div>
+  <ToggleFilter bind:value={filterOnlineOnly} label={i18n.t.filterOnlineOnly}
+    onToggle={onSearch} alignEnd={true} />
   <div class="search-actions">
     <button class="btn small secondary" onclick={onReset}>{i18n.t.reset}</button>
   </div>
@@ -67,29 +62,10 @@
   .search-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   .search-group input { width: 180px; }
   .search-group.narrow input { width: 110px; }
-  .toggle-group {
-    display: flex; flex-direction: row; align-items: center; gap: 8px;
-    margin-left: auto; align-self: flex-end; height: 28px;
-  }
-  .toggle-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-  .toggle {
-    width: 36px; height: 18px;
-    background: var(--border); border: 1px solid var(--border);
-    border-radius: 0; padding: 0; cursor: pointer;
-    position: relative; transition: background 0.15s, border-color 0.15s; flex-shrink: 0;
-  }
-  .toggle.active { background: var(--green-bg); border-color: var(--green); }
-  .toggle-thumb {
-    position: absolute; top: 2px; left: 2px;
-    width: 12px; height: 12px;
-    background: var(--text-dim); transition: left 0.15s, background 0.15s;
-  }
-  .toggle.active .toggle-thumb { left: 20px; background: var(--green); }
   .search-actions { display: flex; gap: 8px; align-self: flex-end; }
   @media (max-width: 640px) {
     .search-bar { padding: 8px 12px; gap: 6px; }
     .search-group input { width: 120px; }
     .search-group.narrow input { width: 72px; }
-    .toggle-group { margin-left: 0; }
   }
 </style>
