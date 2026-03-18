@@ -9,6 +9,7 @@ export interface PlayerFormState {
   rank: PlayerRank;
   role: string;
   isAlive: string;
+  alwaysOnline: boolean;
   hp: number;
   maxHp: number;
   strength: number;
@@ -30,7 +31,7 @@ export interface PlayerFormState {
 
 export const FORM_DEFAULTS: PlayerFormState = {
   username: '', password: '', unitType: UnitType.HUMAN_A, faction: Faction.HUMANS,
-  rank: PlayerRank.NOVICE, role: '', isAlive: 'true', hp: 100, maxHp: 100, strength: 10,
+  rank: PlayerRank.NOVICE, role: '', isAlive: 'true', alwaysOnline: false, hp: 100, maxHp: 100, strength: 10,
   defense: 10, agility: 10, speed: 10, intelligence: 10, leadership: 0,
   vision: 10, vaccineLevel: 0, bagSize: 5, mutation: 0,
   heavyWeapon: 0, twoHanded: 0, camouflage: 0, regeneration: 0, stench: 0,
@@ -43,8 +44,9 @@ export function populateForm(form: PlayerFormState, p: Player): void {
   form.faction     = p.faction     ?? Faction.HUMANS;
   form.rank        = p.rank        ?? PlayerRank.NOVICE;
   form.role        = p.role        ?? '';
-  form.isAlive     = p.isAlive !== false ? 'true' : 'false';
-  form.hp          = p.hp          ?? 100;
+  form.isAlive      = p.isAlive !== false ? 'true' : 'false';
+  form.alwaysOnline = p.alwaysOnline ?? false;
+  form.hp           = p.hp          ?? 100;
   form.maxHp       = p.maxHp       ?? 100;
   form.strength    = p.strength    ?? 10;
   form.defense     = p.defense     ?? 10;

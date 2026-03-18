@@ -63,6 +63,14 @@
 </div>
 
 <div class="form-group">
+  <label class="form-label" for="f-always-online">{i18n.t.fieldAlwaysOnline}</label>
+  <select id="f-always-online" name="always-online" bind:value={form.alwaysOnline}>
+    <option value={true}>{i18n.t.optionYes}</option>
+    <option value={false}>{i18n.t.optionNo}</option>
+  </select>
+</div>
+
+<div class="form-group">
   <label class="form-label" for="f-hp">{i18n.t.fieldHp}</label>
   <input id="f-hp" type="number" name="hp" bind:value={form.hp} />
 </div>

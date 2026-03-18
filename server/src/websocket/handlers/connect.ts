@@ -23,7 +23,7 @@ export function isOnline(id: string): boolean {
 
 export function broadcast(message: SocketMessage, senderId?: string) {
   for (const key in clientsSockets) {
-    if (senderId && key !== senderId) {
+    if (!senderId || key !== senderId) {
       clientsSockets[key].send(JSON.stringify(message));
     }
   }

@@ -56,6 +56,7 @@ interface Translations {
   fieldHp: string;
   fieldMaxHp: string;
   fieldIsAlive: string;
+  fieldAlwaysOnline: string;
   sectionBase: string;
   sectionAttributes: string;
   sectionSkills: string;
@@ -191,6 +192,7 @@ const LANGS: Record<Lang, Translations> = {
     fieldHp: 'HP',
     fieldMaxHp: 'Max HP',
     fieldIsAlive: 'Status',
+    fieldAlwaysOnline: 'Always Online',
     sectionBase: 'Base',
     sectionAttributes: 'Attributes',
     sectionSkills: 'Skills',

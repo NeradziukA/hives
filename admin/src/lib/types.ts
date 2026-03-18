@@ -11,6 +11,7 @@ export interface Player {
   rank: PlayerRank;
   role: PlayerRole | null;
   isAlive: boolean;
+  alwaysOnline: boolean;
   isOnline: boolean;
   hp: number; maxHp: number;
   lastLat: number | null; lastLng: number | null;
