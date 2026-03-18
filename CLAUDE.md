@@ -93,7 +93,7 @@ Three.js scene — `client/src/game.ts`. LOD: 3D model when > 20px screen size, 
 Served at `/admin/`. Uses a custom i18n system (`admin/src/lib/i18n.svelte.ts`). The game client uses svelte-i18n with JSON files in `client/src/i18n/`. These are two separate i18n systems.
 
 ### Database
-PostgreSQL + Drizzle ORM. Schema in `server/src/db/schema.ts`. Key tables: `players`, `staticObjects`, `inventory`, `playerTracks`, `hexVisited`, `hexOwnership`, `combatEvents`.
+PostgreSQL + Drizzle ORM. Schema in `server/src/db/schema.ts`. Key tables: `players`, `staticObjects`, `inventory`, `playerTracks`, `hexVisited`, `hexOwnership`, `combatEvents`, `zombiePatrols`, `npcPatrols`.
 
 ### Static file serving
 `npm run build` compiles client → `server/static/client/` and admin → `server/static/admin/`. The Express server serves these; no separate web server needed.
