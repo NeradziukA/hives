@@ -9,34 +9,22 @@
 ## Install Dependencies
 
 ```bash
-# From project root
-npm install
-cd client && npm install
-cd ../server && npm install
+npm run install:all    # installs deps in all packages (root, client, server, admin)
 ```
 
 ## Run in Development
 
 Open two terminals:
 
-**Terminal 1 — Server:**
+**Terminal 1 — Server (run both in parallel):**
 ```bash
-cd server
-npm run watch-ts   # compiles TypeScript on change
-# in another tab:
-npm run dev        # runs nodemon on compiled output
-```
-
-Or combined (build then run):
-```bash
-npm run server     # from project root — builds + starts server
+npm run server:dev     # watch-compile TypeScript server
+npm run server:run     # run compiled server with nodemon
 ```
 
 **Terminal 2 — Client:**
 ```bash
-npm run client     # from project root
-# or
-cd client && npm run dev
+npm run client         # Vite dev server at http://localhost:5173
 ```
 
 Client dev server: http://localhost:5173
@@ -45,27 +33,12 @@ Server (WebSocket + API): http://localhost:3000
 ## Build for Production
 
 ```bash
-# Linux / Mac
-npm run build-client
-
-# Windows
-npm run build-client-win
+npm run build          # builds client + admin → server/static/
 ```
 
-This builds the client and copies the output into `server/static/client/`, so the server can serve it directly.
-
-Build the admin panel:
-```bash
-npm run build --prefix ./admin   # outputs to server/static/admin/
-```
-
-Then build and start the server:
-```bash
-cd server && npm run build
-npm run server
-```
-
-Open http://localhost:3000
+This compiles both SPAs into `server/static/`, so the Express server can serve them directly:
+- `server/static/client/` — game SPA served at `/`
+- `server/static/admin/` — admin SPA served at `/admin/`
 
 ## Deployment (VDS + pm2)
 
