@@ -3,6 +3,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import path from "path";
 import { Server } from "http";
 import { setupWebSocket } from "./websocket";
+import { startNpcLoop } from "./npc/patrol-loop";
 import { logger } from "./logger";
 import docsRouter from "./routers/docs";
 import statusRouter from "./routers/status";
@@ -31,3 +32,4 @@ const server: Server = app.listen(PORT, () =>
 );
 
 setupWebSocket(server);
+startNpcLoop().catch(err => logger.error("Failed to start NPC loop: " + err));

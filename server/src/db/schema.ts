@@ -31,7 +31,8 @@ export const players = pgTable('players', {
   stench:       integer('stench').default(0),
   mutation:     integer('mutation').default(0),
 
-  isAlive:    boolean('is_alive').default(true),
+  isAlive:      boolean('is_alive').default(true),
+  alwaysOnline: boolean('always_online').default(false),
   respawnAt:  timestamp('respawn_at', { withTimezone: true }),
   infectedAt: timestamp('infected_at', { withTimezone: true }),
 

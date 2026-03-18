@@ -31,6 +31,21 @@ Exact values are set by administrators. See [units.md § Unit Data Model](../uni
 
 ---
 
+## Always-Online Flag
+
+Every NPC has an `alwaysOnline` boolean column in the `players` table (default `false`).
+
+When `alwaysOnline = true` the server registers the NPC in the shared `users` map at startup, so it always appears in `INIT_UNITS` responses sent to connecting clients — even if no player is near and even if the NPC has no patrol.
+
+| `alwaysOnline` | Behaviour |
+|----------------|-----------|
+| `false`        | NPC is invisible to clients unless explicitly placed in the users map by game logic |
+| `true`         | NPC appears in every `INIT_UNITS` response from the moment the server starts |
+
+Patrol NPCs (`npc_patrols` with `isActive = true`) are always registered regardless of this flag; `alwaysOnline` is primarily useful for stationary NPCs such as quest masters and bosses.
+
+---
+
 ## WebSocket Visibility
 
 NPCs are transmitted to clients as standard `User` objects:

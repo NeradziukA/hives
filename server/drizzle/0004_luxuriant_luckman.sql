@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "always_online" boolean DEFAULT false;

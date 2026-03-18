@@ -1,9 +1,9 @@
-import { eq, gt, and } from 'drizzle-orm'
+import { eq, gt, and, isNotNull } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { db } from './index'
-import { players, staticObjects, playerTracks, hexVisited, combatEvents } from './schema'
+import { players, staticObjects, playerTracks, hexVisited, combatEvents, npcPatrols } from './schema'
 import type { Player, CombatEvent } from './schema'
-import { BuildingType, StaticObject } from '../types'
+import { BuildingType, StaticObject, UnitType } from '../types'
 
 // --- Player ---
 
@@ -91,6 +91,61 @@ export async function getAllStaticObjects(): Promise<StaticObject[]> {
       lon: row.lng,
     },
   }))
+}
+
+// --- NPC ---
+
+export interface ActivePatrolRow {
+  patrolId: string
+  npcId: string
+  speed: number
+  waypoints: Array<{ lat: number; lng: number; order: number }>
+  unitType: UnitType
+  lastLat: number | null
+  lastLng: number | null
+}
+
+/** Returns all NPC patrols that are currently active, joined with player data. */
+export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
+  const rows = await db
+    .select({
+      patrolId:  npcPatrols.id,
+      npcId:     npcPatrols.npcId,
+      speed:     npcPatrols.speed,
+      waypoints: npcPatrols.waypoints,
+      unitType:  players.unitType,
+      lastLat:   players.lastLat,
+      lastLng:   players.lastLng,
+    })
+    .from(npcPatrols)
+    .innerJoin(players, eq(npcPatrols.npcId, players.id))
+    .where(eq(npcPatrols.isActive, true))
+
+  return rows
+    .filter(r => r.npcId !== null)
+    .map(r => ({ ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType }))
+}
+
+export interface AlwaysOnlineNpcRow {
+  id: string
+  unitType: UnitType
+  lastLat: number | null
+  lastLng: number | null
+}
+
+/**
+ * Returns NPCs with alwaysOnline=true that do NOT have an active patrol
+ * (patrol NPCs are handled separately by the patrol loop).
+ */
+export async function getAlwaysOnlineNpcs(excludeIds: string[]): Promise<AlwaysOnlineNpcRow[]> {
+  const rows = await db
+    .select({ id: players.id, unitType: players.unitType, lastLat: players.lastLat, lastLng: players.lastLng })
+    .from(players)
+    .where(and(eq(players.alwaysOnline, true), isNotNull(players.role)))
+
+  return rows
+    .filter(r => !excludeIds.includes(r.id))
+    .map(r => ({ ...r, unitType: r.unitType as UnitType }))
 }
 
 // --- Combat ---

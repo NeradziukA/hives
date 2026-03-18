@@ -29,6 +29,27 @@ export function broadcast(message: SocketMessage, senderId?: string) {
   }
 }
 
+/**
+ * Register an NPC as "always online" in the shared users map.
+ * Called by the NPC patrol loop at startup; the NPC will appear
+ * in INIT_UNITS responses sent to newly connecting clients.
+ */
+export function registerNpc(id: string, user: User): void {
+  users[id] = user;
+}
+
+/** Update an NPC's position in the shared users map (no WebSocket involved). */
+export function setNpcPosition(id: string, coords: { lat: number; lon: number }): void {
+  if (users[id]) {
+    users[id].coords = coords;
+  }
+}
+
+/** Remove an NPC from the shared users map (e.g. patrol deactivated at runtime). */
+export function deregisterNpc(id: string): void {
+  delete users[id];
+}
+
 export function handleConnection(ws: WebSocket) {
   logger.info("New WS connection — waiting for UNIT_AUTH");
 
