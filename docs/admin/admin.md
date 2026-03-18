@@ -25,7 +25,7 @@ graph TD
         Pagination["PlayersPagination.svelte"]
         PlayerModal["dialogs/PlayerModal.svelte"]
         FormState["playerFormState.svelte.ts"]
-        PlayerFormBase["PlayerFormBase.svelte"]
+        PlayerFormBase["PlayerFormBase.svelte\nrole → NPC / QUEST_MASTER / BOSS"]
         PlayerFormAttributes["PlayerFormAttributes.svelte"]
         PlayerFormSkills["PlayerFormSkills.svelte"]
     end
@@ -44,6 +44,23 @@ graph TD
     PlayerModal --> FormState & PlayerFormBase & PlayerFormAttributes & PlayerFormSkills
     BuildingsPage --> BuildingsSearchBar & BuildingsTable & Pagination & BuildingModal & ConfirmDialog
 ```
+
+## NPC Creation
+
+NPCs are not a separate section — they are players distinguished by their `role` field. The same `PlayerModal` dialog handles creation and editing for all player types, including NPCs.
+
+**To create an NPC:**
+
+1. Open the **Players** section from the sidebar
+2. Click **+ New Player**
+3. In the **Base** section, set **Role** to `NPC` (or `QUEST_MASTER` / `BOSS` for special subtypes)
+4. Fill in username, password, unit type, faction, rank, HP, max HP
+5. Configure attributes (`PlayerFormAttributes`) and skills (`PlayerFormSkills`)
+6. Click **Save**
+
+NPCs appear in the Players table alongside regular players. The search bar can filter by username; there is no role-specific filter.
+
+> **Role field behavior:** the Role `<select>` has an empty option (`—`) as default, meaning newly created players have no role unless explicitly set. Setting Role to `NPC`, `QUEST_MASTER`, or `BOSS` is what distinguishes NPC-type units from human players.
 
 ## Components
 
