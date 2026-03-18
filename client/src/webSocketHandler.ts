@@ -100,7 +100,7 @@ export async function handleWebSocketMessages(
         break;
 
       case "UNIT_MOVED":
-        handleUnitMoved(message, otherUnits);
+        await handleUnitMoved(message, otherUnits, scene);
         break;
 
       case "INIT_UNITS":

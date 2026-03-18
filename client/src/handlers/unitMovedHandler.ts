@@ -1,13 +1,22 @@
+import * as THREE from "three";
 import { Coords } from "../../../lib/geo/coords";
 import { UnitModel } from "../models";
 
 type UnitMovedMessage = { srcId: string; payload: { coords: { lat: number; lon: number } } };
 
-export function handleUnitMoved(
+export async function handleUnitMoved(
   message: UnitMovedMessage,
-  otherUnits: Map<string, UnitModel>
-): void {
-  const movingUnit = otherUnits.get(message.srcId);
+  otherUnits: Map<string, UnitModel>,
+  scene?: THREE.Scene
+): Promise<void> {
+  let movingUnit = otherUnits.get(message.srcId);
+  if (!movingUnit && scene) {
+    const unit = await UnitModel.create();
+    unit.renderObj.userData.unitId = message.srcId;
+    otherUnits.set(message.srcId, unit);
+    scene.add(unit.renderObj);
+    movingUnit = unit;
+  }
   if (movingUnit) {
     movingUnit.moveTo(
       new Coords(message.payload.coords.lat, message.payload.coords.lon)
