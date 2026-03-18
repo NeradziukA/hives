@@ -12,5 +12,9 @@
 | [lib/lib.md](lib/lib.md) | Shared library — geo math, Unit class, enums, interfaces |
 | [gameplay/calculations/combat.md](gameplay/calculations/combat.md) | Combat formulas: hit chance, damage, infection |
 | [gameplay/calculations/vision.md](gameplay/calculations/vision.md) | Vision radius, camouflage, intel delay, group vision |
-| [gameplay/units/human.md](gameplay/units/human.md) | Human character attributes, skills, roles, combat outcomes |
-| [gameplay/units/zombie.md](gameplay/units/zombie.md) | Zombie character attributes, skills, roles, transformation |
+| [gameplay/units/units.md](gameplay/units/units.md) | Unit class hierarchy, shared data model (DB schema + TS types) |
+| [gameplay/units/players.md](gameplay/units/players.md) | Human-controlled players — factions, ranks, inventory, auth |
+| [gameplay/units/npc.md](gameplay/units/npc.md) | Server-controlled NPCs — bosses, quest masters, zombie patrols |
+| [gameplay/units/human.md](gameplay/units/human.md) | Human faction attributes, skills, roles, combat outcomes |
+| [gameplay/units/zombie.md](gameplay/units/zombie.md) | Zombie faction attributes, skills, roles, transformation |
+| [gameplay/objects/objects.md](gameplay/objects/objects.md) | Static objects — buildings, capture mechanics, fog-of-war reveal |
