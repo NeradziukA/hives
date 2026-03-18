@@ -270,10 +270,43 @@ async function tick(elapsedMs: number): Promise<void> {
  * because NPCs should always be online.
  */
 /**
- * Update the in-memory speed for a patrol identified by its `patrolId` (UUID
- * of the `npc_patrols` row).  Call this immediately after persisting a speed
- * change to the database so the running tick loop picks it up without a restart.
+ * Reload an active patrol's configuration from the database (speed, waypoints,
+ * alwaysOnline). Current position is preserved; the closest waypoint index is
+ * recalculated against the new waypoint list. Call after any field change other
+ * than isActive (which is handled by applyPatrolActive).
  */
+export async function applyPatrolUpdate(patrolId: string): Promise<void> {
+  // Find current in-memory state
+  let current: PatrolState | undefined
+  for (const state of patrolStates.values()) {
+    if (state.patrolId === patrolId) { current = state; break }
+  }
+  if (!current) return // patrol not active in memory — nothing to do
+
+  const row = await getPatrolById(patrolId)
+  if (!row) return
+
+  const sorted = [...row.waypoints].sort((a, b) => a.order - b.order)
+
+  // Recalculate closest waypoint to current position
+  let closestIndex = 0
+  if (sorted.length > 0) {
+    let minDist = Infinity
+    sorted.forEach((wp, i) => {
+      const d = haversineDistance(current!.currentLat, current!.currentLng, wp.lat, wp.lng)
+      if (d < minDist) { minDist = d; closestIndex = i }
+    })
+  }
+
+  current.speed        = row.speed
+  current.alwaysOnline = row.alwaysOnline
+  current.waypoints    = sorted
+  current.currentWaypointIndex = closestIndex
+
+  logger.info(`NPC patrol updated in-memory: ${current.npcId}`)
+}
+
+/** @deprecated Use applyPatrolUpdate instead — kept for backwards compatibility. */
 export function applyPatrolSpeed(patrolId: string, speed: number): void {
   for (const state of patrolStates.values()) {
     if (state.patrolId === patrolId) {

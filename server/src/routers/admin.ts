@@ -8,7 +8,7 @@ import { players, staticObjects, npcPatrols } from "../db/schema";
 import { BuildingType, MessageType } from "../types";
 import { verifyAccess } from "../auth/jwt";
 import { getOnlineIds, isOnline, broadcast } from "../websocket/handlers/connect";
-import { applyPatrolSpeed, applyNpcAlwaysOnline, applyPatrolActive } from "../npc/patrol-loop";
+import { applyPatrolUpdate, applyNpcAlwaysOnline, applyPatrolActive } from "../npc/patrol-loop";
 
 const router = Router();
 
@@ -413,11 +413,10 @@ api.put("/patrols/:id", async (req: Request, res: Response) => {
     res.status(404).json({ error: "Patrol not found" });
     return;
   }
-  if (typeof rest.speed === "number") {
-    applyPatrolSpeed(req.params.id as string, rest.speed);
-  }
   if (typeof rest.isActive === "boolean") {
     await applyPatrolActive(req.params.id as string, rest.isActive);
+  } else {
+    await applyPatrolUpdate(req.params.id as string);
   }
   res.json(rows[0]);
 });
