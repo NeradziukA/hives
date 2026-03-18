@@ -58,7 +58,12 @@ api.get("/users", async (req: Request, res: Response) => {
 
   if (onlineOnly) {
     const onlineIds = getOnlineIds();
-    filters.push(onlineIds.length > 0 ? inArray(players.id, onlineIds) : eq(players.id, ""));
+    filters.push(
+      or(
+        eq(players.role, 'npc'),
+        onlineIds.length > 0 ? inArray(players.id, onlineIds) : eq(players.id, ""),
+      )!,
+    );
   }
 
   if (!isNaN(lat) && !isNaN(lng) && !isNaN(radius) && radius > 0) {
