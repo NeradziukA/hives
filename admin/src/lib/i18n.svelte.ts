@@ -124,7 +124,7 @@ interface Translations {
   modalCreatePatrolTitle: string;
   modalEditPatrolTitle: string;
   fieldNpcId: string;
-  fieldSpeed: string;
+  fieldPatrolSpeed: string;
   fieldWaypoints: string;
   fieldPatrolActive: string;
   addWaypoint: string;
@@ -289,7 +289,7 @@ const LANGS: Record<Lang, Translations> = {
     modalCreatePatrolTitle: 'New Patrol',
     modalEditPatrolTitle: 'Edit Patrol',
     fieldNpcId: 'NPC *',
-    fieldSpeed: 'Speed (m/s) *',
+    fieldPatrolSpeed: 'Speed (m/s) *',
     fieldWaypoints: 'Waypoints',
     fieldPatrolActive: 'Active',
     addWaypoint: '+ Add Waypoint',
@@ -452,7 +452,7 @@ const LANGS: Record<Lang, Translations> = {
     modalCreatePatrolTitle: 'Новый патруль',
     modalEditPatrolTitle: 'Редактировать патруль',
     fieldNpcId: 'NPC *',
-    fieldSpeed: 'Скорость (м/с) *',
+    fieldPatrolSpeed: 'Скорость (м/с) *',
     fieldWaypoints: 'Точки маршрута',
     fieldPatrolActive: 'Активен',
     addWaypoint: '+ Добавить точку',

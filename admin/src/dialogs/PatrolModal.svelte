@@ -139,7 +139,7 @@
 
         <div class="row">
           <div class="field">
-            <label for="p-speed">{i18n.t.fieldSpeed}</label>
+            <label for="p-speed">{i18n.t.fieldPatrolSpeed}</label>
             <input id="p-speed" type="number" step="0.1" min="0.1" bind:value={form.speed} />
           </div>
           <div class="field">
