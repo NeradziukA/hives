@@ -70,4 +70,4 @@ Players authenticate via JWT:
 
 - [human.md](human.md) — full Human attribute and skill reference
 - [zombie.md](zombie.md) — full Zombie attribute, skill, and transformation reference
-- [units.md](units.md) — shared Unit data model and class hierarchy
+- [units.md](../units.md) — shared Unit data model and class hierarchy

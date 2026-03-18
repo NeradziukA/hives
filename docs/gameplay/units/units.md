@@ -138,7 +138,10 @@ The full attribute set is only loaded server-side or via the REST/admin API.
 
 | Document | Description |
 |----------|-------------|
-| [players.md](players.md) | Human-controlled accounts — humans and zombies |
-| [npc.md](npc.md) | Server-controlled entities — bosses, quest masters, patrols |
-| [human.md](human.md) | Human faction attributes, skills, roles, combat outcomes |
-| [zombie.md](zombie.md) | Zombie faction attributes, skills, roles, transformation |
+| [player/players.md](player/players.md) | Human-controlled accounts — humans and zombies |
+| [player/human.md](player/human.md) | Human faction attributes, skills, roles, combat outcomes |
+| [player/zombie.md](player/zombie.md) | Zombie faction attributes, skills, roles, transformation |
+| [npc/npc.md](npc/npc.md) | Server-controlled entities — bosses, quest masters, patrols |
+| [npc/boss.md](npc/boss.md) | Immortal faction leader |
+| [npc/quest-master.md](npc/quest-master.md) | Quest-generating NPC |
+| [npc/patrol.md](npc/patrol.md) | Zombie patrol following waypoints |
