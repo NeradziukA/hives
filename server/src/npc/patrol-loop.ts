@@ -31,7 +31,7 @@
 
 import { MessageType, UnitType } from '../types'
 import { getActivePatrols, getPatrolById, updatePlayerPosition } from '../db/queries'
-import { registerNpc, setNpcPosition, deregisterNpc, broadcast } from '../websocket/handlers/connect'
+import { registerNpc, setNpcPosition, broadcast } from '../websocket/handlers/connect'
 import { NPC_TICK_INTERVAL_MS } from '../config'
 import { logger } from '../logger'
 
@@ -336,15 +336,11 @@ export function applyNpcAlwaysOnline(npcId: string, alwaysOnline: boolean): void
  */
 export async function applyPatrolActive(patrolId: string, isActive: boolean): Promise<void> {
   if (!isActive) {
-    // Find the state by patrolId and remove it
+    // Remove from tick loop — NPC stops moving but stays visible in users map
     for (const [npcId, state] of patrolStates) {
       if (state.patrolId === patrolId) {
         patrolStates.delete(npcId)
-        if (state.alwaysOnline) {
-          deregisterNpc(npcId)
-          broadcast({ type: MessageType.UNIT_DISCONNECTED, srcId: npcId, payload: {} })
-        }
-        logger.info(`NPC patrol deactivated: ${npcId}`)
+        logger.info(`NPC patrol deactivated (stopped): ${npcId}`)
         return
       }
     }
