@@ -1,7 +1,6 @@
 ---
 name: commit
-description: Create a commit only after documentation and diagrams are
-  updated
+description: Create a commit only after documentation and diagrams are updated
 ---
 
 # Commit With Documentation Update
