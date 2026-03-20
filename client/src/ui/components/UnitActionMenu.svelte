@@ -45,15 +45,17 @@
 
 {#if gameState.selectedUnitId}
   <div class="menu">
-    {#if !gameState.messagingMode}
+    <div class="header">
       <span class="unit-id">{label}</span>
+      <button class="btn-dismiss" onclick={dismiss} aria-label="Dismiss">✕</button>
+    </div>
+    {#if !gameState.messagingMode}
       <div class="actions">
         <button disabled>Follow</button>
         <button
           onclick={() => (gameState.messagingMode = true)}
           disabled={gameState.selectedUnitId === MAIN_UNIT_ID}
         >Message</button>
-        <button onclick={dismiss} aria-label="Dismiss">✕</button>
       </div>
     {:else}
       <input
@@ -64,12 +66,11 @@
         maxlength={UNIT_MESSAGE_MAX_LENGTH}
         autofocus
       />
-      <span class="char-hint" class:warn={messageText.length > UNIT_MESSAGE_MAX_LENGTH * 0.9}>
-        {UNIT_MESSAGE_MAX_LENGTH - messageText.length}
-      </span>
-      <div class="actions">
+      <div class="msg-footer">
+        <span class="char-hint" class:warn={messageText.length > UNIT_MESSAGE_MAX_LENGTH * 0.9}>
+          {UNIT_MESSAGE_MAX_LENGTH - messageText.length}
+        </span>
         <button onclick={sendMessage}>Send</button>
-        <button onclick={cancelMessage}>✕</button>
       </div>
     {/if}
   </div>
@@ -78,7 +79,7 @@
 <style>
   .menu {
     position: fixed;
-    bottom: 60px;
+    top: 56px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.88);
@@ -87,22 +88,49 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     letter-spacing: 0.08em;
-    padding: 10px 18px;
+    padding: 10px 14px;
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    gap: 8px;
     z-index: 6;
     pointer-events: auto;
+    min-width: 180px;
+    max-width: min(320px, calc(100vw - 80px));
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .unit-id {
     opacity: 0.7;
     text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .btn-dismiss {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 0 2px;
+    cursor: pointer;
+    opacity: 0.5;
+    line-height: 1;
+  }
+
+  .btn-dismiss:hover {
+    opacity: 1;
   }
 
   .actions {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
   }
 
   button {
@@ -112,10 +140,11 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     letter-spacing: 0.08em;
-    padding: 4px 10px;
+    padding: 8px 10px;
     cursor: pointer;
     text-transform: uppercase;
     transition: background 0.15s;
+    text-align: left;
   }
 
   button:hover:not(:disabled) {
@@ -136,8 +165,16 @@
     font-size: 13px;
     letter-spacing: 0.08em;
     outline: none;
-    width: 220px;
+    width: 100%;
     padding: 2px 0;
+  }
+
+  .msg-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 2px;
   }
 
   .msg-input::placeholder {
@@ -149,6 +186,7 @@
     font-size: 11px;
     min-width: 2.5em;
     text-align: right;
+    flex-shrink: 0;
   }
 
   .char-hint.warn {

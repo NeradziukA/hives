@@ -88,6 +88,8 @@ export async function getAllStaticObjects(): Promise<StaticObject[]> {
     type: row.type as BuildingType,
     coords: { lat: row.lat, lon: row.lng },
     name: row.name ?? undefined,
+    revealRadius: row.revealRadius,
+    faction: row.faction ?? undefined,
   }))
 }
 

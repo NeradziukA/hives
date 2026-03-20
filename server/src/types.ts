@@ -69,6 +69,8 @@ export type StaticObject = {
   type: BuildingType;
   coords: Coordinates;
   name?: string;
+  revealRadius: number;
+  faction?: string;
 };
 
 export type Coordinates = {

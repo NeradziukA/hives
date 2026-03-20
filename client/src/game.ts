@@ -19,8 +19,9 @@ import {
   getUnitById,
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
-import { gameState, wireSetZoom } from "./ui/gameState.svelte.ts";
+import { gameState, wireSetZoom, type UnitCandidate } from "./ui/gameState.svelte.ts";
 import { createHexGrid, updateHexGrid } from "./hexgrid";
+import { getStaticObjectsMap } from "./handlers/initUnitsHandler";
 
 const MAIN_UNIT_ID = "__self__";
 
@@ -104,14 +105,34 @@ export async function initGame(container: HTMLElement): Promise<void> {
     const intersects = raycaster.intersectObjects(getOtherUnitObjects(), true);
 
     if (intersects.length > 0) {
-      const unitId = findUnitId(intersects[0].object);
-      gameState.selectedUnitId = unitId;
-      gameState.selectedObjectType = findObjectType(intersects[0].object);
-      gameState.selectedUnitUsername = findUsername(intersects[0].object);
+      const seen = new Set<string>();
+      const candidates: UnitCandidate[] = [];
+      for (const hit of intersects) {
+        const unitId = findUnitId(hit.object);
+        if (unitId && !seen.has(unitId)) {
+          seen.add(unitId);
+          candidates.push({
+            unitId,
+            username: findUsername(hit.object),
+            objectType: findObjectType(hit.object),
+          });
+        }
+      }
+
+      if (candidates.length === 1) {
+        gameState.selectedUnitId = candidates[0].unitId;
+        gameState.selectedObjectType = candidates[0].objectType;
+        gameState.selectedUnitUsername = candidates[0].username;
+        gameState.unitPickerCandidates = [];
+      } else {
+        gameState.unitPickerCandidates = candidates;
+        gameState.selectedUnitId = null;
+      }
     } else {
       gameState.selectedUnitId = null;
       gameState.selectedObjectType = null;
       gameState.selectedUnitUsername = null;
+      gameState.unitPickerCandidates = [];
     }
   });
 
@@ -160,10 +181,37 @@ export async function initGame(container: HTMLElement): Promise<void> {
   renderer.setAnimationLoop(animate);
 }
 
+function updateEffectiveVision(lat: number, lon: number): void {
+  const playerFaction = gameState.faction;
+  let effective = gameState.visionRadius;
+  const M_PER_LAT = 111320;
+  const M_PER_LNG = 111320 * Math.cos(lat * Math.PI / 180);
+  for (const [, obj] of getStaticObjectsMap()) {
+    if (obj.faction !== playerFaction) continue;
+    const dx = (lon - obj.coords.y) * M_PER_LNG;
+    const dy = (lat - obj.coords.x) * M_PER_LAT;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= obj.revealRadius) {
+      effective = Math.max(effective, obj.revealRadius);
+    }
+  }
+  gameState.effectiveVisionRadius = effective;
+}
+
 export function connectToServer(playerId: string, accessToken: string, onAuthError?: () => void): void {
-  connectWebSocket(playerId, accessToken, _scene, handleWebSocketMessages, (coords) => {
-    if (_mainUnit?.renderObj) _mainUnit.moveTo(new Coords(coords.lat, coords.lon));
-    _updateTarget(coords.lat, coords.lon);
-    updateHexGrid(_hexGrid, coords.lat, coords.lon);
-  }, onAuthError);
+  let _lastCoords = { lat: 0, lon: 0 };
+  connectWebSocket(
+    playerId, accessToken, _scene,
+    (event, scene, socket, units, setMyId, onOwnMove) =>
+      handleWebSocketMessages(event, scene, socket, units, setMyId, onOwnMove,
+        () => updateEffectiveVision(_lastCoords.lat, _lastCoords.lon)),
+    (coords) => {
+      _lastCoords = coords;
+      if (_mainUnit?.renderObj) _mainUnit.moveTo(new Coords(coords.lat, coords.lon));
+      _updateTarget(coords.lat, coords.lon);
+      updateHexGrid(_hexGrid, coords.lat, coords.lon);
+      updateEffectiveVision(coords.lat, coords.lon);
+    },
+    onAuthError
+  );
 }

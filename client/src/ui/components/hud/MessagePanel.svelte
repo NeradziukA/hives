@@ -78,8 +78,9 @@
   .panel {
     position: fixed;
     bottom: 16px;
-    left: 16px;
-    width: 320px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(480px, calc(100vw - 100px));
     background: rgba(0, 0, 0, 0.82);
     border: 1px solid rgba(var(--accent-rgb), 0.4);
     color: var(--accent);

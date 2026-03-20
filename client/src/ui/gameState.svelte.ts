@@ -1,3 +1,9 @@
+export type UnitCandidate = {
+  unitId: string;
+  username: string | null;
+  objectType: string | null;
+};
+
 export const gameState = $state({
   zoom: 1,
   messages: [] as { id: number; text: string }[],
@@ -7,6 +13,9 @@ export const gameState = $state({
   selectedUnitUsername: null as string | null,
   faction: null as string | null,
   messagingMode: false,
+  unitPickerCandidates: [] as UnitCandidate[],
+  visionRadius: 200, // meters; base = 200 + vision_attribute * 10
+  effectiveVisionRadius: 200, // max of visionRadius and any nearby allied building's revealRadius
 });
 
 // Wired up by game.ts after camera setup; call to actually move the camera

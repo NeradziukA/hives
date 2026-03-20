@@ -29,6 +29,9 @@
       if (res.ok) {
         const data = await res.json();
         gameState.faction = data.faction ?? null;
+        if (typeof data.vision === "number") {
+          gameState.visionRadius = 200 + data.vision * 10;
+        }
       }
     } catch {
       // ignore

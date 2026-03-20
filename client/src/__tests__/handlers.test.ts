@@ -22,7 +22,7 @@ vi.mock('../ui/gameState.svelte.ts', () => ({
 import { handleUnitMoved } from '../handlers/unitMovedHandler'
 import { handleUnitDisconnected } from '../handlers/unitDisconnectedHandler'
 import { handleUnitConnected } from '../handlers/unitConnectedHandler'
-import { handleInitUnits } from '../handlers/initUnitsHandler'
+import { handleInitUnits, getStaticObjectsMap } from '../handlers/initUnitsHandler'
 import { handleUnitMessage } from '../handlers/unitMessageHandler'
 import { pushMessage } from '../ui/gameState.svelte.ts'
 import { UnitModel } from '../models'
@@ -202,6 +202,31 @@ describe('handleInitUnits', () => {
     const scene = makeScene()
     await handleInitUnits({ payload: {} }, scene, new Map(), 'my-id')
     expect(UnitModel.create).not.toHaveBeenCalled()
+  })
+
+  // Regression: staticObjectsMap did not store revealRadius/faction, so
+  // updateEffectiveVision always skipped all buildings (faction mismatch / radius=0).
+  // Location union (allied building extends vision) never activated.
+  it('populates staticObjectsMap with revealRadius and faction for static objects', async () => {
+    const scene = makeScene()
+
+    await handleInitUnits(
+      {
+        payload: {
+          staticObjects: [
+            { id: 'base-1', coords: { lat: 55.0, lon: 37.0 }, revealRadius: 600, faction: 'humans' },
+          ],
+        },
+      },
+      scene,
+      new Map(),
+      'my-id',
+    )
+
+    const map = getStaticObjectsMap()
+    expect(map.has('base-1')).toBe(true)
+    expect(map.get('base-1')?.revealRadius).toBe(600)
+    expect(map.get('base-1')?.faction).toBe('humans')
   })
 
   // Regression: username was not stored in userData — HUD/menu showed raw ID instead of name

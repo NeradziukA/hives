@@ -88,7 +88,8 @@ export async function handleWebSocketMessages(
   socket: WebSocket,
   otherUnits: Map<string, UnitModel>,
   setMyId: (id: string) => void,
-  onOwnMove?: (coords: { lat: number; lon: number }) => void
+  onOwnMove?: (coords: { lat: number; lon: number }) => void,
+  onInitUnits?: () => void
 ): Promise<void> {
   try {
     const message = JSON.parse(event.data);
@@ -112,6 +113,7 @@ export async function handleWebSocketMessages(
 
       case "INIT_UNITS":
         await handleInitUnits(message, scene, otherUnits, myId);
+        onInitUnits?.();
         break;
 
       case "AUTH_ERROR":

@@ -2,10 +2,14 @@ import * as THREE from "three";
 import { UnitModel } from "../models";
 import { Coords } from "../../../lib/geo/coords";
 
+type StaticObjectInfo = { coords: Coords; revealRadius: number; faction?: string };
+const staticObjectsMap = new Map<string, StaticObjectInfo>();
+export function getStaticObjectsMap() { return staticObjectsMap; }
+
 type InitUnitsMessage = {
   payload: {
     users?: Record<string, { type: string; coords: { lat: number; lon: number }; username?: string }>;
-    staticObjects?: Array<{ id: string; type: string; coords: { lat: number; lon: number }; name?: string }>;
+    staticObjects?: Array<{ id: string; type: string; coords: { lat: number; lon: number }; name?: string; revealRadius: number; faction?: string }>;
   };
 };
 
@@ -34,6 +38,7 @@ export async function handleInitUnits(
       }
     }
   }
+  staticObjectsMap.clear();
   if (message.payload.staticObjects) {
     for (const o of message.payload.staticObjects) {
       const unit = await UnitModel.create(false, "/assets/models-3d/Large Building.glb", 25);
@@ -43,6 +48,11 @@ export async function handleInitUnits(
       unit.moveTo(new Coords(o.coords.lat, o.coords.lon));
       otherUnits.set(o.id, unit);
       scene.add(unit.renderObj);
+      staticObjectsMap.set(o.id, {
+        coords: new Coords(o.coords.lat, o.coords.lon),
+        revealRadius: o.revealRadius,
+        faction: o.faction,
+      });
     }
   }
 }

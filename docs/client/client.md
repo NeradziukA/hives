@@ -35,6 +35,7 @@ graph TD
         GameHud["GameHud.svelte\nmessage panel wrapper"]
         MessagePanel["MessagePanel.svelte\ncollapsible history · filter"]
         UnitActionMenu["UnitActionMenu.svelte\nselected unit actions"]
+        UnitPicker["UnitPicker.svelte\noverlapping unit picker"]
         gameState["gameState.svelte.ts\nshared reactive state"]
     end
 
@@ -48,10 +49,11 @@ graph TD
     init & connected & moved & disconnected --> models
     App --> Splash & MainMenu & Game & Profile
     Game & Profile --> Layout --> Sidebar
-    Game --> GameHud & UnitActionMenu
+    Game --> GameHud & UnitActionMenu & UnitPicker
     GameHud --> MessagePanel
-    GameHud & UnitActionMenu & MessagePanel --> gameState
-    scene -->|zoom · selectedUnitId| gameState
+    GameHud & UnitActionMenu & UnitPicker & MessagePanel --> gameState
+    scene -->|zoom · selectedUnitId · visionRadius| gameState
+    init -->|onInitUnits callback| scene
     connected & disconnected & msg -->|pushMessage| gameState
 ```
 
@@ -68,7 +70,7 @@ graph TD
 | [webSocketHandler.ts](../../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
 | [location.ts](../../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
 | [lighting.ts](../../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
-| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages (TTL), messageHistory (last 500), selectedUnitId, messagingMode     |
+| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages (TTL), messageHistory (last 500), selectedUnitId, messagingMode, visionRadius, effectiveVisionRadius, unitPickerCandidates |
 
 ## Handlers
 
@@ -77,7 +79,7 @@ Located in [client/src/handlers/](../../client/src/handlers/)
 | Handler                    | Triggered by         | Action                                                                          |
 | -------------------------- | -------------------- | ------------------------------------------------------------------------------- |
 | `unitAuthenticatedHandler` | `UNIT_AUTHENTICATED` | Saves own ID, starts LocationTracker, begins sending position                   |
-| `initUnitsHandler`         | `INIT_UNITS`         | Clears stale units, then creates 3D models for all existing users and buildings |
+| `initUnitsHandler`         | `INIT_UNITS`         | Clears stale units, creates 3D models for all existing users and buildings; populates `staticObjectsMap` with `revealRadius`/`faction` for vision calculations; triggers `onInitUnits` callback so `game.ts` can refresh `effectiveVisionRadius` |
 | `unitConnectedHandler`     | `UNIT_CONNECTED`     | Creates 3D model for newly joined user                                          |
 | `unitMovedHandler`         | `UNIT_MOVED`         | Updates position of a user's model                                              |
 | `unitDisconnectedHandler`  | `UNIT_DISCONNECTED`  | Removes model from scene                                                        |
@@ -150,10 +152,19 @@ Clicking a non-own unit:
 
 - Highlights it with a green outline (`OutlinePass`) in 3D model mode
 - Shows a green selection ring sprite in dot LOD mode
-- Opens `UnitActionMenu` above the HUD with unit ID and action buttons
+- If multiple objects overlap at the click point, opens `UnitPicker` — a list letting the player choose which unit to target
+- Opens `UnitActionMenu` (top-center, below HUD bar) with unit name and action buttons
 - Deselects previous unit before selecting the new one
 
 Clicking empty space or pressing ✕ dismisses the selection.
+
+## Fog of War
+
+A CSS `radial-gradient` overlay (`Game.svelte`) dims the area outside the player's vision radius.
+
+- Inner radius (`fogInner`) is computed from `gameState.effectiveVisionRadius` and `gameState.zoom` — see [docs/gameplay/calculations/vision.md](../gameplay/calculations/vision.md#рендеринг-тумана-войны-клиент)
+- `effectiveVisionRadius` is the max of the player's personal `visionRadius` and any allied location's `revealRadius` that the player is currently inside
+- Recalculated on every GPS update **and** immediately after `INIT_UNITS` (so allied buildings take effect even when the player is stationary)
 
 Clicking **Message** opens an inline text input (max `UNIT_MESSAGE_MAX_LENGTH` chars, defined in `lib/constants.ts`). Enter sends the message; Escape cancels. A remaining-character counter is shown next to the field and turns highlighted when fewer than 10 % of characters remain. The server routes the message only to the target player's socket using the JWT-verified sender ID.
 
@@ -171,7 +182,8 @@ cd client && npm run test:coverage # run with HTML coverage report
 | [`__tests__/auth.test.ts`](../../client/src/__tests__/auth.test.ts)                                         | `setTokens`, `getAccessToken`, `getPlayerId`, `hasSession`, `clearSession`, `refreshAccessToken`                                          |
 | [`__tests__/handlers.test.ts`](../../client/src/__tests__/handlers.test.ts)                                 | `handleUnitMoved`, `handleUnitDisconnected`, `handleUnitConnected`, `handleInitUnits`; ghost-player regression                            |
 | [`__tests__/unitAuthenticatedHandler.test.ts`](../../client/src/__tests__/unitAuthenticatedHandler.test.ts) | `handleUnitAuthenticated`: setup, first/subsequent location updates, reconnect behaviour                                                  |
-| [`__tests__/webSocketHandler.test.ts`](../../client/src/__tests__/webSocketHandler.test.ts)                 | `disconnectWebSocket`: no auto-reconnect after disconnect, cleans up socket; `connectWebSocket`: closes previous socket on account switch |
+| [`__tests__/fogFormula.test.ts`](../../client/src/__tests__/fogFormula.test.ts)                             | Fog formula proportional scaling; regression: `Math.max(8,…)` clamp detached fog size from vision radius at high zoom |
+| [`__tests__/webSocketHandler.test.ts`](../../client/src/__tests__/webSocketHandler.test.ts)                 | `disconnectWebSocket`: no auto-reconnect; `connectWebSocket`: closes previous socket; `handleWebSocketMessages`: `onInitUnits` callback fires after `INIT_UNITS` |
 | [`__tests__/lodDotSize.test.ts`](../../client/src/__tests__/lodDotSize.test.ts)                             | LOD dot size formula: constant at any zoom/position; regression for `window.innerHeight` vs renderer height divergence on iOS |
 
 Coverage reports are written to `client/coverage/` (git-ignored).

@@ -25,6 +25,10 @@ vi.mock('../handlers/initUnitsHandler', () => ({
   handleInitUnits: vi.fn(),
 }))
 
+vi.mock('../handlers/unitMessageHandler', () => ({
+  handleUnitMessage: vi.fn(),
+}))
+
 // Minimal WebSocket stub used across tests
 // Tracks the most recently created instance so tests can inspect it
 let lastWs: {
@@ -67,7 +71,8 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-import { connectWebSocket, disconnectWebSocket } from '../webSocketHandler'
+import { connectWebSocket, disconnectWebSocket, handleWebSocketMessages } from '../webSocketHandler'
+import { handleInitUnits } from '../handlers/initUnitsHandler'
 import type * as THREE from 'three'
 
 const makeScene = () => ({
@@ -123,5 +128,46 @@ describe('connectWebSocket', () => {
     // And its onclose was nullified before close — no extra reconnect timer
     vi.advanceTimersByTime(10_000)
     expect(MockWebSocket).toHaveBeenCalledTimes(2)
+  })
+})
+
+// ---------------------------------------------------------------------------
+
+describe('handleWebSocketMessages', () => {
+  // Regression: updateEffectiveVision was only called from the GPS move callback.
+  // When INIT_UNITS arrived (with static objects / revealRadius), the effective vision
+  // radius was never recalculated if the player was stationary — location union did not work.
+  // Fix: handleWebSocketMessages now calls onInitUnits() after handleInitUnits completes.
+  it('calls onInitUnits callback after INIT_UNITS is processed', async () => {
+    const onInitUnits = vi.fn()
+
+    await handleWebSocketMessages(
+      { data: JSON.stringify({ type: 'INIT_UNITS', payload: {} }) } as MessageEvent,
+      makeScene(),
+      {} as WebSocket,
+      new Map(),
+      vi.fn(),
+      undefined,
+      onInitUnits,
+    )
+
+    expect(handleInitUnits).toHaveBeenCalledOnce()
+    expect(onInitUnits).toHaveBeenCalledOnce()
+  })
+
+  it('does not call onInitUnits for other message types', async () => {
+    const onInitUnits = vi.fn()
+
+    await handleWebSocketMessages(
+      { data: JSON.stringify({ type: 'UNIT_CONNECTED', srcId: 'x' }) } as MessageEvent,
+      makeScene(),
+      {} as WebSocket,
+      new Map(),
+      vi.fn(),
+      undefined,
+      onInitUnits,
+    )
+
+    expect(onInitUnits).not.toHaveBeenCalled()
   })
 })
