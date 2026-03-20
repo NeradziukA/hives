@@ -67,6 +67,8 @@ Only `id`, `type`, and `coords` are transmitted to the client. Capture state and
 
 Each static object clears the fog of war within its `revealRadius` (metres) for members of the owning faction. A larger `revealRadius` means a wider revealed zone around the building.
 
+`revealRadius` is configurable per building in the admin panel (**Buildings → Edit → Reveal Radius**).
+
 See [vision.md](../calculations/vision.md) for the full fog-of-war model.
 
 ---
