@@ -59,6 +59,7 @@ export type User = {
   id: string;
   type: UnitType;
   coords: Coordinates;
+  username?: string;
 };
 
 export type UserList = { [key: string]: User };
@@ -67,6 +68,7 @@ export type StaticObject = {
   id: string;
   type: BuildingType;
   coords: Coordinates;
+  name?: string;
 };
 
 export type Coordinates = {
@@ -90,6 +92,7 @@ export type SocketMessage = {
     config?: GameConfig;
     error?: string;
     unitType?: string;
+    username?: string;
     dstId?: string;
     text?: string;
   };

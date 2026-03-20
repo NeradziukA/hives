@@ -42,6 +42,15 @@ function findObjectType(object: THREE.Object3D): 'unit' | 'building' | null {
   return null;
 }
 
+function findUsername(object: THREE.Object3D): string | null {
+  let node: THREE.Object3D | null = object;
+  while (node) {
+    if (node.userData.username) return node.userData.username as string;
+    node = node.parent;
+  }
+  return null;
+}
+
 let _scene: THREE.Scene;
 let _mainUnit: UnitModel;
 let _updateTarget: (lat: number, lon: number) => void;
@@ -98,9 +107,11 @@ export async function initGame(container: HTMLElement): Promise<void> {
       const unitId = findUnitId(intersects[0].object);
       gameState.selectedUnitId = unitId;
       gameState.selectedObjectType = findObjectType(intersects[0].object);
+      gameState.selectedUnitUsername = findUsername(intersects[0].object);
     } else {
       gameState.selectedUnitId = null;
       gameState.selectedObjectType = null;
+      gameState.selectedUnitUsername = null;
     }
   });
 

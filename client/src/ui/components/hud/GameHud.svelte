@@ -5,11 +5,17 @@
 
   const MAIN_UNIT_ID = "__self__";
 
+  let lastMessage = $derived(gameState.messages.at(-1)?.text ?? "");
+
   let displayMsg = $derived(
-    gameState.selectedUnitId && gameState.selectedUnitId !== MAIN_UNIT_ID
-      ? `${$_('types.' + gameState.selectedObjectType, { default: gameState.selectedObjectType ?? '' })} · ${gameState.selectedUnitId.slice(0, 8)}`
-      : gameState.messages.at(-1)?.text ?? ""
+    lastMessage
+      ? lastMessage
+      : gameState.selectedUnitId && gameState.selectedUnitId !== MAIN_UNIT_ID
+        ? `${$_('types.' + gameState.selectedObjectType, { default: gameState.selectedObjectType ?? '' })} · ${gameState.selectedUnitUsername ?? gameState.selectedUnitId.slice(0, 8)}`
+        : ""
   );
+
+
 </script>
 
 <div class="hud">

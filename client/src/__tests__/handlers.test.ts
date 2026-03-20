@@ -23,6 +23,7 @@ import { handleUnitMoved } from '../handlers/unitMovedHandler'
 import { handleUnitDisconnected } from '../handlers/unitDisconnectedHandler'
 import { handleUnitConnected } from '../handlers/unitConnectedHandler'
 import { handleInitUnits } from '../handlers/initUnitsHandler'
+import { handleUnitMessage } from '../handlers/unitMessageHandler'
 import { pushMessage } from '../ui/gameState.svelte.ts'
 import { UnitModel } from '../models'
 
@@ -106,6 +107,13 @@ describe('handleUnitConnected', () => {
     expect(units.get('u2')).toBe(mockUnit)
   })
 
+  // Regression: username was not stored in userData on UNIT_CONNECTED
+  it('stores username in userData', async () => {
+    const scene = makeScene()
+    await handleUnitConnected({ srcId: 'u3', payload: { username: 'Bob' } }, scene, new Map())
+    expect(mockUnit.renderObj.userData.username).toBe('Bob')
+  })
+
   it('pushes a connection message', async () => {
     const scene = makeScene()
     await handleUnitConnected({ srcId: 'abcdef999999' }, scene, new Map())
@@ -116,6 +124,26 @@ describe('handleUnitConnected', () => {
     const scene = makeScene()
     await handleUnitConnected({ srcId: '' }, scene, new Map())
     expect(UnitModel.create).not.toHaveBeenCalled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+
+describe('handleUnitMessage', () => {
+  // Regression: HUD showed sender's raw UUID instead of their username
+  it('uses username from payload as the sender label', () => {
+    handleUnitMessage({ srcId: 'aabbccdd-1234-5678-abcd-ef0123456789', payload: { text: 'hello', username: 'Kira' } })
+    expect(pushMessage).toHaveBeenCalledWith(expect.stringContaining('[Kira]:'), expect.any(Number))
+  })
+
+  it('falls back to short srcId when username is absent', () => {
+    handleUnitMessage({ srcId: 'aabbccdd-1234-5678-abcd-ef0123456789', payload: { text: 'hi' } })
+    expect(pushMessage).toHaveBeenCalledWith(expect.stringContaining('[aabbccdd]'), expect.any(Number))
+  })
+
+  it('does nothing when text is empty', () => {
+    handleUnitMessage({ srcId: 'x', payload: { text: '' } })
+    expect(pushMessage).not.toHaveBeenCalled()
   })
 })
 
@@ -174,6 +202,49 @@ describe('handleInitUnits', () => {
     const scene = makeScene()
     await handleInitUnits({ payload: {} }, scene, new Map(), 'my-id')
     expect(UnitModel.create).not.toHaveBeenCalled()
+  })
+
+  // Regression: username was not stored in userData — HUD/menu showed raw ID instead of name
+  it('stores username in userData for remote users', async () => {
+    const scene = makeScene()
+    const units = new Map()
+
+    await handleInitUnits(
+      {
+        payload: {
+          users: {
+            'u-alice': { coords: { lat: 55.0, lon: 37.0 }, username: 'Alice' },
+          },
+        },
+      },
+      scene,
+      units,
+      'my-id',
+    )
+
+    expect(mockUnit.renderObj.userData.username).toBe('Alice')
+  })
+
+  // Regression: building name field was not included in INIT_UNITS payload —
+  // clicking a building showed its UUID instead of its name
+  it('stores building name in userData.username for static objects', async () => {
+    const scene = makeScene()
+    const units = new Map()
+
+    await handleInitUnits(
+      {
+        payload: {
+          staticObjects: [
+            { id: 'bld-1', coords: { lat: 55.0, lon: 37.0 }, name: 'Central Hub' },
+          ],
+        },
+      },
+      scene,
+      units,
+      'my-id',
+    )
+
+    expect(mockUnit.renderObj.userData.username).toBe('Central Hub')
   })
 
   // Regression: ghost players after account switch / WS reconnect

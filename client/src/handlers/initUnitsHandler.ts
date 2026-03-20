@@ -4,8 +4,8 @@ import { Coords } from "../../../lib/geo/coords";
 
 type InitUnitsMessage = {
   payload: {
-    users?: Record<string, { type: string; coords: { lat: number; lon: number } }>;
-    staticObjects?: Array<{ id: string; type: string; coords: { lat: number; lon: number } }>;
+    users?: Record<string, { type: string; coords: { lat: number; lon: number }; username?: string }>;
+    staticObjects?: Array<{ id: string; type: string; coords: { lat: number; lon: number }; name?: string }>;
   };
 };
 
@@ -27,6 +27,7 @@ export async function handleInitUnits(
         const unit = await UnitModel.create();
         unit.renderObj.userData.unitId = id;
         unit.renderObj.userData.objectType = unitData.type;
+        unit.renderObj.userData.username = unitData.username ?? null;
         unit.moveTo(new Coords(unitData.coords.lat, unitData.coords.lon));
         otherUnits.set(id, unit);
         scene.add(unit.renderObj);
@@ -38,6 +39,7 @@ export async function handleInitUnits(
       const unit = await UnitModel.create(false, "/assets/models-3d/Large Building.glb", 25);
       unit.renderObj.userData.unitId = o.id;
       unit.renderObj.userData.objectType = o.type;
+      unit.renderObj.userData.username = o.name ?? null;
       unit.moveTo(new Coords(o.coords.lat, o.coords.lon));
       otherUnits.set(o.id, unit);
       scene.add(unit.renderObj);

@@ -101,7 +101,7 @@ export function handleConnection(ws: WebSocket) {
       existingSocket.close();
     }
 
-    users[id] = { id, type: player.unitType as UnitType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 } };
+    users[id] = { id, type: player.unitType as UnitType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 }, username: player.username ?? undefined };
     clientsSockets[id] = ws;
     logger.info("Authenticated: " + id);
 
@@ -111,7 +111,7 @@ export function handleConnection(ws: WebSocket) {
       payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
     }));
 
-    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id, payload: { unitType: player.unitType } }, id);
+    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id, payload: { unitType: player.unitType, username: player.username ?? undefined } }, id);
 
     // Idle timeout — close zombie connections that stop sending UNIT_MOVED
     let idleTimer = setTimeout(() => {
@@ -159,10 +159,11 @@ export function handleConnection(ws: WebSocket) {
           dstSocket.send(JSON.stringify({
             type: MessageType.UNIT_MESSAGE,
             srcId: id, // use server-verified id, not client-claimed srcId
-            payload: { dstId, text },
+            payload: { dstId, text, username: users[id]?.username ?? undefined },
           }));
           break;
         }
+      }
     });
 
     ws.on("close", function () {

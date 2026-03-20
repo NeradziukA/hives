@@ -22,6 +22,7 @@ export async function handleUnitGetAll(
         id: npc.id,
         type: npc.unitType,
         coords: { lat: npc.lastLat ?? 0, lon: npc.lastLng ?? 0 },
+        username: npc.username ?? undefined,
       };
     }
   }

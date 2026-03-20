@@ -86,10 +86,8 @@ export async function getAllStaticObjects(): Promise<StaticObject[]> {
   return rows.map(row => ({
     id: row.id,
     type: row.type as BuildingType,
-    coords: {
-      lat: row.lat,
-      lon: row.lng,
-    },
+    coords: { lat: row.lat, lon: row.lng },
+    name: row.name ?? undefined,
   }))
 }
 
@@ -154,6 +152,7 @@ export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
 export interface AlwaysOnlineNpcRow {
   id: string
   unitType: UnitType
+  username: string | null
   lastLat: number | null
   lastLng: number | null
 }
@@ -161,7 +160,7 @@ export interface AlwaysOnlineNpcRow {
 /** Returns all NPCs with alwaysOnline=true. */
 export async function getAlwaysOnlineNpcs(): Promise<AlwaysOnlineNpcRow[]> {
   const rows = await db
-    .select({ id: players.id, unitType: players.unitType, lastLat: players.lastLat, lastLng: players.lastLng })
+    .select({ id: players.id, unitType: players.unitType, username: players.username, lastLat: players.lastLat, lastLng: players.lastLng })
     .from(players)
     .where(and(eq(players.alwaysOnline, true), isNotNull(players.role)))
 

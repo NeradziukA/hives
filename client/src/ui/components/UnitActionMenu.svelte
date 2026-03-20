@@ -8,24 +8,19 @@
   let label = $derived(
     gameState.selectedUnitId === MAIN_UNIT_ID
       ? "You"
-      : gameState.selectedUnitId?.slice(0, 8) ?? ""
+      : gameState.selectedUnitUsername ?? gameState.selectedUnitId?.slice(0, 8) ?? ""
   );
 
-  let messagingMode = $state(false);
   let messageText = $state("");
 
   function dismiss() {
     gameState.selectedUnitId = null;
-    messagingMode = false;
+    gameState.messagingMode = false;
     messageText = "";
   }
 
-  function openMessage() {
-    messagingMode = true;
-  }
-
   function cancelMessage() {
-    messagingMode = false;
+    gameState.messagingMode = false;
     messageText = "";
   }
 
@@ -39,7 +34,7 @@
       payload: { dstId: gameState.selectedUnitId, text },
     });
     messageText = "";
-    messagingMode = false;
+    gameState.messagingMode = false;
   }
 
   function onKeydown(e: KeyboardEvent) {
@@ -50,12 +45,12 @@
 
 {#if gameState.selectedUnitId}
   <div class="menu">
-    {#if !messagingMode}
-      <span class="unit-id">Unit: {label}</span>
+    {#if !gameState.messagingMode}
+      <span class="unit-id">{label}</span>
       <div class="actions">
         <button disabled>Follow</button>
         <button
-          onclick={openMessage}
+          onclick={() => (gameState.messagingMode = true)}
           disabled={gameState.selectedUnitId === MAIN_UNIT_ID}
         >Message</button>
         <button onclick={dismiss} aria-label="Dismiss">✕</button>

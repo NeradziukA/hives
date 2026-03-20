@@ -3,7 +3,9 @@ export const gameState = $state({
   messages: [] as { id: number; text: string }[],
   selectedUnitId: null as string | null,
   selectedObjectType: null as string | null,
+  selectedUnitUsername: null as string | null,
   faction: null as string | null,
+  messagingMode: false,
 });
 
 // Wired up by game.ts after camera setup; call to actually move the camera
