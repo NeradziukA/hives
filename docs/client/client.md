@@ -32,7 +32,8 @@ graph TD
         Profile["Profile.svelte"]
         Layout["Layout.svelte"]
         Sidebar["Sidebar.svelte"]
-        GameHud["GameHud.svelte\nzoom · messages"]
+        GameHud["GameHud.svelte\nmessage panel wrapper"]
+        MessagePanel["MessagePanel.svelte\ncollapsible history · filter"]
         UnitActionMenu["UnitActionMenu.svelte\nselected unit actions"]
         gameState["gameState.svelte.ts\nshared reactive state"]
     end
@@ -48,7 +49,8 @@ graph TD
     App --> Splash & MainMenu & Game & Profile
     Game & Profile --> Layout --> Sidebar
     Game --> GameHud & UnitActionMenu
-    GameHud & UnitActionMenu --> gameState
+    GameHud --> MessagePanel
+    GameHud & UnitActionMenu & MessagePanel --> gameState
     scene -->|zoom · selectedUnitId| gameState
     connected & disconnected & msg -->|pushMessage| gameState
 ```
@@ -66,7 +68,7 @@ graph TD
 | [webSocketHandler.ts](../../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
 | [location.ts](../../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
 | [lighting.ts](../../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
-| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages, selectedUnitId                                                     |
+| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages (TTL), messageHistory (last 500), selectedUnitId, messagingMode     |
 
 ## Handlers
 
@@ -109,13 +111,23 @@ The accent color adapts to the player's faction using CSS custom properties.
 
 ## Game HUD
 
-A fixed bottom-center overlay visible on the Game screen.
+Fixed overlays visible on the Game screen.
 
-| Component     | File                                | Displays                                             |
-| ------------- | ----------------------------------- | ---------------------------------------------------- |
-| `GameHud`     | `components/hud/GameHud.svelte`     | Container; shows `MessageLog` only                   |
-| `ZoomDisplay` | `components/hud/ZoomDisplay.svelte` | Current camera zoom value (used inside `ZoomSlider`) |
-| `MessageLog`  | `components/hud/MessageLog.svelte`  | Last incoming event message (auto-clears after 4s)   |
+| Component      | File                                 | Displays                                                                 |
+| -------------- | ------------------------------------ | ------------------------------------------------------------------------ |
+| `GameHud`      | `components/hud/GameHud.svelte`      | Thin wrapper that renders `MessagePanel`                                 |
+| `MessagePanel` | `components/hud/MessagePanel.svelte` | Collapsible message history (bottom-left); see below                     |
+| `ZoomDisplay`  | `components/hud/ZoomDisplay.svelte`  | Current camera zoom value (used inside `ZoomSlider`)                     |
+
+### MessagePanel
+
+Fixed to the bottom-left of the screen. Sources data from `gameState.messageHistory` (last 500 entries, never expire).
+
+- **Collapsed** — shows the most recent message in a single bar with a ▲ toggle button
+- **Expanded** — scrollable list capped at 10 visible lines (`12px × 1.4 × 10`); auto-scrolls to bottom on new messages
+- **Sender filter** — messages formatted as `[Username]: text` render the `[Username]` part as a clickable button; clicking it filters the history to that sender only
+- **Filter chip** — while a filter is active a `Username ✕` chip appears in the bar; clicking it clears the filter
+- System messages (no `[Name]:` prefix) are rendered as plain text and are never filterable
 
 ## Zoom Slider
 

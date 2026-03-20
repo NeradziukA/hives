@@ -1,6 +1,7 @@
 export const gameState = $state({
   zoom: 1,
   messages: [] as { id: number; text: string }[],
+  messageHistory: [] as { id: number; text: string }[],
   selectedUnitId: null as string | null,
   selectedObjectType: null as string | null,
   selectedUnitUsername: null as string | null,
@@ -16,9 +17,15 @@ export function wireSetZoom(fn: (value: number) => void) {
 
 let _msgId = 0;
 
+const MESSAGE_HISTORY_MAX = 500;
+
 export function pushMessage(text: string, ttl = 4000) {
   const id = _msgId++;
   gameState.messages.push({ id, text });
+  gameState.messageHistory.push({ id, text });
+  if (gameState.messageHistory.length > MESSAGE_HISTORY_MAX) {
+    gameState.messageHistory.shift();
+  }
   setTimeout(() => {
     const idx = gameState.messages.findIndex((m) => m.id === id);
     if (idx !== -1) gameState.messages.splice(idx, 1);
