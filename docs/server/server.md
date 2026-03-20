@@ -42,6 +42,7 @@ graph TD
         connect["connect.ts\nwait UNIT_AUTH → authenticate"]
         unitGetAll["unit-get-all.ts\nUNIT_GET_ALL → INIT_UNITS"]
         unitMove["unit-move.ts\nUNIT_MOVED → broadcast"]
+        unitMsg["connect.ts (UNIT_MESSAGE)\nroute text to target socket"]
         close["close.ts\ndisconnect → UNIT_DISCONNECTED"]
     end
 
@@ -61,7 +62,7 @@ graph TD
     index --> PatrolLoop
     adminRouter --> staticAdmin & db
     wsIndex --> connect
-    connect --> unitGetAll & unitMove & close
+    connect --> unitGetAll & unitMove & unitMsg & close
     connect --> db
     authRouter --> db
     unitGetAll --> State & db
@@ -119,6 +120,7 @@ Located in [server/src/websocket/handlers/](../../server/src/websocket/handlers/
 | `connect.ts` | New WS connection | Waits for `UNIT_AUTH` (10 s timeout), verifies player in DB, closes any previous socket for same player, registers in memory; starts 5-minute idle timer reset on each `UNIT_MOVED` |
 | `unit-get-all.ts` | `UNIT_GET_ALL` message | Sends `INIT_UNITS` with all users + static objects |
 | `unit-move.ts` | `UNIT_MOVED` message | Updates user coords in map; broadcasts to all other clients; persists to DB |
+| `connect.ts` | `UNIT_MESSAGE` message | Routes a direct text message to a specific online player; validates `dstId`, trims text to `UNIT_MESSAGE_MAX_LENGTH`; uses server-verified sender `id` (not client-claimed `srcId`) |
 | `close.ts` | Connection closed | Checks socket identity (ignores stale socket if replaced by a newer connection); removes user from maps; broadcasts `UNIT_DISCONNECTED`; clears position buffer |
 
 ## Port

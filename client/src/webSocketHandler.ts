@@ -5,11 +5,18 @@ import { handleUnitConnected } from "./handlers/unitConnectedHandler";
 import { handleUnitDisconnected } from "./handlers/unitDisconnectedHandler";
 import { handleUnitMoved } from "./handlers/unitMovedHandler";
 import { handleInitUnits } from "./handlers/initUnitsHandler";
+import { handleUnitMessage } from "./handlers/unitMessageHandler";
 
 let socket: WebSocket | null = null;
 let myId: string;
 const otherUnits: Map<string, UnitModel> = new Map();
 let _onAuthError: (() => void) | null = null;
+
+export function sendWsMessage(data: object): void {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(data));
+  }
+}
 
 export function disconnectWebSocket(): void {
   if (socket) {
@@ -110,6 +117,10 @@ export async function handleWebSocketMessages(
       case "AUTH_ERROR":
         console.error("Auth error:", message.payload?.error);
         _onAuthError?.();
+        break;
+
+      case "UNIT_MESSAGE":
+        handleUnitMessage(message);
         break;
     }
   } catch (error) {

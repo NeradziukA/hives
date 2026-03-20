@@ -6,7 +6,7 @@ import { handleClose } from "./close";
 import { findPlayerById } from "../../db/queries";
 import { verifyAccess } from "../../auth/jwt";
 import { logger } from "../../logger";
-import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL, IDLE_TIMEOUT_MS } from "../../config";
+import { CAMERA_DRIFT_SPEED, LOCATION_UPDATE_INTERVAL, IDLE_TIMEOUT_MS, UNIT_MESSAGE_MAX_LENGTH } from "../../config";
 
 const AUTH_TIMEOUT_MS = 10000;
 
@@ -148,7 +148,21 @@ export function handleConnection(ws: WebSocket) {
           }, IDLE_TIMEOUT_MS);
           handleUnitMoved(msg, users);
           break;
-      }
+        case MessageType.UNIT_MESSAGE: {
+          const dstId = msg.payload?.dstId;
+          const rawText = msg.payload?.text;
+          if (!dstId || typeof rawText !== "string") break;
+          const text = rawText.trim().slice(0, UNIT_MESSAGE_MAX_LENGTH);
+          if (!text) break;
+          const dstSocket = clientsSockets[dstId];
+          if (!dstSocket) break;
+          dstSocket.send(JSON.stringify({
+            type: MessageType.UNIT_MESSAGE,
+            srcId: id, // use server-verified id, not client-claimed srcId
+            payload: { dstId, text },
+          }));
+          break;
+        }
     });
 
     ws.on("close", function () {

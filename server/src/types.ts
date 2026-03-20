@@ -7,6 +7,7 @@ export enum MessageType {
   UNIT_DISCONNECTED = "UNIT_DISCONNECTED",
   UNIT_GET_ALL = "UNIT_GET_ALL",
   UNIT_MOVED = "UNIT_MOVED",
+  UNIT_MESSAGE = "UNIT_MESSAGE",
 }
 
 export enum BuildingType {
@@ -89,5 +90,7 @@ export type SocketMessage = {
     config?: GameConfig;
     error?: string;
     unitType?: string;
+    dstId?: string;
+    text?: string;
   };
 };

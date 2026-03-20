@@ -1,27 +1,82 @@
 <script lang="ts">
   import { gameState } from "../gameState.svelte.ts";
+  import { sendWsMessage } from "../../webSocketHandler.ts";
+  import { UNIT_MESSAGE_MAX_LENGTH } from "../../../../lib/constants.ts";
 
   const MAIN_UNIT_ID = "__self__";
-console.log(gameState)
+
   let label = $derived(
     gameState.selectedUnitId === MAIN_UNIT_ID
       ? "You"
       : gameState.selectedUnitId?.slice(0, 8) ?? ""
   );
 
+  let messagingMode = $state(false);
+  let messageText = $state("");
+
   function dismiss() {
     gameState.selectedUnitId = null;
+    messagingMode = false;
+    messageText = "";
+  }
+
+  function openMessage() {
+    messagingMode = true;
+  }
+
+  function cancelMessage() {
+    messagingMode = false;
+    messageText = "";
+  }
+
+  function sendMessage() {
+    const text = messageText.trim();
+    if (!text || !gameState.selectedUnitId) return;
+    const srcId = localStorage.getItem("playerId") ?? "";
+    sendWsMessage({
+      type: "UNIT_MESSAGE",
+      srcId,
+      payload: { dstId: gameState.selectedUnitId, text },
+    });
+    messageText = "";
+    messagingMode = false;
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") sendMessage();
+    if (e.key === "Escape") cancelMessage();
   }
 </script>
 
 {#if gameState.selectedUnitId}
   <div class="menu">
-    <span class="unit-id">Unit: {label}</span>
-    <div class="actions">
-      <button disabled>Follow</button>
-      <button disabled>Message</button>
-      <button onclick={dismiss} aria-label="Dismiss">✕</button>
-    </div>
+    {#if !messagingMode}
+      <span class="unit-id">Unit: {label}</span>
+      <div class="actions">
+        <button disabled>Follow</button>
+        <button
+          onclick={openMessage}
+          disabled={gameState.selectedUnitId === MAIN_UNIT_ID}
+        >Message</button>
+        <button onclick={dismiss} aria-label="Dismiss">✕</button>
+      </div>
+    {:else}
+      <input
+        class="msg-input"
+        bind:value={messageText}
+        onkeydown={onKeydown}
+        placeholder="Message to {label}…"
+        maxlength={UNIT_MESSAGE_MAX_LENGTH}
+        autofocus
+      />
+      <span class="char-hint" class:warn={messageText.length > UNIT_MESSAGE_MAX_LENGTH * 0.9}>
+        {UNIT_MESSAGE_MAX_LENGTH - messageText.length}
+      </span>
+      <div class="actions">
+        <button onclick={sendMessage}>Send</button>
+        <button onclick={cancelMessage}>✕</button>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -75,5 +130,34 @@ console.log(gameState)
   button:disabled {
     opacity: 0.3;
     cursor: default;
+  }
+
+  .msg-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.6);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    outline: none;
+    width: 220px;
+    padding: 2px 0;
+  }
+
+  .msg-input::placeholder {
+    opacity: 0.4;
+  }
+
+  .char-hint {
+    opacity: 0.35;
+    font-size: 11px;
+    min-width: 2.5em;
+    text-align: right;
+  }
+
+  .char-hint.warn {
+    opacity: 0.8;
+    color: #f0a;
   }
 </style>

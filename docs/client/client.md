@@ -21,6 +21,7 @@ graph TD
         connected["unitConnectedHandler\nUNIT_CONNECTED"]
         moved["unitMovedHandler\nUNIT_MOVED"]
         disconnected["unitDisconnectedHandler\nUNIT_DISCONNECTED"]
+        msg["unitMessageHandler\nUNIT_MESSAGE"]
     end
 
     subgraph UI["Svelte UI"]
@@ -40,7 +41,7 @@ graph TD
 
     main --> renderer & scene & wsHandler & UI
     main --> hexgrid
-    wsHandler --> auth & init & connected & moved & disconnected
+    wsHandler --> auth & init & connected & moved & disconnected & msg
     auth --> location
     location -->|coords| wsHandler
     init & connected & moved & disconnected --> models
@@ -49,7 +50,7 @@ graph TD
     Game --> GameHud & UnitActionMenu
     GameHud & UnitActionMenu --> gameState
     scene -->|zoom · selectedUnitId| gameState
-    connected & disconnected -->|pushMessage| gameState
+    connected & disconnected & msg -->|pushMessage| gameState
 ```
 
 ## Files
@@ -78,6 +79,7 @@ Located in [client/src/handlers/](../../client/src/handlers/)
 | `unitConnectedHandler`     | `UNIT_CONNECTED`     | Creates 3D model for newly joined user                                          |
 | `unitMovedHandler`         | `UNIT_MOVED`         | Updates position of a user's model                                              |
 | `unitDisconnectedHandler`  | `UNIT_DISCONNECTED`  | Removes model from scene                                                        |
+| `unitMessageHandler`       | `UNIT_MESSAGE`       | Pushes `[senderId]: text` to `gameState.messages` (TTL 8 s); shown in GameHud  |
 
 ## 3D Models
 
@@ -140,6 +142,8 @@ Clicking a non-own unit:
 - Deselects previous unit before selecting the new one
 
 Clicking empty space or pressing ✕ dismisses the selection.
+
+Clicking **Message** opens an inline text input (max `UNIT_MESSAGE_MAX_LENGTH` chars, defined in `lib/constants.ts`). Enter sends the message; Escape cancels. A remaining-character counter is shown next to the field and turns highlighted when fewer than 10 % of characters remain. The server routes the message only to the target player's socket using the JWT-verified sender ID.
 
 ## Testing
 
