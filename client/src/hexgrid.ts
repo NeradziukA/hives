@@ -8,7 +8,7 @@ import {
 // How many hex rings to render around the player cell
 const RENDER_RADIUS = 10;
 // Fog covers a larger radius so it extends beyond hex-line rendering at high zoom
-const FOG_RENDER_RADIUS = 15;
+const FOG_RENDER_RADIUS = 150;
 
 // Metres-to-degrees conversion (consistent with geogrid.ts origin)
 const M_PER_LAT = 111320;
@@ -56,15 +56,83 @@ export function hexesInRadius(lat: number, lng: number, radiusM: number): Set<st
   return result;
 }
 
+// Fog shader tuning — adjust FOG_NOISE_SCALE for swirl size (larger = finer)
+const FOG_NOISE_SCALE = 80;
+
+const FOG_VERT = /* glsl */`
+  varying vec2 vWorldPos;
+  varying float vEdgeDist;
+  void main() {
+    vWorldPos = vec2(position.x, position.z);
+    // Centre vertex has w=0 in userData — we detect it by checking if this vertex
+    // is the first of each triangle fan. Instead, pass distance from hex centre
+    // via a simple heuristic: centre vertex is placed at even multiples of 3 in
+    // the buffer, but GLSL has no index access. Use length of local offset from
+    // the averaged centroid approximation — just pass 0 for now, dissolve via noise.
+    vEdgeDist = 0.0;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const FOG_FRAG = /* glsl */`
+  #define FOG_NOISE_SCALE ${FOG_NOISE_SCALE.toFixed(1)}
+  uniform float uTime;
+  uniform vec2 uPlayerPos;
+  uniform float uMaxFogDist;
+  varying vec2 vWorldPos;
+
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  // Gradient noise (Perlin-like) — no rectangular grid artifacts
+  vec2 grad(vec2 p) { float a = hash(p) * 6.2831853; return vec2(cos(a), sin(a)); }
+  float noise(vec2 p) {
+    vec2 i = floor(p); vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(dot(grad(i),              f),
+          dot(grad(i + vec2(1,0)),  f - vec2(1,0)), u.x),
+      mix(dot(grad(i + vec2(0,1)),  f - vec2(0,1)),
+          dot(grad(i + vec2(1,1)),  f - vec2(1,1)), u.x),
+      u.y
+    ) * 0.5 + 0.5;
+  }
+  float fbm(vec2 p) {
+    float v = 0.0; float a = 0.5;
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p); p = p * 2.1 + vec2(1.7, 9.2); a *= 0.5;
+    }
+    return v;
+  }
+  void main() {
+    vec2 q = vWorldPos * FOG_NOISE_SCALE;
+    float f = fbm(q + vec2(uTime * 0.08, uTime * 0.05));
+    f += 0.5 * fbm(q + vec2(-uTime * 0.06, uTime * 0.03) + vec2(f * 2.0));
+    // Dissolve hex edges with high-frequency noise
+    float edgeNoise = fbm(vWorldPos * FOG_NOISE_SCALE * 3.0 + vec2(uTime * 0.12));
+    float dissolve = smoothstep(0.3, 0.7, edgeNoise);
+    // Distance from player: 0 = near, 1 = max fog radius
+    float dist = clamp(length(vWorldPos - uPlayerPos) / uMaxFogDist, 0.0, 1.0);
+    // Closer to player: slightly lighter smoke; far away: pure black
+    float brightness = (1.0 - dist) * f * 0.05;
+    float opacity = mix(0.85 + f * 0.13, 0.99, dist) * (0.7 + 0.3 * dissolve);
+    gl_FragColor = vec4(brightness, brightness, brightness, opacity);
+  }
+`;
+
+export const fogMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime: { value: 0 },
+    uPlayerPos: { value: new THREE.Vector2() },
+    uMaxFogDist: { value: 0.01 },
+  },
+  vertexShader: FOG_VERT,
+  fragmentShader: FOG_FRAG,
+  transparent: true,
+  side: THREE.DoubleSide,
+  depthTest: false,
+});
+
 export function createFogGrid(): THREE.Mesh {
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x0a1208,
-    transparent: true,
-    opacity: 0.93,
-    side: THREE.DoubleSide,
-    depthTest: false,
-  });
-  const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
+  const mesh = new THREE.Mesh(new THREE.BufferGeometry(), fogMaterial);
   mesh.renderOrder = 1;
   return mesh;
 }
@@ -79,6 +147,9 @@ export function updateFogGrid(
   lng: number,
   visibleHexIds: Set<string>,
 ): void {
+  fogMaterial.uniforms.uPlayerPos.value.set(lat, lng);
+  fogMaterial.uniforms.uMaxFogDist.value = (FOG_RENDER_RADIUS * HEX_RADIUS_METERS) / M_PER_LAT;
+
   const playerCell = latLngToHex(lat, lng);
   const cells = hexRange(playerCell.q, playerCell.r, FOG_RENDER_RADIUS);
 

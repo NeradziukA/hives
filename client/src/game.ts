@@ -20,7 +20,7 @@ import {
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
 import { gameState, wireSetZoom, type UnitCandidate } from "./ui/gameState.svelte.ts";
-import { createHexGrid, updateHexGrid, createFogGrid, updateFogGrid, hexesInRadius } from "./hexgrid";
+import { createHexGrid, updateHexGrid, createFogGrid, updateFogGrid, hexesInRadius, fogMaterial } from "./hexgrid";
 import { latLngToHex } from "../../lib/geo/geogrid";
 import { getStaticObjectsMap, getUnitMetaMap } from "./handlers/initUnitsHandler";
 
@@ -157,6 +157,7 @@ export async function initGame(container: HTMLElement): Promise<void> {
 
     _hexGrid.visible = gameState.zoom <= 25;
 
+    fogMaterial.uniforms.uTime.value = clock.getElapsedTime();
     _mainUnit.renderObj.rotation.y += 0.02;
     const driftSpeed = getDriftSpeed();
     tickCamera();
@@ -172,6 +173,8 @@ export async function initGame(container: HTMLElement): Promise<void> {
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
   });
+
+  const clock = new THREE.Clock();
 
   _hexGrid = createHexGrid();
   scene.add(_hexGrid);

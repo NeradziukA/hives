@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && node ./dist/index.js",
+    "kill-port": "node -e \"const {execSync}=require('child_process');try{const pid=execSync('netstat -ano').toString().split('\\n').find(l=>l.includes(':3000 '))?.trim().split(/\\s+/).pop();if(pid)execSync('taskkill /PID '+pid+' /F')}catch(e){}\"",
+    "start": "npm run kill-port && npm run build && node ./dist/index.js",
     "build": "node scripts/build.js",
     "dev": "nodemon ./dist/index.js",
     "watch-ts": "tsc --watch",

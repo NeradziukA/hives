@@ -161,12 +161,27 @@ Clicking empty space or pressing ✕ dismisses the selection.
 
 ## Fog of War
 
-A hex-based fog mesh (`hexgrid.ts`) rendered in the Three.js scene dims the area outside the player's vision radius.
+A hex-based animated fog mesh (`hexgrid.ts`) rendered in the Three.js scene covers the area outside the player's vision radius.
 
-- `createFogGrid()` builds a semitransparent mesh covering `FOG_RENDER_RADIUS = 15` hexes
-- `updateFogGrid()` receives the set of visible hexes and clears fog over them
+- `createFogGrid()` builds a mesh covering `FOG_RENDER_RADIUS` hexes using `fogMaterial` — a `ShaderMaterial` with animated FBM (Fractional Brownian Motion) noise
+- `updateFogGrid()` receives the set of visible hexes, clears fog over them, and updates player position uniforms
 - Visible hexes are computed by `hexesInRadius(lat, lng, gameState.visionRadius)`
 - Updated on every GPS tick and immediately after `INIT_UNITS`
+
+### Fog Shader
+
+The fog is rendered with a GLSL `ShaderMaterial` driven by a `uTime` uniform updated each frame via `THREE.Clock`:
+
+- **Gradient noise** (Perlin-like) — no rectangular grid artifacts
+- **FBM with 4 octaves + domain warping** — organic, swirling smoke appearance
+- **Distance darkening** — fog fades from dark grey near the player to pure black at `FOG_RENDER_RADIUS`
+- **Edge dissolve** — high-frequency noise layer breaks up hex boundary edges
+
+Tuning constants in `hexgrid.ts`:
+
+| Constant | Default | Effect |
+|---|---|---|
+| `FOG_NOISE_SCALE` | `80` | Swirl size — larger = finer detail |
 
 See [docs/gameplay/calculations/vision.md](../gameplay/calculations/vision.md#рендеринг-тумана-войны-клиент) for the full calculation.
 

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { initGame, connectToServer } from "../game";
   import { setTokens, hasSession, refreshAccessToken, getAccessToken, getPlayerId, getUsername, clearSession } from "../auth";
   import { disconnectWebSocket } from "../webSocketHandler";
   import { gameState } from "./gameState.svelte";
@@ -38,12 +37,18 @@
     }
   }
 
-  onMount(async () => {
-    await initGame(gameContainer);
+  onMount(() => {
     hasSavedSession = hasSession();
     username = getUsername() ?? "";
     screen = "mainmenu";
   });
+
+  async function startGame(id: string, accessToken: string): Promise<void> {
+    const { initGame, connectToServer } = await import("../game");
+    await initGame(gameContainer);
+    connectToServer(id, accessToken, handleLogout);
+    screen = "game";
+  }
 
   function handleLogout(): void {
     clearSession();
@@ -67,8 +72,7 @@
     setTokens(accessToken, refreshToken, id);
     username = getUsername() ?? "";
     await fetchFaction(accessToken);
-    connectToServer(id, accessToken, handleLogout);
-    screen = "game";
+    await startGame(id, accessToken);
   }
 
   async function handleContinue(): Promise<void> {
@@ -81,8 +85,7 @@
     const accessToken = getAccessToken()!;
     username = getUsername() ?? "";
     await fetchFaction(accessToken);
-    connectToServer(id, accessToken, handleLogout);
-    screen = "game";
+    await startGame(id, accessToken);
   }
 
   const showTitle = $derived(screen === "splash" || screen === "mainmenu");

@@ -64,7 +64,6 @@
         onkeydown={onKeydown}
         placeholder="Message to {label}…"
         maxlength={UNIT_MESSAGE_MAX_LENGTH}
-        autofocus
       />
       <div class="msg-footer">
         <span class="char-hint" class:warn={messageText.length > UNIT_MESSAGE_MAX_LENGTH * 0.9}>

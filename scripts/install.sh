@@ -3,3 +3,4 @@ set -e
 npm install
 npm install --prefix ./client
 npm install --prefix ./server
+npm install --prefix ./admin
