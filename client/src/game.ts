@@ -20,8 +20,9 @@ import {
 } from "./webSocketHandler";
 import { Coords } from "../../lib/geo/coords";
 import { gameState, wireSetZoom, type UnitCandidate } from "./ui/gameState.svelte.ts";
-import { createHexGrid, updateHexGrid } from "./hexgrid";
-import { getStaticObjectsMap } from "./handlers/initUnitsHandler";
+import { createHexGrid, updateHexGrid, createFogGrid, updateFogGrid, hexesInRadius } from "./hexgrid";
+import { latLngToHex } from "../../lib/geo/geogrid";
+import { getStaticObjectsMap, getUnitMetaMap } from "./handlers/initUnitsHandler";
 
 const MAIN_UNIT_ID = "__self__";
 
@@ -56,6 +57,7 @@ let _scene: THREE.Scene;
 let _mainUnit: UnitModel;
 let _updateTarget: (lat: number, lon: number) => void;
 let _hexGrid: THREE.LineSegments;
+let _fogGrid: THREE.Mesh;
 
 export async function initGame(container: HTMLElement): Promise<void> {
   container.appendChild(renderer.domElement);
@@ -175,27 +177,39 @@ export async function initGame(container: HTMLElement): Promise<void> {
   scene.add(_hexGrid);
   updateHexGrid(_hexGrid, 54.3761, 18.5694);
 
+  _fogGrid = createFogGrid();
+  scene.add(_fogGrid);
+  updateFogGrid(_fogGrid, 54.3761, 18.5694, hexesInRadius(54.3761, 18.5694, gameState.visionRadius));
+
   _mainUnit = await UnitModel.create(true);
   _mainUnit.renderObj.userData.unitId = MAIN_UNIT_ID;
   scene.add(_mainUnit.renderObj);
   renderer.setAnimationLoop(animate);
 }
 
-function updateEffectiveVision(lat: number, lon: number): void {
+function computeVisibleHexes(lat: number, lon: number): Set<string> {
   const playerFaction = gameState.faction;
-  let effective = gameState.visionRadius;
-  const M_PER_LAT = 111320;
-  const M_PER_LNG = 111320 * Math.cos(lat * Math.PI / 180);
+  const visible = hexesInRadius(lat, lon, gameState.visionRadius);
+  // Allied buildings whose hex is already visible → add their reveal area
   for (const [, obj] of getStaticObjectsMap()) {
     if (obj.faction !== playerFaction) continue;
-    const dx = (lon - obj.coords.y) * M_PER_LNG;
-    const dy = (lat - obj.coords.x) * M_PER_LAT;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist <= obj.revealRadius) {
-      effective = Math.max(effective, obj.revealRadius);
+    if (visible.has(latLngToHex(obj.coords.x, obj.coords.y).id)) {
+      for (const id of hexesInRadius(obj.coords.x, obj.coords.y, obj.revealRadius)) visible.add(id);
     }
   }
-  gameState.effectiveVisionRadius = effective;
+  // Allied units whose hex is already visible → add their vision area
+  for (const [uid, unit] of getUnitMetaMap()) {
+    if (!unit.visionRadius || unit.faction !== playerFaction) continue;
+    const uHex = latLngToHex(unit.coords.x, unit.coords.y);
+    if (visible.has(uHex.id)) {
+      for (const id of hexesInRadius(unit.coords.x, unit.coords.y, unit.visionRadius)) visible.add(id);
+    }
+  }
+  return visible;
+}
+
+function updateFog(lat: number, lon: number): void {
+  if (_fogGrid) updateFogGrid(_fogGrid, lat, lon, computeVisibleHexes(lat, lon));
 }
 
 export function connectToServer(playerId: string, accessToken: string, onAuthError?: () => void): void {
@@ -204,13 +218,14 @@ export function connectToServer(playerId: string, accessToken: string, onAuthErr
     playerId, accessToken, _scene,
     (event, scene, socket, units, setMyId, onOwnMove) =>
       handleWebSocketMessages(event, scene, socket, units, setMyId, onOwnMove,
-        () => updateEffectiveVision(_lastCoords.lat, _lastCoords.lon)),
+        () => updateFog(_lastCoords.lat, _lastCoords.lon),
+        () => updateFog(_lastCoords.lat, _lastCoords.lon)),
     (coords) => {
       _lastCoords = coords;
       if (_mainUnit?.renderObj) _mainUnit.moveTo(new Coords(coords.lat, coords.lon));
       _updateTarget(coords.lat, coords.lon);
       updateHexGrid(_hexGrid, coords.lat, coords.lon);
-      updateEffectiveVision(coords.lat, coords.lon);
+      updateFog(coords.lat, coords.lon);
     },
     onAuthError
   );

@@ -60,6 +60,8 @@ export type User = {
   type: UnitType;
   coords: Coordinates;
   username?: string;
+  faction?: string;
+  visionRadius?: number;
 };
 
 export type UserList = { [key: string]: User };
@@ -95,6 +97,8 @@ export type SocketMessage = {
     error?: string;
     unitType?: string;
     username?: string;
+    faction?: string;
+    visionRadius?: number;
     dstId?: string;
     text?: string;
   };

@@ -104,6 +104,8 @@ export interface ActivePatrolRow {
   alwaysOnline: boolean
   lastLat: number | null
   lastLng: number | null
+  faction: string
+  vision: number
 }
 
 /** Returns a single patrol by its patrol id, regardless of isActive state. */
@@ -118,6 +120,8 @@ export async function getPatrolById(patrolId: string): Promise<ActivePatrolRow |
       alwaysOnline: players.alwaysOnline,
       lastLat:      players.lastLat,
       lastLng:      players.lastLng,
+      faction:      players.faction,
+      vision:       players.vision,
     })
     .from(npcPatrols)
     .innerJoin(players, eq(npcPatrols.npcId, players.id))
@@ -126,7 +130,7 @@ export async function getPatrolById(patrolId: string): Promise<ActivePatrolRow |
 
   const r = rows[0]
   if (!r || !r.npcId) return null
-  return { ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false }
+  return { ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false, faction: r.faction ?? 'humans', vision: r.vision ?? 0 }
 }
 
 /** Returns all NPC patrols that are currently active, joined with player data. */
@@ -141,6 +145,8 @@ export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
       alwaysOnline: players.alwaysOnline,
       lastLat:      players.lastLat,
       lastLng:      players.lastLng,
+      faction:      players.faction,
+      vision:       players.vision,
     })
     .from(npcPatrols)
     .innerJoin(players, eq(npcPatrols.npcId, players.id))
@@ -148,7 +154,7 @@ export async function getActivePatrols(): Promise<ActivePatrolRow[]> {
 
   return rows
     .filter(r => r.npcId !== null)
-    .map(r => ({ ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false }))
+    .map(r => ({ ...r, npcId: r.npcId as string, unitType: r.unitType as UnitType, alwaysOnline: r.alwaysOnline ?? false, faction: r.faction ?? 'humans', vision: r.vision ?? 0 }))
 }
 
 export interface AlwaysOnlineNpcRow {
@@ -157,16 +163,18 @@ export interface AlwaysOnlineNpcRow {
   username: string | null
   lastLat: number | null
   lastLng: number | null
+  faction: string
+  vision: number
 }
 
 /** Returns all NPCs with alwaysOnline=true. */
 export async function getAlwaysOnlineNpcs(): Promise<AlwaysOnlineNpcRow[]> {
   const rows = await db
-    .select({ id: players.id, unitType: players.unitType, username: players.username, lastLat: players.lastLat, lastLng: players.lastLng })
+    .select({ id: players.id, unitType: players.unitType, username: players.username, lastLat: players.lastLat, lastLng: players.lastLng, faction: players.faction, vision: players.vision })
     .from(players)
     .where(and(eq(players.alwaysOnline, true), isNotNull(players.role)))
 
-  return rows.map(r => ({ ...r, unitType: r.unitType as UnitType }))
+  return rows.map(r => ({ ...r, unitType: r.unitType as UnitType, faction: r.faction ?? 'humans', vision: r.vision ?? 0 }))
 }
 
 // --- Combat ---

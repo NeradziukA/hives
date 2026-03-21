@@ -101,7 +101,7 @@ export function handleConnection(ws: WebSocket) {
       existingSocket.close();
     }
 
-    users[id] = { id, type: player.unitType as UnitType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 }, username: player.username ?? undefined };
+    users[id] = { id, type: player.unitType as UnitType, coords: { lat: player.lastLat ?? 0, lon: player.lastLng ?? 0 }, username: player.username ?? undefined, faction: player.faction ?? undefined, visionRadius: 200 + (player.vision ?? 0) * 10 };
     clientsSockets[id] = ws;
     logger.info("Authenticated: " + id);
 
@@ -111,7 +111,7 @@ export function handleConnection(ws: WebSocket) {
       payload: { config: { cameraDriftSpeed: CAMERA_DRIFT_SPEED, locationUpdateInterval: LOCATION_UPDATE_INTERVAL } },
     }));
 
-    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id, payload: { unitType: player.unitType, username: player.username ?? undefined } }, id);
+    broadcast({ type: MessageType.UNIT_CONNECTED, srcId: id, payload: { unitType: player.unitType, username: player.username ?? undefined, faction: player.faction ?? undefined, visionRadius: 200 + (player.vision ?? 0) * 10 } }, id);
 
     // Idle timeout — close zombie connections that stop sending UNIT_MOVED
     let idleTimer = setTimeout(() => {
@@ -131,13 +131,9 @@ export function handleConnection(ws: WebSocket) {
 
       switch (msg.type) {
         case MessageType.UNIT_GET_ALL: {
-          // Pass only human players (those with an active WebSocket connection).
-          // alwaysOnline NPCs are added in handleUnitGetAll from the database.
-          const humanUsers: { [key: string]: User } = {};
-          for (const pid of Object.keys(clientsSockets)) {
-            if (users[pid]) humanUsers[pid] = users[pid];
-          }
-          handleUnitGetAll(msg, clientsSockets[msg.srcId], humanUsers);
+          // Pass all users including active patrol NPCs (registered via registerNpc).
+          // alwaysOnline stationary NPCs without an active patrol are added in handleUnitGetAll from the database.
+          handleUnitGetAll(msg, clientsSockets[msg.srcId], users);
           break;
         }
         case MessageType.UNIT_MOVED:

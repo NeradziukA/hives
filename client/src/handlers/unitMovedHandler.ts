@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Coords } from "../../../lib/geo/coords";
 import { UnitModel } from "../models";
+import { getUnitMetaMap } from "./initUnitsHandler";
 
 type UnitMovedMessage = { srcId: string; payload: { coords: { lat: number; lon: number } } };
 
@@ -18,8 +19,9 @@ export async function handleUnitMoved(
     movingUnit = unit;
   }
   if (movingUnit) {
-    movingUnit.moveTo(
-      new Coords(message.payload.coords.lat, message.payload.coords.lon)
-    );
+    const coords = new Coords(message.payload.coords.lat, message.payload.coords.lon);
+    movingUnit.moveTo(coords);
+    const meta = getUnitMetaMap().get(message.srcId);
+    if (meta) meta.coords = coords;
   }
 }

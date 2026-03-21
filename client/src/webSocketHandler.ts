@@ -89,7 +89,8 @@ export async function handleWebSocketMessages(
   otherUnits: Map<string, UnitModel>,
   setMyId: (id: string) => void,
   onOwnMove?: (coords: { lat: number; lon: number }) => void,
-  onInitUnits?: () => void
+  onInitUnits?: () => void,
+  onUnitChanged?: () => void
 ): Promise<void> {
   try {
     const message = JSON.parse(event.data);
@@ -101,14 +102,17 @@ export async function handleWebSocketMessages(
 
       case "UNIT_CONNECTED":
         await handleUnitConnected(message, scene, otherUnits);
+        onUnitChanged?.();
         break;
 
       case "UNIT_DISCONNECTED":
         handleUnitDisconnected(message, scene, otherUnits);
+        onUnitChanged?.();
         break;
 
       case "UNIT_MOVED":
         await handleUnitMoved(message, otherUnits, scene);
+        onUnitChanged?.();
         break;
 
       case "INIT_UNITS":

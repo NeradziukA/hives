@@ -6,9 +6,13 @@ type StaticObjectInfo = { coords: Coords; revealRadius: number; faction?: string
 const staticObjectsMap = new Map<string, StaticObjectInfo>();
 export function getStaticObjectsMap() { return staticObjectsMap; }
 
+export type UnitMeta = { coords: Coords; faction?: string; visionRadius?: number };
+const unitMetaMap = new Map<string, UnitMeta>();
+export function getUnitMetaMap() { return unitMetaMap; }
+
 type InitUnitsMessage = {
   payload: {
-    users?: Record<string, { type: string; coords: { lat: number; lon: number }; username?: string }>;
+    users?: Record<string, { type: string; coords: { lat: number; lon: number }; username?: string; faction?: string; visionRadius?: number }>;
     staticObjects?: Array<{ id: string; type: string; coords: { lat: number; lon: number }; name?: string; revealRadius: number; faction?: string }>;
   };
 };
@@ -25,6 +29,7 @@ export async function handleInitUnits(
   }
   otherUnits.clear();
 
+  unitMetaMap.clear();
   if (message.payload.users) {
     for (const [id, unitData] of Object.entries(message.payload.users)) {
       if (id !== myId.toString()) {
@@ -35,6 +40,11 @@ export async function handleInitUnits(
         unit.moveTo(new Coords(unitData.coords.lat, unitData.coords.lon));
         otherUnits.set(id, unit);
         scene.add(unit.renderObj);
+        unitMetaMap.set(id, {
+          coords: new Coords(unitData.coords.lat, unitData.coords.lon),
+          faction: unitData.faction,
+          visionRadius: unitData.visionRadius,
+        });
       }
     }
   }

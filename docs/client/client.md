@@ -53,7 +53,8 @@ graph TD
     GameHud --> MessagePanel
     GameHud & UnitActionMenu & UnitPicker & MessagePanel --> gameState
     scene -->|zoom · selectedUnitId · visionRadius| gameState
-    init -->|onInitUnits callback| scene
+    init -->|onInitUnits callback + onUnitChanged| scene
+    connected & disconnected -->|onUnitChanged| scene
     connected & disconnected & msg -->|pushMessage| gameState
 ```
 
@@ -63,14 +64,14 @@ graph TD
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [main.ts](../../client/src/main.ts)                               | App entry; animation loop; raycaster for click interactions                                               |
 | [game.ts](../../client/src/game.ts)                               | Scene init, EffectComposer, OutlinePass, hover/click raycasting, hex grid wiring                          |
-| [hexgrid.ts](../../client/src/hexgrid.ts)                         | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25              |
+| [hexgrid.ts](../../client/src/hexgrid.ts)                         | `createHexGrid` / `updateHexGrid` — Three.js `LineSegments` hex overlay; hidden at zoom > 25; `createFogGrid` / `updateFogGrid` — hex-based fog-of-war mesh; `hexesInRadius` — visible hex set builder |
 | [renderer.ts](../../client/src/renderer.ts)                       | WebGL renderer (antialiasing, transparent background)                                                     |
 | [sceneSetup.ts](../../client/src/sceneSetup.ts)                   | Three.js scene, lights, camera; updates `gameState.zoom` on scroll                                        |
 | [models.ts](../../client/src/models.ts)                           | `UnitModel` — GLTF, LOD dot sprite, selection ring, `setSelected()`; dot size formula uses `renderer.domElement.clientHeight` (not `window.innerHeight`) to stay constant on iOS Safari |
 | [webSocketHandler.ts](../../client/src/webSocketHandler.ts)       | WS connect/disconnect, message routing, auto-reconnect (5s); `disconnectWebSocket()` stops reconnect loop |
 | [location.ts](../../client/src/location.ts)                       | `LocationTracker` — Geolocation API polling; interval configured by server on auth                        |
 | [lighting.ts](../../client/src/lighting.ts)                       | Lighting helper (currently unused)                                                                        |
-| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages (TTL), messageHistory (last 500), selectedUnitId, messagingMode, visionRadius, effectiveVisionRadius, unitPickerCandidates |
+| [ui/gameState.svelte.ts](../../client/src/ui/gameState.svelte.ts) | Shared reactive state: zoom, messages (TTL), messageHistory (last 500), selectedUnitId, messagingMode, visionRadius, unitPickerCandidates |
 
 ## Handlers
 
@@ -79,10 +80,10 @@ Located in [client/src/handlers/](../../client/src/handlers/)
 | Handler                    | Triggered by         | Action                                                                          |
 | -------------------------- | -------------------- | ------------------------------------------------------------------------------- |
 | `unitAuthenticatedHandler` | `UNIT_AUTHENTICATED` | Saves own ID, starts LocationTracker, begins sending position                   |
-| `initUnitsHandler`         | `INIT_UNITS`         | Clears stale units, creates 3D models for all existing users and buildings; populates `staticObjectsMap` with `revealRadius`/`faction` for vision calculations; triggers `onInitUnits` callback so `game.ts` can refresh `effectiveVisionRadius` |
-| `unitConnectedHandler`     | `UNIT_CONNECTED`     | Creates 3D model for newly joined user                                          |
-| `unitMovedHandler`         | `UNIT_MOVED`         | Updates position of a user's model                                              |
-| `unitDisconnectedHandler`  | `UNIT_DISCONNECTED`  | Removes model from scene                                                        |
+| `initUnitsHandler`         | `INIT_UNITS`         | Clears stale units, creates 3D models for all existing users and buildings; populates `staticObjectsMap` and `unitMetaMap` (coords/faction/visionRadius per unit); triggers `onInitUnits` callback so `game.ts` can refresh fog grid |
+| `unitConnectedHandler`     | `UNIT_CONNECTED`     | Creates 3D model for newly joined user; adds entry to `unitMetaMap`             |
+| `unitMovedHandler`         | `UNIT_MOVED`         | Updates position of a user's model; syncs coords in `unitMetaMap`               |
+| `unitDisconnectedHandler`  | `UNIT_DISCONNECTED`  | Removes model from scene; deletes entry from `unitMetaMap`                      |
 | `unitMessageHandler`       | `UNIT_MESSAGE`       | Pushes `[senderId]: text` to `gameState.messages` (TTL 8 s); shown in GameHud  |
 
 ## 3D Models
@@ -160,11 +161,14 @@ Clicking empty space or pressing ✕ dismisses the selection.
 
 ## Fog of War
 
-A CSS `radial-gradient` overlay (`Game.svelte`) dims the area outside the player's vision radius.
+A hex-based fog mesh (`hexgrid.ts`) rendered in the Three.js scene dims the area outside the player's vision radius.
 
-- Inner radius (`fogInner`) is computed from `gameState.effectiveVisionRadius` and `gameState.zoom` — see [docs/gameplay/calculations/vision.md](../gameplay/calculations/vision.md#рендеринг-тумана-войны-клиент)
-- `effectiveVisionRadius` is the max of the player's personal `visionRadius` and any allied location's `revealRadius` that the player is currently inside
-- Recalculated on every GPS update **and** immediately after `INIT_UNITS` (so allied buildings take effect even when the player is stationary)
+- `createFogGrid()` builds a semitransparent mesh covering `FOG_RENDER_RADIUS = 15` hexes
+- `updateFogGrid()` receives the set of visible hexes and clears fog over them
+- Visible hexes are computed by `hexesInRadius(lat, lng, gameState.visionRadius)`
+- Updated on every GPS tick and immediately after `INIT_UNITS`
+
+See [docs/gameplay/calculations/vision.md](../gameplay/calculations/vision.md#рендеринг-тумана-войны-клиент) for the full calculation.
 
 Clicking **Message** opens an inline text input (max `UNIT_MESSAGE_MAX_LENGTH` chars, defined in `lib/constants.ts`). Enter sends the message; Escape cancels. A remaining-character counter is shown next to the field and turns highlighted when fewer than 10 % of characters remain. The server routes the message only to the target player's socket using the JWT-verified sender ID.
 

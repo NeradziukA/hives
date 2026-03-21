@@ -56,6 +56,8 @@ interface PatrolState {
   /** Current position (updated in-memory every tick) */
   currentLat: number
   currentLng: number
+  faction: string
+  visionRadius: number
 }
 
 /**
@@ -205,14 +207,18 @@ async function loadPatrols(): Promise<void> {
       currentWaypointIndex: startIndex,
       currentLat:           row.lastLat ?? (sorted[0]?.lat ?? 0),
       currentLng:           row.lastLng ?? (sorted[0]?.lng ?? 0),
+      faction:              row.faction,
+      visionRadius:         200 + row.vision * 10,
     }
 
     patrolStates.set(row.npcId, state)
 
     registerNpc(row.npcId, {
-      id:     row.npcId,
-      type:   row.unitType,
-      coords: { lat: state.currentLat, lon: state.currentLng },
+      id:           row.npcId,
+      type:         row.unitType,
+      coords:       { lat: state.currentLat, lon: state.currentLng },
+      faction:      state.faction,
+      visionRadius: state.visionRadius,
     })
 
     logger.info(`NPC patrol registered: ${row.npcId} (${row.unitType}), waypoints: ${sorted.length}`)
@@ -374,13 +380,17 @@ export async function applyPatrolActive(patrolId: string, isActive: boolean): Pr
     currentWaypointIndex: startIndex,
     currentLat:           row.lastLat ?? (sorted[0]?.lat ?? 0),
     currentLng:           row.lastLng ?? (sorted[0]?.lng ?? 0),
+    faction:              row.faction,
+    visionRadius:         200 + row.vision * 10,
   }
 
   patrolStates.set(row.npcId, state)
   registerNpc(row.npcId, {
-    id:     row.npcId,
-    type:   row.unitType,
-    coords: { lat: state.currentLat, lon: state.currentLng },
+    id:           row.npcId,
+    type:         row.unitType,
+    coords:       { lat: state.currentLat, lon: state.currentLng },
+    faction:      state.faction,
+    visionRadius: state.visionRadius,
   })
 
   if (row.alwaysOnline) {

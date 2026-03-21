@@ -23,6 +23,8 @@ export async function handleUnitGetAll(
         type: npc.unitType,
         coords: { lat: npc.lastLat ?? 0, lon: npc.lastLng ?? 0 },
         username: npc.username ?? undefined,
+        faction: npc.faction,
+        visionRadius: 200 + npc.vision * 10,
       };
     }
   }
